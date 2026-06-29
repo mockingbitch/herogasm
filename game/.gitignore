@@ -1,0 +1,12 @@
+# Godot 4
+.godot/
+/android/
+/build/
+/exports/
+
+# Chứa khoá ký/keystore — không commit
+export_presets.cfg
+
+# Tạm
+*.tmp
+*.bak

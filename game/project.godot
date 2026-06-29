@@ -1,0 +1,37 @@
+; Herogasm — Godot 4 project config
+; Pixel-perfect 384x216, GL Compatibility (tốt cho 2D + mobile).
+; Input actions đăng ký bằng code trong autoload/game_state.gd.
+
+config_version=5
+
+[application]
+
+config/name="Herogasm"
+run/main_scene="res://scenes/hub.tscn"
+config/features=PackedStringArray("4.7", "GL Compatibility")
+config/icon="res://icon.svg"
+
+[autoload]
+
+EventBus="*res://autoload/event_bus.gd"
+GameState="*res://autoload/game_state.gd"
+SaveManager="*res://autoload/save_manager.gd"
+Database="*res://autoload/database.gd"
+Profile="*res://autoload/profile.gd"
+AudioManager="*res://autoload/audio_manager.gd"
+NetManager="*res://autoload/net_manager.gd"
+
+[display]
+
+window/size/viewport_width=384
+window/size/viewport_height=216
+window/size/window_width_override=1152
+window/size/window_height_override=648
+window/stretch/mode="canvas_items"
+window/stretch/aspect="keep"
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+textures/canvas_textures/default_texture_filter=0
