@@ -6,10 +6,14 @@ extends Node
 
 const SUITES := [
 	preload("res://tests/unit/test_damage_formula.gd"),
+	preload("res://tests/unit/test_battle_engine.gd"),
 	preload("res://tests/unit/test_hero_instance.gd"),
+	preload("res://tests/unit/test_goal_scoring.gd"),
 	preload("res://tests/unit/test_save_roundtrip.gd"),
 	preload("res://tests/unit/test_migration_v1.gd"),
+	preload("res://tests/unit/test_offline.gd"),
 	preload("res://tests/unit/test_bootstrap.gd"),
+	preload("res://tests/simulation/test_ai_simulation.gd"),
 ]
 
 var _pass: int = 0

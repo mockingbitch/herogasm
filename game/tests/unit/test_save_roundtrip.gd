@@ -29,7 +29,8 @@ static func run(t) -> void:
 	var d := PlayerProfile.to_dict()
 	PlayerProfile.gold = 0
 	PlayerProfile.gems = 0
+	var roster := PlayerProfile.hero_ids.size()
 	PlayerProfile.from_dict(d)
 	t.eq(PlayerProfile.gold, 777, "Account_GoldRoundTrip")
 	t.eq(PlayerProfile.gems, 5, "Account_GemsRoundTrip")
-	t.eq(PlayerProfile.hero_ids.size(), 1, "Account_HeroCountRoundTrip")
+	t.eq(PlayerProfile.hero_ids.size(), roster, "Account_HeroCountRoundTrip")

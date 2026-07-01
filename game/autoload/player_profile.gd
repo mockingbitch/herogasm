@@ -3,9 +3,19 @@ extends Node
 ## Chỉ số per-hero nằm trong HeroInstance; PlayerProfile điều phối economy/save/emit.
 
 const CONSTANTS_PATH := "res://data/combat_constants.tres"
+const MAX_ENERGY := 120
+const ENERGY_REGEN_SEC := 30.0                     # +1 energy mỗi 30s
+const MAX_OFFLINE_SEC := 8 * 3600.0                # trần offline 8h (chống đổi giờ)
+const OFFLINE_GOLD_PER_SEC := 0.05                 # ~3 gold/phút/hero (placeholder)
+const OFFLINE_XP_PER_SEC := 0.03
 
 var gold: int = 0
 var gems: int = 0                                  # tiền cứng (gacha P3)
+var energy: int = MAX_ENERGY
+var max_energy: int = MAX_ENERGY
+var last_energy_ts: float = 0.0
+var offline_ts: float = 0.0                        # mốc thời gian lần lưu cuối (offline calc)
+var last_offline_reward: Dictionary = {}
 var hero_ids: Array[String] = []                   # thứ tự roster
 var heroes: Dictionary = {}                        # hero_id -> HeroInstance
 var consumables: Dictionary = {}                   # id -> count (kho chung town)
@@ -24,23 +34,28 @@ func _ready() -> void:
 		new_game()
 	else:
 		from_dict(data)
+		_apply_offline_progress()
+	_regen_energy()
+	TimeService.register_slice(_regen_energy, ENERGY_REGEN_SEC)
 	_emit_all()
 	Telemetry.log_event("Player", "game_start", {"heroes": hero_ids.size(), "gold": gold})
 
 func new_game() -> void:
 	gold = 0
 	gems = 0
+	energy = max_energy
+	last_energy_ts = TimeService.now_unix()
 	hero_ids = []
 	heroes = {}
 	consumables = {}
 	materials = {}
 	unlocks = {}
 	_hero_seq = 0
-	var starter := spawn_hero("", "Tân Binh")
-	starter.equipment["weapon"] = HeroInstance.make_instance("rusty_sword")  # không affix (như bản cũ)
-	starter.reset_hp()
+	# Roster khởi tạo từ HeroDef (data-driven).
+	for def_id in Database.hero_def_ids():
+		spawn_hero(def_id)
 	add_consumable("health_potion", 2)
-	Telemetry.log_event("Player", "new_game", {})
+	Telemetry.log_event("Player", "new_game", {"heroes": hero_ids.size()})
 	save()
 
 func reset_progress() -> void:
@@ -49,18 +64,31 @@ func reset_progress() -> void:
 	_emit_all()
 
 # --- roster ---------------------------------------------------------------
-func spawn_hero(def_id: String, display_name: String = "") -> HeroInstance:
+func spawn_hero(def_id: String) -> HeroInstance:
 	var h := HeroInstance.new()
 	h.hero_id = "hero_%d" % _hero_seq
 	_hero_seq += 1
 	h.hero_def_id = def_id
-	h.display_name = display_name
 	h.set_constants(_constants)
+	_apply_def(h)
+	# Trang bị khởi đầu từ def (không affix).
+	var def: HeroDef = Database.get_hero_def(def_id)
+	if def != null and def.start_weapon != "":
+		h.equipment["weapon"] = HeroInstance.make_instance(def.start_weapon)
 	h.reset_hp()
 	heroes[h.hero_id] = h
 	hero_ids.append(h.hero_id)
 	EventBus.hero_spawned.emit(h.hero_id)
 	return h
+
+## Áp thuộc tính data-driven từ HeroDef (display_name + ai_weights). Gọi khi spawn & load.
+func _apply_def(h: HeroInstance) -> void:
+	var def: HeroDef = Database.get_hero_def(h.hero_def_id)
+	if def == null:
+		return
+	if h.display_name == "":
+		h.display_name = def.display_name
+	h.ai_weights = def.ai_weights
 
 func get_hero(id: String) -> HeroInstance:
 	return heroes.get(id)
@@ -72,9 +100,10 @@ func primary_hero() -> HeroInstance:
 
 func knock_out(id: String) -> void:
 	var h: HeroInstance = get_hero(id)
-	if h == null or h.is_knocked_out():
+	if h == null or h.is_ko:
 		return
 	h.current_hp = 0
+	h.is_ko = true
 	EventBus.hero_knocked_out.emit(id)
 
 # --- ví -------------------------------------------------------------------
@@ -85,6 +114,53 @@ func add_gold(amount: int) -> void:
 func add_gems(amount: int) -> void:
 	gems = maxi(gems + amount, 0)
 	EventBus.gems_changed.emit(gems)
+
+# --- energy (regen theo thời gian) ----------------------------------------
+func add_energy(amount: int) -> void:
+	energy = clampi(energy + amount, 0, max_energy)
+	EventBus.energy_changed.emit(energy, max_energy)
+
+func spend_energy(amount: int) -> bool:
+	if energy < amount:
+		return false
+	energy -= amount
+	EventBus.energy_changed.emit(energy, max_energy)
+	return true
+
+## Cộng energy dựa trên thời gian đã trôi từ last_energy_ts (regen offline luôn đúng).
+func _regen_energy() -> void:
+	var now := TimeService.now_unix()
+	if last_energy_ts <= 0.0:
+		last_energy_ts = now
+		return
+	var elapsed := now - last_energy_ts
+	if elapsed < ENERGY_REGEN_SEC:
+		return
+	var gained := int(elapsed / ENERGY_REGEN_SEC)
+	if gained > 0 and energy < max_energy:
+		energy = clampi(energy + gained, 0, max_energy)
+		EventBus.energy_changed.emit(energy, max_energy)
+	last_energy_ts = now - fmod(elapsed, ENERGY_REGEN_SEC)
+
+# --- offline progression (clamp trần, chống đổi giờ) ----------------------
+func _apply_offline_progress() -> void:
+	var now := TimeService.now_unix()
+	if offline_ts <= 0.0:
+		offline_ts = now
+		return
+	var elapsed: float = clampf(now - offline_ts, 0.0, MAX_OFFLINE_SEC)
+	offline_ts = now
+	if elapsed < 60.0 or hero_ids.is_empty():
+		return
+	var n := hero_ids.size()
+	var gold_gain := int(elapsed * OFFLINE_GOLD_PER_SEC * n)
+	var xp_each := int(elapsed * OFFLINE_XP_PER_SEC)
+	add_gold(gold_gain)
+	for id in hero_ids:
+		grant_xp(id, xp_each)
+	last_offline_reward = {"seconds": int(elapsed), "gold": gold_gain, "xp_each": xp_each, "clamped": (now - offline_ts) >= MAX_OFFLINE_SEC}
+	EventBus.offline_reward.emit(last_offline_reward)
+	Telemetry.log_event("Economy", "offline_reward", last_offline_reward)
 
 # --- kho chung ------------------------------------------------------------
 func add_consumable(id: String, n: int = 1) -> void:
@@ -191,6 +267,7 @@ func grant_xp(hero_id: String, amount: int) -> void:
 
 # --- save / load ----------------------------------------------------------
 func save() -> void:
+	offline_ts = TimeService.now_unix()   # mốc cho offline khi mở lại
 	SaveManager.save_game(to_dict())
 
 func to_dict() -> Dictionary:
@@ -201,6 +278,10 @@ func to_dict() -> Dictionary:
 		"player": {
 			"gold": gold,
 			"gems": gems,
+			"energy": energy,
+			"max_energy": max_energy,
+			"last_energy_ts": last_energy_ts,
+			"offline_ts": offline_ts,
 			"consumables": consumables,
 			"materials": materials,
 			"unlocks": unlocks,
@@ -216,6 +297,10 @@ func from_dict(d: Dictionary) -> void:
 		p = {}
 	gold = maxi(int(p.get("gold", 0)), 0)
 	gems = maxi(int(p.get("gems", 0)), 0)
+	max_energy = maxi(int(p.get("max_energy", MAX_ENERGY)), 1)
+	energy = clampi(int(p.get("energy", max_energy)), 0, max_energy)
+	last_energy_ts = float(p.get("last_energy_ts", 0.0))
+	offline_ts = float(p.get("offline_ts", 0.0))
 	consumables = _norm_counts(p.get("consumables", {}))
 	materials = _norm_counts(p.get("materials", {}))
 	unlocks = p.get("unlocks", {}) if typeof(p.get("unlocks")) == TYPE_DICTIONARY else {}
@@ -234,6 +319,7 @@ func from_dict(d: Dictionary) -> void:
 				var h := HeroInstance.from_dict(hd[id])
 				h.hero_id = id
 				h.set_constants(_constants)
+				_apply_def(h)
 				heroes[id] = h
 	_hero_seq = _max_hero_index() + 1
 
@@ -256,6 +342,7 @@ func _norm_counts(d) -> Dictionary:
 func _emit_all() -> void:
 	EventBus.gold_changed.emit(gold)
 	EventBus.gems_changed.emit(gems)
+	EventBus.energy_changed.emit(energy, max_energy)
 	EventBus.consumables_changed.emit()
 	EventBus.inventory_changed.emit()
 	EventBus.equipment_changed.emit()

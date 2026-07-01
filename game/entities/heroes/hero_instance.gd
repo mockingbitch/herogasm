@@ -38,9 +38,22 @@ var talents: Dictionary = {}                       # id -> rank
 var inventory: Array = []                          # gear instances của hero
 var equipment: Dictionary = {"weapon": null, "armor": null}
 var current_hp: int = -1                            # -1 = chưa init (sẽ = eff_max_hp)
+var stamina: float = 100.0                          # 0..100, giảm khi săn, hồi khi nghỉ
+var durability: float = 100.0                       # 0..100, độ bền gear tổng, hồi khi sửa
+var is_ko: bool = false                             # bất tỉnh (KHÔNG permadeath) -> về thành hồi
 var state: int = State.IDLE
 
+var ai_weights: Dictionary = {}                     # runtime, áp từ HeroDef (không serialize)
 var _constants: CombatConstants
+
+func aggression() -> float:
+	return float(ai_weights.get("aggression", 1.0))
+
+func rest_threshold() -> float:
+	return float(ai_weights.get("rest_threshold", 0.45))
+
+func repair_threshold() -> float:
+	return float(ai_weights.get("repair_threshold", 0.30))
 
 func _c() -> CombatConstants:
 	if _constants == null:
@@ -55,7 +68,7 @@ func reset_hp() -> void:
 	current_hp = eff_max_hp()
 
 func is_knocked_out() -> bool:
-	return current_hp == 0
+	return is_ko or current_hp == 0
 
 # --- gear instance helpers ------------------------------------------------
 static func make_instance(id: String, lvl: int = 0, affixes: Array = []) -> Dictionary:
@@ -264,6 +277,9 @@ func to_dict() -> Dictionary:
 		"inventory": inventory,
 		"equipment": equipment,
 		"current_hp": current_hp,
+		"stamina": stamina,
+		"durability": durability,
+		"is_ko": is_ko,
 		"state": state,
 	}
 
@@ -285,6 +301,9 @@ static func from_dict(d: Dictionary) -> HeroInstance:
 		"armor": h._norm_instance(eq.get("armor")),
 	}
 	h.state = int(d.get("state", State.IDLE))
+	h.stamina = clampf(float(d.get("stamina", 100.0)), 0.0, 100.0)
+	h.durability = clampf(float(d.get("durability", 100.0)), 0.0, 100.0)
+	h.is_ko = bool(d.get("is_ko", false))
 	h.current_hp = int(d.get("current_hp", -1))
 	if h.current_hp < 0:
 		h.reset_hp()

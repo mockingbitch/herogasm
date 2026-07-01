@@ -8,7 +8,9 @@ extends RefCounted
 ## k: hằng số mềm hoá defense (CombatConstants.def_k). Trả {"damage": int, "crit": bool}.
 static func compute(attack: int, defense: int, cc: float, cd: float,
 		rng: RandomNumberGenerator, k: float = 100.0) -> Dictionary:
+	if attack <= 0:
+		return {"damage": 0, "crit": false}
 	var base := float(attack) * k / (k + maxf(0.0, float(defense)))
 	var is_crit := rng.randf() < clampf(cc, 0.0, 1.0)
 	var dmg := base * (cd if is_crit else 1.0)
-	return {"damage": int(round(dmg)), "crit": is_crit}
+	return {"damage": maxi(1, int(round(dmg))), "crit": is_crit}   # min 1 (build-combat.md)

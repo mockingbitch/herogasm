@@ -1,0 +1,271 @@
+class_name Hero
+extends Node2D
+## Hero tự trị (living-world). Brain (Utility AI) chạy qua AIScheduler (KHÔNG _process);
+## movement/combat thực thi ở _process. Combat giải bằng Battle Engine (mỗi encounter 1 sim
+## tất định). KO thay vì permadeath: hp=0 -> về Nhà Trọ hồi. Data-driven từ HeroInstance/HeroDef.
+
+enum St { IDLE, TRAVEL_FIELD, HUNT, GO_INN, REST, GO_MARKET, BUY, GO_BLACKSMITH, REPAIR }
+
+const MOVE_SPEED := 80.0
+const HUNT_RANGE := 18.0
+const ENGAGE_ENERGY := 1
+const DUR_LOSS_PER_FIGHT := 3.0
+const STAM_DECAY_HUNT := 1.6
+const STAM_DECAY_MOVE := 0.5
+
+# Scheduler contract
+var think_interval: float = 0.6
+var _ai_accum: float = 0.0
+
+var hero_id: String = ""
+var home_pos: Vector2 = Vector2.ZERO
+var field_center: Vector2 = Vector2(260, 0)
+var spawner: MonsterSpawner
+
+var state: int = St.IDLE
+var goal: String = "idle"
+var reason: String = ""
+var destination: Vector2 = Vector2.ZERO
+var target_monster: Monster
+
+var _label: Label
+var _evaluator := HeroGoalEvaluator.new()
+
+func setup(id: String, home: Vector2, field: Vector2, spawner_: MonsterSpawner) -> void:
+	hero_id = id
+	home_pos = home
+	field_center = field
+	spawner = spawner_
+	position = home
+
+func _ready() -> void:
+	_build_visual()
+	AIScheduler.register(self)
+
+func _exit_tree() -> void:
+	AIScheduler.unregister(self)
+
+func hero() -> HeroInstance:
+	return PlayerProfile.get_hero(hero_id)
+
+# --- BRAIN: chấm điểm goal (qua scheduler) --------------------------------
+func ai_tick() -> void:
+	var h := hero()
+	if h == null:
+		return
+	# KO -> luôn về Inn hồi
+	if h.is_ko:
+		if state != St.GO_INN and state != St.REST:
+			goal = "rest"; reason = "KO"; _go_service("inn", St.GO_INN)
+		return
+	# đang thực thi hành động dịch vụ -> để hoàn tất, không đổi goal
+	if state == St.REST or state == St.BUY or state == St.REPAIR:
+		return
+	var ctx := _build_context(h)
+	var d := _evaluator.evaluate(ctx, goal)
+	goal = d["goal"]
+	reason = d["reason"]
+	match goal:
+		"hunt":
+			if state != St.HUNT and state != St.TRAVEL_FIELD:
+				state = St.TRAVEL_FIELD
+				destination = field_center
+		"rest": _go_service("inn", St.GO_INN)
+		"buy_potion": _go_service("market", St.GO_MARKET)
+		"repair": _go_service("blacksmith", St.GO_BLACKSMITH)
+		_:
+			state = St.IDLE
+			destination = home_pos
+	Telemetry.log_event("AI", "goal_selected", {"hero": hero_id, "goal": goal})
+
+func _build_context(h: HeroInstance) -> DecisionContext:
+	var c := DecisionContext.new()
+	c.hp_pct = float(h.current_hp) / float(maxi(1, h.eff_max_hp()))
+	c.stamina01 = h.stamina / 100.0
+	c.durability01 = h.durability / 100.0
+	c.potion_count = PlayerProfile.potion_count()
+	c.gold = PlayerProfile.gold
+	c.energy = PlayerProfile.energy
+	c.inventory_count = h.inventory.size()
+	c.is_ko = h.is_ko
+	c.aggression = h.aggression()
+	c.rest_threshold = h.rest_threshold()
+	c.repair_threshold = h.repair_threshold()
+	var mk := ServiceRegistry.find_nearest("market", position)
+	c.potion_price = (mk["node"] as Building).potion_price() if mk.has("node") else 40
+	var bs := ServiceRegistry.find_nearest("blacksmith", position)
+	c.repair_cost = (bs["node"] as Building).repair_price() if bs.has("node") else 30
+	return c
+
+func _go_service(type: String, st: int) -> void:
+	var s := ServiceRegistry.find_nearest(type, position)
+	if s.has("pos"):
+		destination = s["pos"]
+		state = st
+	else:
+		state = St.IDLE
+		destination = home_pos
+
+# --- EXECUTION: movement + hành động (per-frame, KHÔNG phải "thinking") ----
+func _process(delta: float) -> void:
+	var h := hero()
+	if h == null:
+		queue_free()
+		return
+	match state:
+		St.IDLE:
+			_move(home_pos, delta)
+		St.TRAVEL_FIELD:
+			_decay_stamina(h, STAM_DECAY_MOVE, delta)
+			if _move(field_center, delta):
+				state = St.HUNT
+		St.HUNT:
+			_tick_hunt(h, delta)
+		St.GO_INN:
+			if _move(destination, delta):
+				state = St.REST
+		St.REST:
+			_tick_rest(h, delta)
+		St.GO_MARKET:
+			if _move(destination, delta):
+				state = St.BUY
+		St.BUY:
+			_do_buy(h)
+		St.GO_BLACKSMITH:
+			if _move(destination, delta):
+				state = St.REPAIR
+		St.REPAIR:
+			_do_repair(h)
+	_refresh_label(h)
+
+func _tick_hunt(h: HeroInstance, delta: float) -> void:
+	_decay_stamina(h, STAM_DECAY_HUNT, delta)
+	if spawner == null:
+		return
+	if target_monster == null or not is_instance_valid(target_monster) or not target_monster.is_alive():
+		target_monster = spawner.nearest_alive(position)
+	if target_monster == null:
+		_move(field_center, delta)
+		return
+	if _move(target_monster.global_position, delta, HUNT_RANGE):
+		_engage(target_monster)
+
+func _tick_rest(h: HeroInstance, delta: float) -> void:
+	var inn := ServiceRegistry.find_nearest("inn", position)
+	var rate: float = (inn["node"] as Building).heal_rate() if inn.has("node") else 30.0
+	h.current_hp = mini(h.current_hp + int(ceil(rate * delta)), h.eff_max_hp())
+	h.stamina = minf(h.stamina + 25.0 * delta, 100.0)
+	if h.current_hp >= h.eff_max_hp() and h.stamina >= 100.0:
+		if h.is_ko:
+			h.is_ko = false
+			EventBus.hero_recovered.emit(hero_id)
+		state = St.IDLE
+		goal = "idle"
+
+func _do_buy(h: HeroInstance) -> void:
+	# mua tới 3 potion nếu đủ gold
+	var bought := 0
+	while bought < 3 and PlayerProfile.buy("health_potion"):
+		bought += 1
+	state = St.IDLE
+	goal = "idle"
+
+func _do_repair(h: HeroInstance) -> void:
+	var bs := ServiceRegistry.find_nearest("blacksmith", position)
+	var price: int = (bs["node"] as Building).repair_price() if bs.has("node") else 30
+	if PlayerProfile.gold >= price and h.durability < 100.0:
+		PlayerProfile.add_gold(-price)
+		h.durability = 100.0
+		Telemetry.log_event("Economy", "repair", {"hero": hero_id, "cost": price})
+	state = St.IDLE
+	goal = "idle"
+
+# --- COMBAT: 1 encounter = 1 sim Battle Engine tất định -------------------
+func _engage(monster: Monster) -> void:
+	var h := hero()
+	if h == null or monster == null or not monster.is_alive():
+		return
+	# tự uống potion nếu HP thấp trước khi đánh
+	if h.current_hp < int(0.4 * h.eff_max_hp()) and PlayerProfile.potion_count() > 0:
+		var heal := PlayerProfile.use_potion()
+		h.current_hp = mini(h.current_hp + heal, h.eff_max_hp())
+		Telemetry.log_event("Combat", "potion_used", {"hero": hero_id})
+	PlayerProfile.spend_energy(ENGAGE_ENERGY)
+
+	var hu := BattleUnit.from_hero(h, 0)
+	var mu := BattleUnit.from_enemy(monster.data, 1, monster.uid)
+	var seed_val := RandomService.randi()
+	var res := BattleEngine.simulate([hu], [mu], seed_val)
+
+	h.current_hp = int(res.hero_hp_after.get(hero_id, h.current_hp))
+	h.durability = maxf(0.0, h.durability - DUR_LOSS_PER_FIGHT)
+	_spawn_damage_numbers(res, monster)
+	Telemetry.log_event("Combat", "fight", {"hero": hero_id, "won": res.hero_won(), "dur": res.duration})
+
+	if res.hero_won() and h.current_hp > 0:
+		_loot(monster.data, h)
+		monster.die()
+		target_monster = null
+	else:
+		# thua/KO -> không permadeath
+		h.current_hp = 0
+		h.is_ko = true
+		PlayerProfile.knock_out(hero_id)
+		target_monster = null
+		goal = "rest"
+		_go_service("inn", St.GO_INN)
+		PlayerProfile.save()
+
+func _loot(enemy: EnemyData, h: HeroInstance) -> void:
+	var gold := RandomService.randi_range(enemy.gold_drop_min, enemy.gold_drop_max)
+	PlayerProfile.add_gold(gold)
+	var before := h.level
+	PlayerProfile.grant_xp(hero_id, enemy.xp_reward)
+	for drop in enemy.drops:
+		if RandomService.randf() < float(drop.get("chance", 0.0)):
+			PlayerProfile.add_item(str(drop.get("id", "")))
+	Telemetry.log_event("Economy", "loot_dropped", {"hero": hero_id, "gold": gold, "enemy": enemy.id})
+	if h.level > before:
+		PlayerProfile.save()   # save khi level up (save-system.md §Save Timing)
+
+func _spawn_damage_numbers(res: BattleResult, monster: Monster) -> void:
+	var shown := 0
+	for ev in res.timeline:
+		if shown >= 6:
+			break
+		if ev["type"] != "hit":
+			continue
+		var to_monster: bool = str(ev["tgt"]) == monster.uid
+		var pos: Vector2 = monster.global_position if to_monster else global_position
+		var col := Color(1, 0.9, 0.3) if bool(ev["crit"]) else (Color(1, 1, 1) if to_monster else Color(1, 0.5, 0.4))
+		DamageNumber.spawn(get_parent(), pos + Vector2(0, -14), int(ev["value"]), col, bool(ev["crit"]))
+		shown += 1
+
+# --- helpers --------------------------------------------------------------
+## Di chuyển về dest; trả true khi đã trong `arrive` khoảng cách.
+func _move(dest: Vector2, delta: float, arrive: float = 4.0) -> bool:
+	if position.distance_to(dest) <= arrive:
+		return true
+	position = position.move_toward(dest, MOVE_SPEED * delta)
+	return position.distance_to(dest) <= arrive
+
+func _decay_stamina(h: HeroInstance, rate: float, delta: float) -> void:
+	h.stamina = maxf(0.0, h.stamina - rate * delta)
+
+func _build_visual() -> void:
+	var poly := Polygon2D.new()
+	poly.polygon = PackedVector2Array([Vector2(0, -9), Vector2(7, 0), Vector2(0, 9), Vector2(-7, 0)])
+	poly.color = Color(0.9, 0.85, 0.6)
+	add_child(poly)
+	_label = Label.new()
+	_label.add_theme_font_size_override("font_size", 7)
+	_label.position = Vector2(-10, -26)
+	_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_label)
+
+func _refresh_label(h: HeroInstance) -> void:
+	if _label == null:
+		return
+	var names: Array[String] = ["idle", "→field", "hunt", "→inn", "rest", "→mkt", "buy", "→smith", "repair"]
+	var st_name: String = names[state]
+	_label.text = "%s\n%s hp%d" % [h.display_name, st_name, h.current_hp]
