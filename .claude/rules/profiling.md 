@@ -1,0 +1,553 @@
+# Profiling Rules
+
+## Philosophy
+
+Never optimize by feeling.
+
+Always measure first.
+
+Profiling tells us:
+
+- What is slow
+- Why it is slow
+- How often it happens
+- Whether the fix actually worked
+
+Performance decisions must be data-driven.
+
+---
+
+# Profiling Goals
+
+Measure:
+
+- FPS
+- Frame time
+- CPU time
+- GPU time
+- Script time
+- Physics time
+- Navigation time
+- AI tick time
+- Combat tick time
+- Memory usage
+- Node count
+- Object pool usage
+- Draw calls
+- Save/load time
+
+---
+
+# Golden Rule
+
+Before optimizing:
+
+1. Reproduce the issue
+2. Measure baseline
+3. Identify bottleneck
+4. Fix one thing
+5. Measure again
+6. Compare results
+
+Never change multiple systems at once.
+
+---
+
+# Performance Budget
+
+Target platform:
+
+Android mid-range device.
+
+Recommended budget:
+
+```text
+Frame Time:        <= 16.6 ms
+Script Time:       <= 5 ms
+Physics Time:      <= 3 ms
+AI Tick:           <= 2 ms
+Combat Tick:       <= 2 ms
+Navigation Tick:   <= 3 ms
+UI Update:         <= 2 ms
+Save:              <= 500 ms
+Load:              <= 3 sec
+Memory:            <= 512 MB
+```
+
+---
+
+# Profiling Levels
+
+## Level 1: Quick Check
+
+Use for daily development.
+
+Measure:
+
+- FPS
+- Frame time
+- Memory
+- Node count
+- AI tick
+- Combat tick
+
+---
+
+## Level 2: Feature Profiling
+
+Use before merging a feature.
+
+Measure:
+
+- New allocations
+- New nodes
+- New signals
+- New timers
+- New process callbacks
+- New path requests
+
+---
+
+## Level 3: Stress Profiling
+
+Use before release.
+
+Measure:
+
+- 300 Heroes
+- 1000 Monsters
+- 200 NPC
+- 100 Buildings
+- 3000 Loot
+- 24-hour simulation
+
+---
+
+# Baseline
+
+Every major build must have baseline metrics.
+
+Example:
+
+```text
+Build: 0.1.0
+Map: BenchmarkWorld
+Heroes: 100
+Monsters: 500
+FPS Avg: 60
+FPS Min: 55
+Memory: 180 MB
+AI Tick: 1.2 ms
+Combat Tick: 0.8 ms
+Navigation Tick: 2.1 ms
+```
+
+Never optimize without a baseline.
+
+---
+
+# Benchmark World
+
+Maintain a dedicated profiling scene:
+
+```text
+BenchmarkWorld.tscn
+```
+
+It should include:
+
+- Town
+- Roads
+- Hunting zones
+- 300 Heroes
+- 1000 Monsters
+- 100 NPC
+- 50 Buildings
+- Boss
+- Merchant
+- Weather
+- Festival
+- Loot
+- Combat
+- UI
+
+This scene is used for repeatable performance measurement.
+
+---
+
+# Metrics Collector
+
+Use a dedicated MetricsCollector.
+
+Responsibilities:
+
+- Collect metrics
+- Aggregate averages
+- Track peaks
+- Export reports
+- Detect regressions
+
+---
+
+# Required Metrics
+
+Always collect:
+
+```text
+fps_avg
+fps_min
+frame_time_avg
+frame_time_peak
+memory_avg
+memory_peak
+node_count
+hero_count
+monster_count
+npc_count
+loot_count
+ai_tick_avg
+ai_tick_peak
+combat_tick_avg
+combat_tick_peak
+navigation_tick_avg
+navigation_tick_peak
+save_time_avg
+load_time_avg
+```
+
+---
+
+# Optional Metrics
+
+Collect when relevant:
+
+```text
+draw_calls
+texture_memory
+audio_memory
+signal_count
+timer_count
+pool_hit_rate
+pool_miss_rate
+path_request_count
+path_fail_count
+decision_count
+target_switch_count
+inventory_sort_time
+market_update_time
+event_update_time
+```
+
+---
+
+# AI Profiling
+
+Measure:
+
+- Decision time
+- Scheduler time
+- Goal selection time
+- Path request frequency
+- Failed decisions
+- Idle duration
+- State changes
+- Target switching
+
+AI should not think every frame.
+
+---
+
+# Navigation Profiling
+
+Measure:
+
+- Path request count
+- Path completion time
+- Failed paths
+- Stuck heroes
+- Repath frequency
+- Average travel time
+
+Never call path recalculation every frame.
+
+---
+
+# Combat Profiling
+
+Measure:
+
+- Active combats
+- Skill casts
+- Damage calculations
+- Target searches
+- Status effect updates
+- Projectile count
+- Loot creation
+
+Combat should use direct calls for high-frequency logic.
+
+---
+
+# UI Profiling
+
+Measure:
+
+- Open panel time
+- List rendering time
+- Widget count
+- Rebuild count
+- Inventory sort time
+- Hero list refresh time
+
+UI must update only when state changes.
+
+---
+
+# Save/Load Profiling
+
+Measure:
+
+- Save file size
+- Save time
+- Load time
+- Serialization time
+- Deserialization time
+- Compression time
+- Migration time
+
+Save must not freeze gameplay.
+
+---
+
+# Memory Profiling
+
+Track:
+
+- Total memory
+- Peak memory
+- Node count
+- Resource count
+- Pool size
+- Orphan nodes
+- Persistent references
+
+Memory should return near baseline after closing scenes.
+
+---
+
+# Object Pool Profiling
+
+Measure:
+
+- Pool hit rate
+- Pool miss rate
+- Pool growth
+- Reuse count
+- Exhaustion count
+
+Pool miss spikes indicate wrong sizing.
+
+---
+
+# Signal Profiling
+
+Watch for:
+
+- Signals emitted every frame
+- Repeated connections
+- Dangling connections
+- Global EventBus spam
+
+Signals should represent events, not polling.
+
+---
+
+# Timer Profiling
+
+Avoid hundreds of independent timers.
+
+Prefer centralized scheduler.
+
+Measure:
+
+- Timer count
+- Scheduler queue size
+- Tick latency
+- Starvation
+
+---
+
+# Regression Detection
+
+A build fails profiling when:
+
+```text
+FPS drops > 10%
+Memory increases > 15%
+AI tick increases > 20%
+Combat tick increases > 20%
+Navigation failures increase
+Save time exceeds budget
+Node count grows unexpectedly
+```
+
+---
+
+# Profiling Reports
+
+Every profiling run should generate:
+
+```text
+profiling/reports/
+├── summary.md
+├── metrics.json
+├── frame_time.csv
+├── memory.csv
+├── ai.csv
+├── combat.csv
+├── navigation.csv
+└── recommendations.md
+```
+
+---
+
+# Report Format
+
+Summary should include:
+
+```text
+Build
+Date
+Scene
+Device
+Duration
+Entity Counts
+Average FPS
+Minimum FPS
+Peak Memory
+Slowest Systems
+Warnings
+Recommendations
+Pass / Fail
+```
+
+---
+
+# Godot Profiler
+
+Use Godot profiler for:
+
+- Script functions
+- Physics
+- Rendering
+- Memory
+- Monitors
+- Frame time
+
+Use custom profiler for gameplay-specific metrics.
+
+---
+
+# Custom Profiling Helpers
+
+Use helpers such as:
+
+```gdscript
+Profiler.begin("hero_ai")
+# logic
+Profiler.end("hero_ai")
+```
+
+Never leave noisy profiling enabled in release builds.
+
+---
+
+# Release Build
+
+Profiling code must be:
+
+- Disabled by default
+- Toggleable in debug/dev builds
+- Very low overhead
+- Safe to leave compiled
+
+---
+
+# Optimization Rules
+
+Only optimize after profiling.
+
+Prefer:
+
+- Reducing update frequency
+- Batching work
+- Caching references
+- Reusing objects
+- Removing allocations
+- Simplifying algorithms
+
+Avoid premature micro-optimization.
+
+---
+
+# Optimization Priority
+
+Optimize in this order:
+
+1. Algorithm
+2. Update frequency
+3. Allocation
+4. Object pooling
+5. Data structure
+6. Rendering
+7. Micro-optimization
+
+---
+
+# Common Bottlenecks
+
+Watch for:
+
+- `_process()` on too many nodes
+- `get_tree().get_nodes_in_group()` every frame
+- Repeated `instantiate()`
+- Repeated `load()`
+- Repeated pathfinding
+- Signals emitted too often
+- UI list rebuilt too often
+- Large dictionary lookups in hot loops
+- String concatenation in loops
+
+---
+
+# Debug Overlay
+
+Provide a debug overlay showing:
+
+```text
+FPS
+Memory
+Hero Count
+Monster Count
+AI Tick
+Combat Tick
+Navigation Tick
+Path Requests
+Pool Usage
+Node Count
+```
+
+---
+
+# AI Instructions
+
+When generating code:
+
+- Add profiling hooks for heavy systems.
+- Never optimize without measurement.
+- Include performance budgets.
+- Use benchmark scenes.
+- Track regressions.
+- Prefer scheduler-based optimization.
+- Avoid per-frame allocations.
+- Make profiling reports human-readable.

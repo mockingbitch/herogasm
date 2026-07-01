@@ -1,8 +1,8 @@
-# Kingdom of Ashes
+# Herogasm
 
 > *Build your guild. Forge your legends. Conquer the darkness.*
 
-Kingdom of Ashes là một game **Idle RPG / Hero Collection / Team Building** được phát triển bằng **Godot 4**, nơi người chơi vào vai **Guild Master** thay vì điều khiển một anh hùng duy nhất.
+Herogasm là một game **living-world Idle RPG / Hero Collection / Base-building** (lấy cảm hứng Evil Hunter Tycoon) được phát triển bằng **Godot 4**, nơi người chơi vào vai **Guild Master / chủ thành** thay vì điều khiển một anh hùng duy nhất. Bối cảnh: vương quốc đổ nát **Kingdom of Ashes**.
 
 Người chơi sẽ tuyển mộ, huấn luyện và quản lý một đội quân lính đánh thuê, xây dựng đội hình chiến thuật để vượt qua dungeon, săn boss, tham gia Guild War, PvP Arena và các sự kiện theo mùa.
 

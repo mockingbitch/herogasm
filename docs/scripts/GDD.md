@@ -1,5 +1,7 @@
-# Kingdom of Ashes
+# Herogasm
 ## Game Design Document (Version 0.1)
+
+> *Game living-world idle RPG. Bối cảnh diễn ra tại vương quốc đổ nát **Kingdom of Ashes** trên lục địa Azerath.*
 
 ---
 

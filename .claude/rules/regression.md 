@@ -1,0 +1,567 @@
+# Regression Testing Rules
+
+## Philosophy
+
+Every bug must become a test.
+
+A fixed bug is not truly fixed
+until a regression test protects it.
+
+Regression tests prevent old bugs
+from returning after refactor,
+balance changes,
+content updates,
+or performance optimization.
+
+---
+
+# Core Rule
+
+Bug found
+
+↓
+
+Reproduce
+
+↓
+
+Write failing test
+
+↓
+
+Fix bug
+
+↓
+
+Test passes
+
+↓
+
+Keep test forever
+
+Never fix gameplay bugs
+without adding regression coverage.
+
+---
+
+# Regression Test Goals
+
+Protect:
+
+- AI decisions
+- Combat formulas
+- Save/load integrity
+- Economy transactions
+- Inventory behavior
+- Quest progress
+- Event lifecycle
+- Navigation recovery
+- Offline progression
+- Data migration
+- Performance budgets
+
+---
+
+# When To Add Regression Tests
+
+Always add regression tests for:
+
+- Player-facing bugs
+- Save corruption
+- Item duplication
+- Gold duplication
+- Hero stuck forever
+- Quest cannot complete
+- Boss reward duplicated
+- Inventory item lost
+- Broken migration
+- Crash after loading
+- Economy exploit
+- AI deadlock
+- Performance regression
+
+---
+
+# Bug Report Format
+
+Every regression should start from a bug record.
+
+```text
+Bug ID:
+BUG-0001
+
+Title:
+Hero remains in COMBAT after target monster dies.
+
+Area:
+AI / Combat
+
+Severity:
+High
+
+Steps:
+1. Spawn Hero.
+2. Spawn Monster.
+3. Hero targets Monster.
+4. Monster dies before Hero attack resolves.
+
+Expected:
+Hero clears target and chooses a new goal.
+
+Actual:
+Hero remains in COMBAT forever.
+
+Regression Test:
+GivenMonsterDiesBeforeAttack_WhenHeroUpdatesCombat_ThenHeroClearsInvalidTarget
+
+Status:
+Fixed
+```
+
+---
+
+# Test Naming
+
+Use Given / When / Then.
+
+```text
+GivenInventoryFull_WhenHeroLootsItem_ThenHeroReturnsToTown
+
+GivenQuestCompleted_WhenRewardClaimedTwice_ThenSecondClaimIsRejected
+
+GivenOldSaveVersion_WhenLoaded_ThenMigrationPreservesHeroEquipment
+```
+
+Names must describe the original bug clearly.
+
+---
+
+# Regression Test Location
+
+Store tests by system.
+
+```text
+tests/
+├── regression/
+│   ├── ai/
+│   ├── combat/
+│   ├── economy/
+│   ├── inventory/
+│   ├── quest/
+│   ├── save/
+│   ├── navigation/
+│   ├── offline/
+│   └── performance/
+```
+
+---
+
+# Test Metadata
+
+Each regression test should include metadata.
+
+```text
+Bug ID
+Date
+System
+Severity
+Original Cause
+Expected Behavior
+```
+
+Example:
+
+```gdscript
+# Bug ID: BUG-0042
+# System: Inventory
+# Severity: Critical
+# Cause: Stack merge did not validate max_stack.
+# Expected: Items above max_stack create a new stack.
+```
+
+---
+
+# Reproduction First
+
+Before fixing a bug:
+
+1. Reproduce manually or with a script.
+2. Create a failing automated test.
+3. Confirm the test fails.
+4. Fix the bug.
+5. Confirm the test passes.
+
+Never write the test after the fix without verifying failure first.
+
+---
+
+# Minimal Test Case
+
+Regression tests should be as small as possible.
+
+Bad:
+
+Load full town,
+spawn 100 heroes,
+run 10 minutes,
+verify inventory bug.
+
+Good:
+
+Create inventory model,
+add stackable item,
+verify max stack behavior.
+
+---
+
+# Determinism
+
+Regression tests must be deterministic.
+
+Use seeded RandomService.
+
+Never depend on:
+
+- Real time
+- Rendering
+- Animation timing
+- Input timing
+- Network timing
+- Random unseeded behavior
+
+---
+
+# Save Regression Tests
+
+Required for any save/load bug.
+
+Test:
+
+- Old save versions
+- Missing fields
+- Invalid values
+- Duplicate IDs
+- Corrupted partial data
+- Migration
+- Round-trip equality
+
+Never allow save bugs
+without permanent tests.
+
+---
+
+# Economy Regression Tests
+
+Required for:
+
+- Gold duplication
+- Negative currency
+- Missing sink
+- Free upgrade
+- Market exploit
+- Sell/buy loop exploit
+- Overflow
+
+Every economy exploit
+must have a regression test.
+
+---
+
+# Inventory Regression Tests
+
+Required for:
+
+- Item duplication
+- Item loss
+- Broken stack
+- Equip duplication
+- Sell locked item
+- Invalid item ID
+- Full inventory edge case
+
+Inventory bugs are always high priority.
+
+---
+
+# AI Regression Tests
+
+Required for:
+
+- Hero idle forever
+- Hero stuck in combat
+- Hero cannot return town
+- Hero loops between two goals
+- Hero ignores low HP
+- Hero ignores broken equipment
+- Hero chooses unreachable zone
+
+Every AI deadlock
+must have a regression test.
+
+---
+
+# Navigation Regression Tests
+
+Required for:
+
+- Stuck path
+- Unreachable destination
+- Invalid gate
+- Hero oscillation
+- Repath loop
+- Blocked road
+- Zone transition bug
+
+Navigation tests should verify
+recovery behavior.
+
+---
+
+# Combat Regression Tests
+
+Required for:
+
+- Negative damage
+- Infinite healing
+- Cooldown bypass
+- Skill spam
+- Dead target attack
+- Dead hero attacking
+- Duplicate loot drop
+- Boss reward exploit
+
+---
+
+# Quest Regression Tests
+
+Required for:
+
+- Quest cannot complete
+- Quest completes twice
+- Reward duplicated
+- Progress lost after load
+- Wrong monster counted
+- Expired quest still active
+- Invalid quest target
+
+---
+
+# Event Regression Tests
+
+Required for:
+
+- Event never ends
+- Event starts twice
+- Reward duplicated
+- Event currency persists incorrectly
+- NPC remains in event state
+- Weather stuck
+- Boss event cleanup failure
+
+---
+
+# Offline Regression Tests
+
+Required for:
+
+- Offline reward too high
+- Offline reward negative
+- Offline cap ignored
+- Hero dies incorrectly offline
+- Inventory overflow offline
+- Event reward duplicated offline
+
+---
+
+# Performance Regression Tests
+
+Required when a fix changes:
+
+- AI scheduler
+- Combat loop
+- Navigation
+- Save/load
+- Inventory sorting
+- UI list rendering
+- Object pooling
+- Event system
+
+Track before/after metrics.
+
+---
+
+# Performance Regression Budget
+
+Fail regression if:
+
+```text
+FPS drops more than 10%
+Memory increases more than 15%
+AI tick increases more than 20%
+Combat tick increases more than 20%
+Navigation failures increase
+Save time exceeds 500 ms
+Load time exceeds 3 sec
+```
+
+---
+
+# Bug Categories
+
+Use categories:
+
+```text
+AI
+Combat
+Navigation
+Economy
+Inventory
+Quest
+Save
+Event
+UI
+Performance
+Data
+Offline
+```
+
+---
+
+# Severity
+
+```text
+Critical:
+Save corruption, duplication exploit, crash, data loss.
+
+High:
+Hero stuck, quest blocked, boss reward bug, economy exploit.
+
+Medium:
+Wrong behavior but recoverable.
+
+Low:
+Visual or minor inconsistency.
+```
+
+---
+
+# Regression Dashboard
+
+Maintain a dashboard:
+
+```text
+Total Regression Tests
+Passing
+Failing
+By System
+By Severity
+Recently Added
+Recently Failed
+Flaky Tests
+```
+
+---
+
+# Flaky Tests
+
+Flaky tests are bugs.
+
+Never ignore flaky tests.
+
+Fix by removing:
+
+- Real time dependency
+- Randomness
+- Async race
+- Scene timing
+- External dependency
+
+---
+
+# CI Rules
+
+Every Pull Request runs:
+
+- Unit regression tests
+- Save regression tests
+- Economy exploit tests
+- AI deadlock tests
+- Data validation tests
+
+Nightly runs:
+
+- Simulation regression tests
+- Performance regression tests
+- Long-running regression tests
+
+---
+
+# Release Rules
+
+A release is blocked if:
+
+- Any Critical regression fails
+- Any Save regression fails
+- Any Economy exploit regression fails
+- Any crash regression fails
+- Any migration regression fails
+
+---
+
+# Regression Reports
+
+Each CI run should output:
+
+```text
+Regression Summary
+Failed Tests
+Related Bug IDs
+System
+Severity
+Recent Changes
+Suggested Owner
+```
+
+---
+
+# Regression Database
+
+Maintain:
+
+```text
+docs/bugs/regression-log.md
+```
+
+Format:
+
+```text
+BUG-0001 | AI | High | Fixed | Test Added
+BUG-0002 | Save | Critical | Fixed | Test Added
+BUG-0003 | Economy | Critical | Fixed | Test Added
+```
+
+---
+
+# Never Delete Regression Tests
+
+Do not remove regression tests
+unless the related feature is removed.
+
+If a feature changes,
+update the regression test
+to protect the new expected behavior.
+
+---
+
+# AI Instructions
+
+When fixing bugs:
+
+- First create a failing regression test.
+- Keep the test minimal.
+- Use deterministic data.
+- Include bug ID in comments.
+- Add tests to the correct system folder.
+- Never fix a serious bug without regression coverage.
+- Explain what bug the test prevents.
+- Preserve regression tests permanently.

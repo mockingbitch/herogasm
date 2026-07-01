@@ -1,0 +1,859 @@
+# Simulation Testing Rules
+
+## Philosophy
+
+The game is a living world.
+
+The world itself
+must be testable.
+
+Simulation tests verify
+
+AI
+
+Economy
+
+Combat
+
+World
+
+Events
+
+Persistence
+
+over long periods.
+
+Simulation is more important
+than UI testing.
+
+---
+
+# Simulation Goals
+
+Verify
+
+Stability
+
+Scalability
+
+Balance
+
+Performance
+
+Emergent Gameplay
+
+Long-term progression
+
+---
+
+# Simulation Levels
+
+Level 1
+
+Single Hero
+
+↓
+
+Level 2
+
+Party
+
+↓
+
+Level 3
+
+Town
+
+↓
+
+Level 4
+
+Entire World
+
+↓
+
+Level 5
+
+Stress Simulation
+
+---
+
+# Time Scale
+
+Simulation supports
+
+1x
+
+2x
+
+5x
+
+10x
+
+20x
+
+50x
+
+100x
+
+1000x
+
+Never depend on real time.
+
+---
+
+# Headless Mode
+
+Simulation
+
+must run
+
+without rendering.
+
+Disable
+
+Graphics
+
+Animation
+
+Particles
+
+Audio
+
+UI
+
+Only gameplay remains.
+
+---
+
+# World Simulation
+
+World continues
+
+without player.
+
+Verify
+
+Day/Night
+
+Weather
+
+Events
+
+Economy
+
+NPC Schedule
+
+Boss Spawn
+
+Merchant
+
+Population
+
+---
+
+# Hero Simulation
+
+Every Hero
+
+must continuously
+
+have
+
+Goal
+
+Action
+
+Destination
+
+Need
+
+Task
+
+Never remain idle forever.
+
+---
+
+# Hero Behaviors
+
+Observe
+
+Quest
+
+Travel
+
+Combat
+
+Loot
+
+Repair
+
+Shopping
+
+Eating
+
+Sleeping
+
+Training
+
+Relationships
+
+All behaviors
+must naturally occur.
+
+---
+
+# AI Validation
+
+Detect
+
+Infinite loops
+
+Decision loops
+
+No target
+
+No path
+
+Idle forever
+
+Oscillation
+
+Deadlock
+
+Heroes should recover automatically.
+
+---
+
+# Navigation Validation
+
+Detect
+
+Stuck Hero
+
+Looping path
+
+Invalid destination
+
+Blocked road
+
+Unreachable zone
+
+Measure
+
+Average travel time
+
+Retry count
+
+Recovery success
+
+---
+
+# Economy Simulation
+
+Track
+
+Gold Generated
+
+Gold Spent
+
+Materials
+
+Craft
+
+Repair
+
+Market
+
+Storage
+
+Inflation
+
+No resource
+
+should grow infinitely.
+
+---
+
+# Resource Flow
+
+Every resource
+
+must circulate.
+
+Example
+
+Ore
+
+↓
+
+Weapon
+
+↓
+
+Repair
+
+↓
+
+Recycle
+
+↓
+
+Ore
+
+Detect dead resources.
+
+---
+
+# Loot Simulation
+
+Run
+
+100000 kills
+
+Measure
+
+Drop %
+
+Rare %
+
+Legendary %
+
+Average value
+
+Variance
+
+Compare
+
+configured
+
+vs actual.
+
+---
+
+# Combat Simulation
+
+Measure
+
+Average DPS
+
+Fight duration
+
+Potion usage
+
+Deaths
+
+Critical rate
+
+Skill usage
+
+Healing
+
+Retreat
+
+---
+
+# Hero Lifecycle
+
+Track
+
+Recruit
+
+Train
+
+Travel
+
+Fight
+
+Shop
+
+Sleep
+
+Death
+
+Revive
+
+Retirement
+
+Verify
+
+no invalid states.
+
+---
+
+# Monster Simulation
+
+Track
+
+Spawn
+
+Aggro
+
+Combat
+
+Death
+
+Respawn
+
+Migration
+
+Population
+
+Never exceed limits.
+
+---
+
+# Boss Simulation
+
+Track
+
+Spawn
+
+Participants
+
+Kill time
+
+Failure rate
+
+Rewards
+
+Respawn
+
+Phase changes
+
+---
+
+# Event Simulation
+
+Automatically test
+
+Weather
+
+Festival
+
+Merchant
+
+Boss
+
+Town Attack
+
+Invasion
+
+Economy Event
+
+Verify
+
+start
+
+duration
+
+reward
+
+cleanup
+
+---
+
+# Town Simulation
+
+Track
+
+Population
+
+Visitors
+
+Shops
+
+Repairs
+
+Inn usage
+
+Training
+
+Building upgrades
+
+Food consumption
+
+Town should never stop functioning.
+
+---
+
+# Needs Simulation
+
+Observe
+
+Hunger
+
+Fatigue
+
+Mood
+
+Durability
+
+Mana
+
+Health
+
+Verify
+
+Heroes satisfy needs
+
+without player intervention.
+
+---
+
+# Relationship Simulation
+
+Track
+
+Friendship
+
+Marriage
+
+Guild
+
+Conflict
+
+Party
+
+Companions
+
+Relationships
+
+should evolve naturally.
+
+---
+
+# Save Simulation
+
+Every
+
+10 minutes
+
+Save
+
+↓
+
+Load
+
+↓
+
+Continue
+
+Verify
+
+No state loss.
+
+---
+
+# Offline Simulation
+
+Run
+
+8 hours
+
+offline.
+
+Verify
+
+Rewards
+
+Economy
+
+Durability
+
+Deaths
+
+Events
+
+No exploits.
+
+---
+
+# Long Running Test
+
+Support
+
+12 hours
+
+24 hours
+
+72 hours
+
+7 days
+
+Measure
+
+Memory
+
+CPU
+
+Entity Count
+
+Economy
+
+AI
+
+No degradation.
+
+---
+
+# Performance Metrics
+
+Track
+
+FPS
+
+Frame Time
+
+CPU
+
+Memory
+
+Draw Calls
+
+Script Time
+
+Navigation
+
+AI
+
+Combat
+
+Save Time
+
+---
+
+# Memory Leak Detection
+
+Measure
+
+Object Count
+
+Node Count
+
+Resource Count
+
+Pool Usage
+
+Memory
+
+Before
+
+During
+
+After
+
+Simulation.
+
+---
+
+# World Metrics
+
+Collect
+
+Hero Count
+
+Monster Count
+
+NPC Count
+
+Buildings
+
+Population
+
+Resources
+
+Events
+
+Bosses
+
+Quest Count
+
+Everything should remain healthy.
+
+---
+
+# AI Metrics
+
+Measure
+
+Decision Count
+
+State Changes
+
+Target Switches
+
+Path Requests
+
+Failed Decisions
+
+Recovery Rate
+
+---
+
+# Economy Metrics
+
+Track
+
+Average Gold
+
+Median Wealth
+
+Richest Hero
+
+Poorest Hero
+
+Repair Cost
+
+Craft Cost
+
+Inflation
+
+Material Supply
+
+---
+
+# Balance Metrics
+
+Track
+
+Average Hero Level
+
+Average Kill Time
+
+Average Death Rate
+
+Quest Success
+
+Boss Success
+
+Zone Population
+
+---
+
+# Failure Detection
+
+Automatically detect
+
+Idle Hero > 5 min
+
+Deadlock
+
+Infinite Loop
+
+Negative Gold
+
+Negative HP
+
+Broken Inventory
+
+Invalid Quest
+
+Duplicate IDs
+
+Null Targets
+
+---
+
+# Success Criteria
+
+Simulation passes when
+
+No crashes
+
+No deadlocks
+
+No leaks
+
+Stable economy
+
+Healthy AI
+
+Valid save/load
+
+Stable performance
+
+---
+
+# Reports
+
+Simulation generates
+
+Summary
+
+Statistics
+
+Warnings
+
+Errors
+
+Heatmaps
+
+Charts
+
+Recommendations
+
+---
+
+# Debug Commands
+
+Support
+
+Fast Forward
+
+Spawn Hero
+
+Spawn Boss
+
+Give Gold
+
+Teleport
+
+Force Weather
+
+Start Festival
+
+Pause AI
+
+Resume AI
+
+Kill All Monsters
+
+Repair All Equipment
+
+---
+
+# CI
+
+Nightly Build
+
+runs
+
+24-hour simulation.
+
+Release Candidate
+
+runs
+
+72-hour simulation.
+
+Major Release
+
+runs
+
+7-day simulation.
+
+---
+
+# AI Instructions
+
+When generating simulation systems:
+
+- Design for autonomous worlds.
+- Support headless execution.
+- Collect meaningful metrics.
+- Detect failures automatically.
+- Simulate long periods efficiently.
+- Never depend on rendering.
+- Prioritize reproducibility.
+- Produce human-readable reports.
