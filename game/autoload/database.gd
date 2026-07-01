@@ -298,9 +298,9 @@ func _build_heroes() -> void:
 		{"aggression": 0.85, "rest_threshold": 0.55, "repair_threshold": 0.30})
 	_hero("rogue", "Luna", "rogue", "iron_sword", "elf_f",
 		{"aggression": 1.15, "rest_threshold": 0.40, "repair_threshold": 0.25}, "elf")
-	_hero("archer", "Beo", "ranger", "rusty_sword", "elf_m",
+	_hero("archer", "Beo", "ranger", "rusty_sword", "archer",
 		{"aggression": 1.05, "rest_threshold": 0.42, "repair_threshold": 0.30}, "elf")
-	_hero("mage", "Mira", "mage", "rusty_sword", "wizard_m",
+	_hero("mage", "Mira", "mage", "rusty_sword", "wizzard_m",
 		{"aggression": 1.0, "rest_threshold": 0.45, "repair_threshold": 0.30})
 	_hero("cleric", "Kane", "support", "rusty_sword", "knight_f",
 		{"aggression": 0.7, "rest_threshold": 0.6, "repair_threshold": 0.35})

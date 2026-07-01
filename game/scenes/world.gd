@@ -39,10 +39,60 @@ func _dispatch_tick() -> void:
 func F6_hint() -> void:
 	Debug.log("World P1 ready — %d hero, %d monster" % [PlayerProfile.hero_ids.size(), _spawner.alive_count()])
 
+const TILE := 32
+const T_GRASS := Vector2i(0, 0)
+const T_GRASS_DK := Vector2i(1, 0)
+const T_DIRT := Vector2i(2, 0)
+const T_PATH := Vector2i(3, 0)
+const T_WATER := Vector2i(4, 0)
+const T_WALL := Vector2i(5, 0)
+const T_PLAZA := Vector2i(6, 0)
+const T_BUSH := Vector2i(7, 0)
+
+## Nền TileMap từ atlas placeholder: thành có tường bao + quảng trường, Bãi Săn cỏ/đất + suối.
 func _build_ground() -> void:
-	# nền town (xanh) + field (nâu) cho dễ nhìn
-	_rect(Rect2(-380, -140, 260, 280), Color(0.18, 0.22, 0.16))
-	_rect(FIELD_RECT.grow(20), Color(0.22, 0.18, 0.12))
+	var ts := TileSet.new()
+	ts.tile_size = Vector2i(TILE, TILE)
+	var src := TileSetAtlasSource.new()
+	src.texture = load("res://assets/generated/tiles/atlas.png")
+	src.texture_region_size = Vector2i(TILE, TILE)
+	for i in 8:
+		src.create_tile(Vector2i(i, 0))
+	ts.add_source(src, 0)
+	var layer := TileMapLayer.new()
+	layer.tile_set = ts
+	layer.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	add_child(layer)                       # thêm đầu tiên -> vẽ dưới cùng (sau buildings/hero)
+
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 20260702
+	# nền cỏ toàn bản đồ
+	for cy in range(-6, 7):
+		for cx in range(-15, 17):
+			layer.set_cell(Vector2i(cx, cy), 0, T_GRASS_DK if rng.randf() < 0.16 else T_GRASS)
+
+	# --- THÀNH (trái): tường bao + quảng trường + lối đá ---
+	var tx0 := -14; var tx1 := -2; var ty0 := -5; var ty1 := 4
+	for cx in range(tx0, tx1 + 1):
+		layer.set_cell(Vector2i(cx, ty0), 0, T_WALL)
+		layer.set_cell(Vector2i(cx, ty1), 0, T_WALL)
+	for cy in range(ty0, ty1 + 1):
+		layer.set_cell(Vector2i(tx0, cy), 0, T_WALL)
+		layer.set_cell(Vector2i(tx1, cy), 0, T_WALL)
+	for cy in range(-1, 2):                # quảng trường trung tâm
+		for cx in range(-9, -5):
+			layer.set_cell(Vector2i(cx, cy), 0, T_PLAZA)
+	for cx in range(tx0 + 1, tx1):         # lối đá ngang giữa thành
+		layer.set_cell(Vector2i(cx, 0), 0, T_PATH)
+
+	# --- BÃI SĂN (phải): cỏ + mảng đất + suối + bụi cây ---
+	for i in 26:
+		layer.set_cell(Vector2i(rng.randi_range(4, 14), rng.randi_range(-4, 4)), 0, T_DIRT)
+	for cy in range(-5, 6):                # suối cột phải
+		layer.set_cell(Vector2i(15, cy), 0, T_WATER)
+		layer.set_cell(Vector2i(16, cy), 0, T_WATER)
+	for i in 14:
+		layer.set_cell(Vector2i(rng.randi_range(4, 13), rng.randi_range(-4, 4)), 0, T_BUSH)
 
 func _build_town() -> void:
 	_building("inn", Vector2(-350, -40))
@@ -81,9 +131,3 @@ func _build_camera() -> void:
 	cam.zoom = Vector2(0.62, 0.62)   # zoom-out để thấy cả town + field
 	add_child(cam)
 	cam.make_current()               # sau khi vào tree
-
-func _rect(r: Rect2, col: Color) -> void:
-	var p := Polygon2D.new()
-	p.polygon = PackedVector2Array([r.position, Vector2(r.end.x, r.position.y), r.end, Vector2(r.position.x, r.end.y)])
-	p.color = col
-	add_child(p)

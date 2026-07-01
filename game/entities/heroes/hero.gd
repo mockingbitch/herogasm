@@ -29,6 +29,8 @@ var destination: Vector2 = Vector2.ZERO
 var target_monster: Monster
 
 var _label: Label
+var _spr: AnimatedSprite2D
+var _prev_pos: Vector2 = Vector2.ZERO
 var _evaluator := HeroGoalEvaluator.new()
 
 func setup(id: String, home: Vector2, field: Vector2, spawner_: MonsterSpawner) -> void:
@@ -139,6 +141,7 @@ func _process(delta: float) -> void:
 	if has_node("/root/ExpeditionService") and ExpeditionService.is_on_expedition(hero_id):
 		_move(home_pos, delta)
 		_refresh_label(h)
+		_update_anim()
 		return
 	match state:
 		St.IDLE:
@@ -165,6 +168,7 @@ func _process(delta: float) -> void:
 		St.TRAIN:
 			_do_train(h)
 	_refresh_label(h)
+	_update_anim()
 
 ## Trạng thái hành động khi tới đích (theo state di chuyển hiện tại).
 func _arrive_state() -> int:
@@ -319,15 +323,52 @@ func _decay_stamina(h: HeroInstance, rate: float, delta: float) -> void:
 	h.stamina = maxf(0.0, h.stamina - rate * delta)
 
 func _build_visual() -> void:
-	var poly := Polygon2D.new()
-	poly.polygon = PackedVector2Array([Vector2(0, -9), Vector2(7, 0), Vector2(0, 9), Vector2(-7, 0)])
-	poly.color = Color(0.9, 0.85, 0.6)
-	add_child(poly)
+	_add_shadow(self, 8.0)
+	var base := "knight_m"
+	var def: HeroDef = Database.get_hero_def(hero().hero_def_id) if hero() != null else null
+	if def != null and def.sprite != "":
+		base = def.sprite
+	if base == "archer":                       # hero dùng sheet archer.png (frame lớn -> scale nhỏ)
+		_spr = SpriteLib.build_archer()
+		_spr.scale = Vector2(0.16, 0.16)
+		_spr.position = Vector2(0, -17)
+	else:
+		_spr = SpriteLib.build(SpriteLib.defs_for(base, false))
+		_spr.scale = Vector2(1.6, 1.6)
+		_spr.position = Vector2(0, -10)
+	_spr.play("idle")
+	add_child(_spr)
 	_label = Label.new()
 	_label.add_theme_font_size_override("font_size", 7)
-	_label.position = Vector2(-10, -26)
+	_label.position = Vector2(-14, -34)
 	_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_label)
+	_prev_pos = position
+
+## Bóng đổ đơn giản (ellipse tối bán trong suốt) dưới chân — đọc silhouette trên nền.
+static func _add_shadow(node: Node2D, rx: float) -> void:
+	var pts := PackedVector2Array()
+	for i in 10:
+		var a := TAU * i / 10.0
+		pts.append(Vector2(cos(a) * rx, sin(a) * rx * 0.4 + 2.0))
+	var sh := Polygon2D.new()
+	sh.polygon = pts
+	sh.color = Color(0, 0, 0, 0.28)
+	node.add_child(sh)
+
+## Cập nhật animation idle/run + lật hướng theo di chuyển (gọi cuối _process).
+func _update_anim() -> void:
+	if _spr == null:
+		return
+	var delta_pos := position - _prev_pos
+	if delta_pos.length() > 0.5:
+		if _spr.animation != "run":
+			_spr.play("run")
+		if absf(delta_pos.x) > 0.05:
+			_spr.flip_h = delta_pos.x < 0.0
+	elif _spr.animation != "idle":
+		_spr.play("idle")
+	_prev_pos = position
 
 func _refresh_label(h: HeroInstance) -> void:
 	if _label == null:

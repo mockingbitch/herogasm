@@ -76,12 +76,23 @@ func upgrade() -> bool:
 
 var _label: Label
 
+const BUILD_DIR := "res://assets/generated/buildings/"
+
 func _build_visual() -> void:
-	var col := _color_for(def.type if def != null else "inn")
-	var poly := Polygon2D.new()
-	poly.polygon = PackedVector2Array([Vector2(-22, -22), Vector2(22, -22), Vector2(22, 22), Vector2(-22, 22)])
-	poly.color = col
-	add_child(poly)
+	var type := def.type if def != null else "inn"
+	var tex: Texture2D = load(BUILD_DIR + type + ".png")
+	if tex != null:
+		var spr := Sprite2D.new()
+		spr.texture = tex
+		spr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		spr.scale = Vector2(1.5, 1.5)
+		spr.position = Vector2(0, -8)     # gốc node ~ chân nhà
+		add_child(spr)
+	else:
+		var poly := Polygon2D.new()
+		poly.polygon = PackedVector2Array([Vector2(-22, -22), Vector2(22, -22), Vector2(22, 22), Vector2(-22, 22)])
+		poly.color = _color_for(type)
+		add_child(poly)
 	_label = Label.new()
 	_label.add_theme_font_size_override("font_size", 8)
 	_label.position = Vector2(-24, -38)
