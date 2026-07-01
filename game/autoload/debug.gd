@@ -2,13 +2,15 @@ extends Node
 ## Debug console stub (P0) theo debug-tools.md: registry lệnh + gate theo build.
 ## Cheat CHỈ bật ở build debug (release không có). Thay print bằng Debug.log/warning/error.
 
-var enabled: bool = OS.is_debug_build()
+var enabled: bool = true                            # đặt lại trong _ready theo ReleaseGate
 var _commands: Dictionary = {}                     # name -> {callable, help}
 
 func _ready() -> void:
+	enabled = ReleaseGate.debug_enabled()          # release build -> tắt toàn bộ debug/cheat
 	_register_defaults()
 	_register_p4()
 	_register_p5()
+	_register_p6()
 
 func register_command(name: String, callable: Callable, help: String = "") -> void:
 	_commands[name] = {"callable": callable, "help": help}
@@ -243,3 +245,23 @@ func _cmd_set_bp(a: Array) -> String:
 	var lvl := int(a[0]) if a.size() > 0 else 1
 	PlayerProfile.battlepass["level"] = maxi(1, lvl)
 	return "bp_level=%d" % int(PlayerProfile.battlepass.get("level", 1))
+
+# --- P6: online / cloud / liveops (debug-tools.md — TẤT gate sau ReleaseGate) --
+func _register_p6() -> void:
+	register_command("simulate_disconnect", func(_a): NetManager.go_offline(); return "offline")
+	register_command("simulate_reconnect", func(_a): NetManager.go_online(); return "online, queue=%d" % NetManager.queued_count())
+	register_command("show_pending_commands", func(_a): return "pending=%d" % NetManager.queued_count())
+	register_command("clear_command_queue", func(_a): NetManager.clear_queue(); return "cleared")
+	register_command("net_state", func(_a): return "state=%d online=%s" % [NetManager.state, str(NetManager.is_online())])
+	register_command("force_cloud_upload", func(_a): return str(CloudSaveService.upload().code))
+	register_command("validate_save_integrity", _cmd_validate_save)
+	register_command("save_now", func(_a): PlayerProfile.save(); return "saved")
+	register_command("run_migration", func(a): return "v%d->%d" % [int(a[0]) if a.size() > 0 else 1, SaveManager.SAVE_VERSION])
+	register_command("run_stress", func(_a): return str(StressTestRunner.run_levels()))
+	register_command("run_economy_sim", func(a): return str(EconomySimRunner.run(int(a[0]) if a.size() > 0 else 30, 1)))
+	register_command("show_leaderboard", func(a): return str(LeaderboardService.top(str(a[0]) if a.size() > 0 else "s0", 10)))
+	register_command("release_info", func(_a): return "is_release=%s debug=%s" % [str(ReleaseGate.is_release), str(enabled)])
+
+func _cmd_validate_save(_a: Array) -> String:
+	var d := SaveManager.load_game()
+	return "empty=%s dup_ids=%s" % [str(d.is_empty()), str(SaveManager.has_duplicate_ids(d))]

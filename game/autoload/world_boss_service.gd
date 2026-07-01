@@ -123,3 +123,6 @@ func import_world(d: Dictionary) -> void:
 	if typeof(wb) == TYPE_DICTIONARY and not wb.is_empty():
 		current = BossRuntimeState.from_dict(wb)
 		_def = Database.get_boss_def(str(current.boss_def_id))
+	else:
+		current = null                            # world block rỗng (wipe/không có boss) -> reset
+		_def = null

@@ -58,5 +58,11 @@ signal event_ended(event_id: String, success: bool)
 signal event_reward_claimed(event_id: String)
 signal world_state_changed(region: String, key: String, value: Variant)
 
+# Online / LiveOps (P6) — offline-first, server-assisted
+signal net_state_changed(state: int)
+signal cloud_conflict_detected(summary: Dictionary)
+signal leaderboard_updated(season_key: String)
+signal guild_changed(guild_id: String)
+
 # Save
 signal save_completed(ok: bool)

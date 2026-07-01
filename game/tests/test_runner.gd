@@ -45,6 +45,13 @@ const SUITES := [
 	preload("res://tests/unit/test_season.gd"),
 	preload("res://tests/unit/test_migration_v6.gd"),
 	preload("res://tests/simulation/test_season_simulation.gd"),
+	# --- Phase 6 (LiveOps · Online · Release) ---
+	preload("res://tests/unit/test_net.gd"),
+	preload("res://tests/unit/test_cloud_save.gd"),
+	preload("res://tests/unit/test_pvp_online.gd"),
+	preload("res://tests/unit/test_guild.gd"),
+	preload("res://tests/unit/test_migration_suite.gd"),
+	preload("res://tests/simulation/test_liveops.gd"),
 ]
 
 var _pass: int = 0

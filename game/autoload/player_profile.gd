@@ -33,6 +33,13 @@ var stage_claims: Dictionary = {}                  # stage_id -> true nếu đã
 var story: Dictionary = {}                         # tiến trình campaign (P5, StoryManager sở hữu)
 var battlepass: Dictionary = {}                    # tiến trình battle pass season (P5)
 var cosmetics: Dictionary = {}                     # id -> true (skin/emote/avatar — cosmetic, không power)
+# --- P6 online (rỗng khi anonymous/offline) ---
+var account_id: String = ""                        # Supabase auth uid ("" = anonymous)
+var cloud_save_id: String = ""
+var guild_id: String = ""
+var pvp_mmr: int = 1000
+var pvp_rank: String = ""
+var play_time: int = 0                             # tổng tick chơi (chống save regression cloud)
 var _claimed_ids: Dictionary = {}                  # claim_id -> reward_hash (SAVE, chống double)
 var _summon: SummonService
 var _reward_guard: RewardProtection
@@ -84,6 +91,12 @@ func new_game() -> void:
 	story = {}
 	battlepass = {}
 	cosmetics = {}
+	account_id = ""
+	cloud_save_id = ""
+	guild_id = ""
+	pvp_mmr = 1000
+	pvp_rank = ""
+	play_time = 0
 	_claimed_ids = {}
 	# Roster khởi tạo từ HeroDef (data-driven).
 	for def_id in Database.hero_def_ids():
@@ -96,7 +109,15 @@ func new_game() -> void:
 func reset_progress() -> void:
 	SaveManager.delete_save()
 	new_game()
+	_reset_services()
 	_emit_all()
+
+## Wipe/new-game phải reset trạng thái transient của các service (chống stale expedition/season/event).
+func _reset_services() -> void:
+	for svc in ["ExpeditionService", "WorldBossService", "ArenaService", "EventManager",
+			"WorldEvolutionService", "SeasonManager"]:
+		if has_node("/root/" + svc):
+			get_node("/root/" + svc).import_world({})
 
 # --- roster ---------------------------------------------------------------
 func spawn_hero(def_id: String) -> HeroInstance:
@@ -599,6 +620,12 @@ func to_dict() -> Dictionary:
 			"story": story,
 			"battlepass": battlepass,
 			"cosmetics": cosmetics,
+			"account_id": account_id,
+			"cloud_save_id": cloud_save_id,
+			"guild_id": guild_id,
+			"pvp_mmr": pvp_mmr,
+			"pvp_rank": pvp_rank,
+			"play_time": play_time,
 			"claimed_ids": _claimed_ids,
 		},
 		"hero_ids": hero_ids,
@@ -651,6 +678,12 @@ func from_dict(d: Dictionary) -> void:
 	story = p.get("story", {}) if typeof(p.get("story")) == TYPE_DICTIONARY else {}
 	battlepass = p.get("battlepass", {}) if typeof(p.get("battlepass")) == TYPE_DICTIONARY else {}
 	cosmetics = p.get("cosmetics", {}) if typeof(p.get("cosmetics")) == TYPE_DICTIONARY else {}
+	account_id = str(p.get("account_id", ""))
+	cloud_save_id = str(p.get("cloud_save_id", ""))
+	guild_id = str(p.get("guild_id", ""))
+	pvp_mmr = maxi(0, int(p.get("pvp_mmr", 1000)))
+	pvp_rank = str(p.get("pvp_rank", ""))
+	play_time = maxi(0, int(p.get("play_time", 0)))
 	_claimed_ids = p.get("claimed_ids", {}) if typeof(p.get("claimed_ids")) == TYPE_DICTIONARY else {}
 	max_energy = MAX_ENERGY + int(unlocks.get("energy_cap_bonus", 0))
 	energy = clampi(energy, 0, max_energy)

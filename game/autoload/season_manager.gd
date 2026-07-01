@@ -80,6 +80,8 @@ func export_world() -> Dictionary:
 func import_world(d: Dictionary) -> void:
 	var s = d.get("season", {})
 	if typeof(s) != TYPE_DICTIONARY or s.is_empty():
+		_active = null                            # world block rỗng (wipe) -> gỡ season + meta
+		_meta.clear()
 		return
 	var def: SeasonDef = Database.get_season_def(str(s.get("season_id", "")))
 	if def == null:

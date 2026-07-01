@@ -1454,6 +1454,15 @@ Theo `testing.md`, `unit-testing.md`, `simulation.md`, `regression.md` (mỗi fe
 
 ## Phase 6 — LiveOps hardening · Online · Release
 > **Mục tiêu:** Đạt chuẩn phát hành theo `prompts/release.md`: online đầy đủ (leaderboard/guild/async-PvP/cloud-save conflict), telemetry đầy đủ không PII, hiệu năng đạt target trên Android mid-range, chống cheat authoritative server-side, save-migration test, gate debug, release checklist + rollback + post-release monitoring. · **Thời lượng:** 6-10 tuần + backend · ongoing · **Phụ thuộc:** P5 (story/season/event framework đã ổn định — leaderboard & guild boss & PvP-bot có nội dung để phục vụ)
+>
+> ✅ **CORE HOÀN THÀNH (headless-testable)** — xem `docs/PHASE6.md`. Giao: Net offline-first (ConnectionState +
+> command queue + reconnect replay idempotent), GameCommand/CommandResult, **MockBackend** (mirror Edge Function
+> in-memory: lb-submit seed-verify, save-upload checksum+conflict, guild boss/shop server-side, pvp stat_hash+seed
+> verify, dedupe, rate-limit), LeaderboardService/GuildService/AsyncPvpService, CloudSaveService+ConflictResolver,
+> AntiCheatValidator, MetricsCollector/StressTestRunner/EconomySimRunner(30-day), ReleaseGate (gate Debug),
+> Telemetry track()+sampling, save v7. **Sửa bug save-checksum tất định** (int→float JSON) → .bak/cloud recovery
+> nay chạy thật. 464/464 test xanh. Ngoài phase (ops sau deploy): Supabase thật + Edge Deno + HTTP adapter +
+> network UI scenes + BenchmarkWorld on-device + release runbook/monitoring.
 
 ### Vì sao ở đây
 P6 nằm cuối vì nó **hardening thứ đã tồn tại**: mọi hệ thống lõi (world sống, hero AI, combat tất định seeded, battle engine SIM↔VIEW, save atomic + migration, town, collection/gacha, boss/stage/PvP-bot P4, story/season P5) đã hoàn chỉnh và ổn định về gameplay. Không thể "làm online" một hệ thống chưa deterministic hay chưa serializable, cũng không thể "tối ưu" cái chưa đo được. P6 lấy các mảnh sẵn có — `GameService` interface + `CommandBus` (skill `build-network` đã dựng từ P1 offline-first), snapshot/diff, cloud-save hooks (skill `build-save`) — và **kích hoạt nhánh server authority**, thêm anti-cheat, telemetry đầy đủ, profiling regression gate, stress suite tự động.

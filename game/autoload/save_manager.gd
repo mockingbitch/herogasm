@@ -6,14 +6,15 @@ extends Node
 const SAVE_PATH := "user://save_0.json"
 const BAK_PATH := "user://save_0.bak"
 const TMP_PATH := "user://save_0.tmp"
-const SAVE_VERSION := 6
+const SAVE_VERSION := 7
 
 func save_game(data: Dictionary) -> bool:
 	var payload := data.duplicate(true)
 	payload["save_version"] = SAVE_VERSION
 	payload.erase("checksum")
 	payload["checksum"] = _checksum(payload)
-	var json := JSON.stringify(payload, "\t")
+	# full_precision -> float round-trip chính xác (checksum tất định khi load lại -> .bak recovery hoạt động)
+	var json := _canon(payload, "\t")
 
 	var f := FileAccess.open(TMP_PATH, FileAccess.WRITE)
 	if f == null:
@@ -49,6 +50,15 @@ func load_game() -> Dictionary:
 
 func has_save() -> bool:
 	return FileAccess.file_exists(SAVE_PATH) or FileAccess.file_exists(BAK_PATH)
+
+## Validate: hero_ids không được trùng (chống duplicate ID — multiplayer.md/save-system.md).
+func has_duplicate_ids(d: Dictionary) -> bool:
+	var seen := {}
+	for id in d.get("hero_ids", []):
+		if seen.has(str(id)):
+			return true
+		seen[str(id)] = true
+	return false
 
 func delete_save() -> void:
 	for p in [SAVE_PATH, BAK_PATH, TMP_PATH]:
@@ -95,10 +105,17 @@ func _read_valid(path: String) -> Dictionary:
 			return {}
 	return d
 
+## Canonical stringify: sort_keys + full_precision (float round-trip chính xác).
+func _canon(d, indent: String = "") -> String:
+	return JSON.stringify(d, indent, true, true)
+
+## Checksum tất định: normalize qua 1 vòng parse (JSON đọc số thành float) -> int/float thống nhất
+## giữa lúc GHI (payload có int) và lúc ĐỌC (đã parse thành float). Chống mismatch -> .bak recovery chạy.
 func _checksum(d: Dictionary) -> String:
 	var copy := d.duplicate(true)
 	copy.erase("checksum")
-	return str(JSON.stringify(copy).hash())
+	var normalized: Variant = JSON.parse_string(_canon(copy))
+	return str(_canon(normalized).hash())
 
 ## Nâng cấp save cũ về schema hiện tại. KHÔNG mutate input; dựng dict mới.
 func _migrate(d: Dictionary) -> Dictionary:
@@ -126,7 +143,25 @@ func _migrate(d: Dictionary) -> Dictionary:
 		out = _migrate_v5_to_v6(out)
 		if has_node("/root/Telemetry"):
 			Telemetry.log_event("Save", "migration_run", {"from": 5, "to": 6})
+	if v <= 6:
+		out = _migrate_v6_to_v7(out)
+		if has_node("/root/Telemetry"):
+			Telemetry.log_event("Save", "migration_run", {"from": 6, "to": 7})
 	out["save_version"] = SAVE_VERSION
+	return out
+
+## v6 -> v7: thêm field online (account_id/guild_id/pvp_mmr/play_time). Anonymous mặc định. Không mất data.
+func _migrate_v6_to_v7(d: Dictionary) -> Dictionary:
+	var out := d.duplicate(true)
+	var player = out.get("player", {})
+	if typeof(player) == TYPE_DICTIONARY:
+		if not player.has("account_id"): player["account_id"] = ""
+		if not player.has("cloud_save_id"): player["cloud_save_id"] = ""
+		if not player.has("guild_id"): player["guild_id"] = ""
+		if not player.has("pvp_mmr"): player["pvp_mmr"] = 1000
+		if not player.has("pvp_rank"): player["pvp_rank"] = ""
+		if not player.has("play_time"): player["play_time"] = 0
+		out["player"] = player
 	return out
 
 ## v5 -> v6: thêm story/battlepass/cosmetics (player) + season/events/world_state (world). Không mất data.
