@@ -1,50 +1,71 @@
 extends Node
-## Lưu/đọc tiến trình offline. Ghi atomic (file tạm -> rename) + giữ 1 bản .bak.
-## Dùng: SaveManager.save_game({"gold": 100, ...}) / var d = SaveManager.load_game()
+## Lưu/đọc offline. Ghi atomic (file tạm -> rename) + giữ 1 bản .bak.
+## v2 (P0): cấu trúc lồng player/heroes/world + checksum + migration v1->v2.
+## Rule save-system.md: migration KHÔNG được làm hỏng save; luôn giữ .bak.
 
 const SAVE_PATH := "user://save_0.json"
 const BAK_PATH := "user://save_0.bak"
 const TMP_PATH := "user://save_0.tmp"
-const SAVE_VERSION := 1
+const SAVE_VERSION := 2
 
 func save_game(data: Dictionary) -> bool:
-	data["save_version"] = SAVE_VERSION
-	var json := JSON.stringify(data, "\t")
+	var payload := data.duplicate(true)
+	payload["save_version"] = SAVE_VERSION
+	payload.erase("checksum")
+	payload["checksum"] = _checksum(payload)
+	var json := JSON.stringify(payload, "\t")
 
 	var f := FileAccess.open(TMP_PATH, FileAccess.WRITE)
 	if f == null:
 		push_error("SaveManager: không mở được file tạm (%s)" % FileAccess.get_open_error())
+		_report(false, 0)
 		return false
 	f.store_string(json)
 	f.close()
 
-	# Giữ bản hiện tại làm backup trước khi ghi đè.
 	if FileAccess.file_exists(SAVE_PATH):
 		DirAccess.copy_absolute(SAVE_PATH, BAK_PATH)
 
 	var err := DirAccess.rename_absolute(TMP_PATH, SAVE_PATH)
-	if err != OK:
+	var ok := err == OK
+	if not ok:
 		push_error("SaveManager: rename thất bại (%d)" % err)
-		return false
-	return true
+	_report(ok, json.length())
+	return ok
+
+func _report(ok: bool, size: int) -> void:
+	if Engine.has_singleton("Telemetry") or has_node("/root/Telemetry"):
+		Telemetry.log_event("Save", "save_completed" if ok else "save_failed",
+			{"size_bytes": size, "version": SAVE_VERSION, "ok": ok})
+	EventBus.save_completed.emit(ok)
 
 func load_game() -> Dictionary:
-	var data := _read(SAVE_PATH)
+	var data := _read_valid(SAVE_PATH)
 	if data.is_empty():
-		# File chính hỏng/thiếu -> thử backup.
-		data = _read(BAK_PATH)
-	return data
+		data = _read_valid(BAK_PATH)   # file chính hỏng/thiếu -> thử backup
+	if data.is_empty():
+		return {}
+	return _migrate(data)
 
 func has_save() -> bool:
 	return FileAccess.file_exists(SAVE_PATH) or FileAccess.file_exists(BAK_PATH)
 
 func delete_save() -> void:
-	# Best-effort: xoá cả save chính, backup và tmp nếu còn.
 	for p in [SAVE_PATH, BAK_PATH, TMP_PATH]:
 		if FileAccess.file_exists(p):
 			DirAccess.remove_absolute(p)
 
-func _read(path: String) -> Dictionary:
+func save_info() -> Dictionary:
+	var d := _read_raw(SAVE_PATH)
+	return {
+		"exists": FileAccess.file_exists(SAVE_PATH),
+		"version": int(d.get("save_version", 0)),
+		"checksum": str(d.get("checksum", "")),
+		"heroes": (d.get("heroes", {}) as Dictionary).size() if typeof(d.get("heroes")) == TYPE_DICTIONARY else 0,
+	}
+
+# --- internal -------------------------------------------------------------
+func _read_raw(path: String) -> Dictionary:
 	if not FileAccess.file_exists(path):
 		return {}
 	var f := FileAccess.open(path, FileAccess.READ)
@@ -57,3 +78,65 @@ func _read(path: String) -> Dictionary:
 		push_warning("SaveManager: save hỏng tại %s" % path)
 		return {}
 	return parsed as Dictionary
+
+## Đọc + xác thực checksum (nếu có). Trả {} nếu hỏng/không khớp.
+func _read_valid(path: String) -> Dictionary:
+	var d := _read_raw(path)
+	if d.is_empty():
+		return {}
+	if d.has("checksum"):
+		var stored := str(d["checksum"])
+		var copy := d.duplicate(true)
+		copy.erase("checksum")
+		if _checksum(copy) != stored:
+			push_warning("SaveManager: checksum không khớp tại %s" % path)
+			if has_node("/root/Telemetry"):
+				Telemetry.log_event("Error", "checksum_mismatch", {"path": path})
+			return {}
+	return d
+
+func _checksum(d: Dictionary) -> String:
+	var copy := d.duplicate(true)
+	copy.erase("checksum")
+	return str(JSON.stringify(copy).hash())
+
+## Nâng cấp save cũ về schema hiện tại. KHÔNG mutate input; dựng dict mới.
+func _migrate(d: Dictionary) -> Dictionary:
+	var v := int(d.get("save_version", 1))
+	if v >= SAVE_VERSION:
+		return d
+	var out := d
+	if v == 1:
+		out = _migrate_v1_to_v2(out)
+		if has_node("/root/Telemetry"):
+			Telemetry.log_event("Save", "migration_run", {"from": 1, "to": 2})
+	out["save_version"] = SAVE_VERSION
+	return out
+
+## v1 (phẳng: gold/xp/level/equipment...) -> v2 (lồng player/heroes/world).
+func _migrate_v1_to_v2(d: Dictionary) -> Dictionary:
+	var hero := {
+		"hero_id": "hero_0",
+		"hero_def_id": "",
+		"display_name": "Anh Hùng",
+		"level": maxi(int(d.get("level", 1)), 1),
+		"xp": maxi(int(d.get("xp", 0)), 0),
+		"talent_points": maxi(int(d.get("talent_points", 0)), 0),
+		"talents": d.get("talents", {}),
+		"inventory": d.get("inventory", []),
+		"equipment": d.get("equipment", {"weapon": null, "armor": null}),
+		"current_hp": -1,
+		"state": 0,
+	}
+	return {
+		"player": {
+			"gold": maxi(int(d.get("gold", 0)), 0),
+			"gems": 0,
+			"consumables": d.get("consumables", {}),
+			"materials": d.get("materials", {}),
+			"unlocks": {},
+		},
+		"hero_ids": ["hero_0"],
+		"heroes": {"hero_0": hero},
+		"world": {},
+	}

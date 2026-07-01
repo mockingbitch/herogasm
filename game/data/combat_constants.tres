@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="CombatConstants" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://data/combat_constants.gd" id="1_cc"]
+
+[resource]
+script = ExtResource("1_cc")
+base_attack = 10
+base_defense = 0
+base_max_hp = 100
+base_speed = 92.0
+base_crit_chance = 0.05
+crit_damage_default = 1.5
+atk_per_level = 2
+def_per_level = 1
+hp_per_level = 10
+upgrade_scale = 0.4
+upgrade_base_cost = 20
+buy_markup = 4
+def_k = 100.0
+lifesteal_cap = 0.8
