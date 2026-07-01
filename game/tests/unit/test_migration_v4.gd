@@ -5,7 +5,7 @@ static func run(t) -> void:
 	var v3 := {"save_version": 3, "player": {"gold": 50}, "hero_ids": ["hero_0"],
 		"heroes": {"hero_0": {"level": 1}}, "world": {}}
 	var out := SaveManager._migrate(v3)
-	t.eq(int(out["save_version"]), 4, "V3_To_V4")
+	t.eq(int(out["save_version"]), SaveManager.SAVE_VERSION, "V3_To_Current")
 	t.truthy((out["player"] as Dictionary).has("pity_counters"), "Player_PityAdded")
 	t.truthy((out["player"] as Dictionary).has("collection"), "Player_CollectionAdded")
 	t.eq(int(out["heroes"]["hero_0"]["shards"]), 0, "Hero_ShardsDefault")

@@ -15,6 +15,15 @@ var set_bonuses: Dictionary = {} # set_id -> {2:{stat:pct},4:{...}}
 var resonances: Dictionary = {} # Element(int) -> {stat:pct}
 var banner_defs: Dictionary = {} # id -> BannerDef (P3-cont gacha)
 var awaken_defs: Dictionary = {} # hero_def_id -> AwakenDef
+# --- P4: boss / stage / formation / arena ---
+var skill_defs: Dictionary = {}        # id -> SkillDef (hero+boss dùng chung)
+var boss_defs: Dictionary = {}         # id -> BossDef
+var boss_phase_defs: Dictionary = {}   # id -> BossPhaseDef
+var formation_defs: Dictionary = {}    # id -> FormationDef
+var stage_defs: Dictionary = {}        # id -> StageDef
+var boss_minion_groups: Dictionary = {} # group_id -> Array[enemy_id]
+var world_boss_rotation: Array = []    # day_of_week(0..6) -> boss_def_id
+var arena_bot_pool: Array = []         # Array[Dictionary] snapshot bot mẫu (seed vòng đời PvP)
 var monster_pool: Array[String] = ["slime", "bat", "skeleton"]   # Bãi Săn MVP
 var shop_stock: Array[String] = ["health_potion", "leather_armor", "iron_sword", "chain_armor", "knight_blade"]
 
@@ -29,6 +38,7 @@ func _ready() -> void:
 	_build_buildings()
 	_build_world()
 	_build_p3()
+	ContentP4.build(self)                  # boss/stage/formation/arena (tách file, <300 dòng)
 
 func get_building_def(id: String) -> BuildingDef:
 	return building_defs.get(id)
@@ -145,6 +155,48 @@ func _build_p3() -> void:
 		{"hero_def_id": "cleric", "rarity": 1, "weight": 8.0},
 	])
 	_awaken("knight", 40, "battle_lord", "guardian_wall_plus", {"bonus_attack": 10.0})
+
+# --- P4 getters (façade duy nhất — không load() rải rác) --------------------
+func get_skill_def(id: String) -> SkillDef:
+	return skill_defs.get(id)
+
+func get_boss_def(id: String) -> BossDef:
+	return boss_defs.get(id)
+
+func get_boss_phase_def(id: String) -> BossPhaseDef:
+	return boss_phase_defs.get(id)
+
+## Phases (theo thứ tự phase_ids) của 1 boss -> Array[BossPhaseDef].
+func boss_phases(def: BossDef) -> Array:
+	var out: Array = []
+	if def == null:
+		return out
+	for pid in def.phase_ids:
+		var p: BossPhaseDef = boss_phase_defs.get(str(pid))
+		if p != null:
+			out.append(p)
+	return out
+
+func get_formation_def(id: String) -> FormationDef:
+	return formation_defs.get(id)
+
+func get_stage_def(id: String) -> StageDef:
+	return stage_defs.get(id)
+
+func stage_ids() -> Array:
+	return stage_defs.keys()
+
+func boss_def_ids() -> Array:
+	return boss_defs.keys()
+
+func get_boss_minion_group(group_id: String) -> Array:
+	return boss_minion_groups.get(group_id, [])
+
+## Boss-of-the-day theo day_of_week (0..6). "" nếu chưa cấu hình.
+func world_boss_for_day(dow: int) -> String:
+	if world_boss_rotation.is_empty():
+		return ""
+	return str(world_boss_rotation[dow % world_boss_rotation.size()])
 
 func get_banner_def(id: String) -> BannerDef:
 	return banner_defs.get(id)

@@ -27,7 +27,9 @@ var owned_runes: Dictionary = {}                   # uid -> RuneInstance (P3)
 var collection: Dictionary = {}                    # hero_def_id -> {owned:int, first_at:float}
 var codex_seen: Dictionary = {}                    # cat -> {id:true}
 var pity_counters: Dictionary = {}                 # banner_id -> {since_guaranteed, total_pulls}
-var currency: Dictionary = {}                      # currency mềm gacha (shard_universal...)
+var currency: Dictionary = {}                      # currency mềm gacha + honor (P4 arena/boss)
+var stage_stars: Dictionary = {}                   # stage_id -> best stars (P4 stage 3/3)
+var stage_claims: Dictionary = {}                  # stage_id -> true nếu đã nhận first-clear
 var _claimed_ids: Dictionary = {}                  # claim_id -> reward_hash (SAVE, chống double)
 var _summon: SummonService
 var _reward_guard: RewardProtection
@@ -74,6 +76,8 @@ func new_game() -> void:
 	codex_seen = {}
 	pity_counters = {}
 	currency = {}
+	stage_stars = {}
+	stage_claims = {}
 	_claimed_ids = {}
 	# Roster khởi tạo từ HeroDef (data-driven).
 	for def_id in Database.hero_def_ids():
@@ -143,6 +147,52 @@ func add_gold(amount: int) -> void:
 func add_gems(amount: int) -> void:
 	gems = maxi(gems + amount, 0)
 	EventBus.gems_changed.emit(gems)
+
+# --- currency mềm (honor arena/boss...) -----------------------------------
+func add_currency(cur: String, amount: int) -> void:
+	if cur == "gems":
+		add_gems(amount)
+		return
+	currency[cur] = maxi(0, int(currency.get(cur, 0)) + amount)
+
+func honor() -> int:
+	return int(currency.get("honor", 0))
+
+# --- team hiện hành (đội hình stage/arena) ---------------------------------
+## N hero khoẻ nhất (không KO) theo power — dựng đội cho stage/arena mặc định.
+func active_team(size: int = 3) -> Array:
+	var ids := hero_ids.duplicate()
+	ids.sort_custom(func(a, b):
+		var ha: HeroInstance = heroes.get(a); var hb: HeroInstance = heroes.get(b)
+		var pa := ha.eff_attack() + ha.eff_max_hp() if ha != null else 0
+		var pb := hb.eff_attack() + hb.eff_max_hp() if hb != null else 0
+		return pa > pb or (pa == pb and a < b))
+	var out: Array = []
+	for id in ids:
+		var h: HeroInstance = heroes.get(id)
+		if h != null and not h.is_ko:
+			out.append(h)
+		if out.size() >= size:
+			break
+	return out
+
+# --- stage progression (P4 3/3) -------------------------------------------
+func stage_star(stage_id: String) -> int:
+	return int(stage_stars.get(stage_id, 0))
+
+## Ghi kết quả stage: giữ sao cao nhất. Trả true nếu là lần đầu clear (>=1 sao).
+func record_stage_result(stage_id: String, stars: int) -> bool:
+	var prev := stage_star(stage_id)
+	var first := prev == 0 and stars >= 1
+	if stars > prev:
+		stage_stars[stage_id] = stars
+	return first
+
+func is_stage_first_claimed(stage_id: String) -> bool:
+	return bool(stage_claims.get(stage_id, false))
+
+func mark_stage_claimed(stage_id: String) -> void:
+	stage_claims[stage_id] = true
 
 # --- energy (regen theo thời gian) ----------------------------------------
 func add_energy(amount: int) -> void:
@@ -483,6 +533,8 @@ func to_dict() -> Dictionary:
 			"codex_seen": codex_seen,
 			"pity_counters": pity_counters,
 			"currency": currency,
+			"stage_stars": stage_stars,
+			"stage_claims": stage_claims,
 			"claimed_ids": _claimed_ids,
 		},
 		"hero_ids": hero_ids,
@@ -490,11 +542,16 @@ func to_dict() -> Dictionary:
 		"world": _world_dict(),
 	}
 
-## World block do ExpeditionService sở hữu; giữ _pending_world nếu service chưa sẵn sàng.
+## World block gộp từ các service (ExpeditionService + WorldBoss + Arena). Giữ _pending_world nếu chưa sẵn sàng.
 func _world_dict() -> Dictionary:
-	if has_node("/root/ExpeditionService"):
-		return ExpeditionService.export_world()
-	return _pending_world
+	if not has_node("/root/ExpeditionService"):
+		return _pending_world
+	var w := ExpeditionService.export_world()
+	if has_node("/root/WorldBossService"):
+		w.merge(WorldBossService.export_world(), true)
+	if has_node("/root/ArenaService"):
+		w.merge(ArenaService.export_world(), true)
+	return w
 
 func world_state() -> Dictionary:
 	return _pending_world
@@ -519,6 +576,8 @@ func from_dict(d: Dictionary) -> void:
 	codex_seen = p.get("codex_seen", {}) if typeof(p.get("codex_seen")) == TYPE_DICTIONARY else {}
 	pity_counters = p.get("pity_counters", {}) if typeof(p.get("pity_counters")) == TYPE_DICTIONARY else {}
 	currency = p.get("currency", {}) if typeof(p.get("currency")) == TYPE_DICTIONARY else {}
+	stage_stars = _norm_counts(p.get("stage_stars", {}))
+	stage_claims = p.get("stage_claims", {}) if typeof(p.get("stage_claims")) == TYPE_DICTIONARY else {}
 	_claimed_ids = p.get("claimed_ids", {}) if typeof(p.get("claimed_ids")) == TYPE_DICTIONARY else {}
 	max_energy = MAX_ENERGY + int(unlocks.get("energy_cap_bonus", 0))
 	energy = clampi(energy, 0, max_energy)

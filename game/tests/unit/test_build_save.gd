@@ -6,7 +6,7 @@ static func run(t) -> void:
 	var v3 := {"save_version": 3, "player": {"gold": 100}, "hero_ids": ["hero_0"],
 		"heroes": {"hero_0": {"level": 2}}, "world": {}}
 	var out := SaveManager._migrate(v3)
-	t.eq(int(out["save_version"]), 4, "V3_To_V4")
+	t.eq(int(out["save_version"]), SaveManager.SAVE_VERSION, "V3_To_Current")
 	t.truthy((out["heroes"]["hero_0"] as Dictionary).has("equipped"), "Hero_EquippedAdded")
 	t.truthy((out["player"] as Dictionary).has("owned_equipment"), "Player_OwnedAdded")
 

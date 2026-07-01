@@ -6,7 +6,7 @@ extends Node
 const SAVE_PATH := "user://save_0.json"
 const BAK_PATH := "user://save_0.bak"
 const TMP_PATH := "user://save_0.tmp"
-const SAVE_VERSION := 4
+const SAVE_VERSION := 5
 
 func save_game(data: Dictionary) -> bool:
 	var payload := data.duplicate(true)
@@ -118,7 +118,31 @@ func _migrate(d: Dictionary) -> Dictionary:
 		out = _migrate_v3_to_v4(out)
 		if has_node("/root/Telemetry"):
 			Telemetry.log_event("Save", "migration_run", {"from": 3, "to": 4})
+	if v <= 4:
+		out = _migrate_v4_to_v5(out)
+		if has_node("/root/Telemetry"):
+			Telemetry.log_event("Save", "migration_run", {"from": 4, "to": 5})
 	out["save_version"] = SAVE_VERSION
+	return out
+
+## v4 -> v5: thêm stage_stars/stage_claims + honor currency + world.{world_boss,arena}. Không mất data.
+func _migrate_v4_to_v5(d: Dictionary) -> Dictionary:
+	var out := d.duplicate(true)
+	var player = out.get("player", {})
+	if typeof(player) == TYPE_DICTIONARY:
+		if not player.has("stage_stars"): player["stage_stars"] = {}
+		if not player.has("stage_claims"): player["stage_claims"] = {}
+		var cur = player.get("currency", {})
+		if typeof(cur) != TYPE_DICTIONARY: cur = {}
+		if not cur.has("honor"): cur["honor"] = 0
+		player["currency"] = cur
+		out["player"] = player
+	var world = out.get("world", {})
+	if typeof(world) != TYPE_DICTIONARY:
+		world = {}
+	if not world.has("world_boss"): world["world_boss"] = {}
+	if not world.has("arena"): world["arena"] = {}
+	out["world"] = world
 	return out
 
 ## v3 -> v4: thêm equipped[8]/runes[5] mỗi hero + owned_equipment/owned_runes. Không mất data.

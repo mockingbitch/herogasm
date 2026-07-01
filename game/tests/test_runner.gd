@@ -31,6 +31,14 @@ const SUITES := [
 	preload("res://tests/unit/test_talent_respec.gd"),
 	preload("res://tests/unit/test_migration_v4.gd"),
 	preload("res://tests/simulation/test_ai_simulation.gd"),
+	# --- Phase 4 (boss · stage · arena) ---
+	preload("res://tests/unit/test_battle_sim.gd"),
+	preload("res://tests/unit/test_boss.gd"),
+	preload("res://tests/unit/test_formation.gd"),
+	preload("res://tests/unit/test_arena.gd"),
+	preload("res://tests/unit/test_stage.gd"),
+	preload("res://tests/unit/test_replay_regression.gd"),
+	preload("res://tests/simulation/test_boss_arena_simulation.gd"),
 ]
 
 var _pass: int = 0

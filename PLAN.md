@@ -974,6 +974,13 @@ FAIL nếu: aggregation ra khác nhau giữa 2 lần cùng input; skill AI spam 
 
 ## Phase 4 — Nội dung có cấu trúc: boss · stage · PvP
 > **Mục tiêu:** Chiều sâu encounter + lớp cạnh tranh · **Thời lượng:** 4-6 tuần · **Phụ thuộc:** P3
+>
+> ✅ **HOÀN THÀNH** — xem `docs/PHASE4.md`. Giao: BattleSim tất định (skill/cast/CC/interrupt/shield/formation),
+> Boss đa phase (BossDef/BossPhaseDef + BossController + enrage/weak-point/break/summon/hazard), WorldBossService
+> (rotation tuần + event machine + ContributionBoard + reward-once), StageBattleService (3/3 seeded + chấm sao +
+> first-clear once), ArenaService async (MMR-lite + Honor + quota 10/ngày + snapshot freeze), ReplayPlayer tất định,
+> save v5 (+migration), Telemetry+Debug, UI BattlePanel, 337/337 test xanh.
+> Ghi chú kiến trúc: BossSkillDef gộp vào `SkillDef` (DRY); content code-built trong `ContentP4` (nhất quán P1–P3).
 
 ### Vì sao ở đây
 P4 nằm ngay sau P3 vì mọi hệ thống cạnh tranh (boss đa phase, stage formation, Đấu Trường Bot) đều tiêu thụ trực tiếp output của P3: hero có skill/equip/rune/synergy, gacha đã cấp đủ pool hero để dựng đội. Không có chiều sâu build từ P3 thì boss "kiểm tra chiến thuật" (theo `docs/scripts/BOSS.md`, `COMBAT.md`) chỉ còn là bài kiểm tra Battle Power thuần — vi phạm triết lý "chiến thuật thắng chỉ số" trong `docs/scripts/PVP.md`. P4 cũng đòi Battle Engine tick-loop tất định (seeded) đã ổn định từ P1: boss phase, PvP replay và stage đều phải cho **cùng input → cùng output** (rules/multiplayer.md, mục Deterministic Logic + Rollback).

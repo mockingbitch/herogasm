@@ -32,6 +32,8 @@ Database="*res://autoload/database.gd"
 SaveManager="*res://autoload/save_manager.gd"
 PlayerProfile="*res://autoload/player_profile.gd"
 ExpeditionService="*res://systems/expedition/expedition_service.gd"
+WorldBossService="*res://autoload/world_boss_service.gd"
+ArenaService="*res://autoload/arena_service.gd"
 AudioManager="*res://autoload/audio_manager.gd"
 NetManager="*res://autoload/net_manager.gd"
 

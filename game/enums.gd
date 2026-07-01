@@ -13,6 +13,22 @@ enum RuneCategory { OFFENSIVE, DEFENSIVE, UTILITY, CONTROL, SUMMONER }
 enum SkillKind { PASSIVE, ACTIVE, ULTIMATE }
 enum SkillType { DAMAGE, HEAL, SHIELD, BUFF, DEBUFF, CC, SUMMON, UTILITY }
 
+# --- P4: combat SIM / boss / arena ---
+## Cách chọn mục tiêu của 1 skill trong BattleSim (data-driven, không hardcode).
+enum SkillTarget { SINGLE_LOWEST_HP, ALL_ENEMIES, SELF, LOWEST_HP_ALLY, RANDOM_ENEMY, HIGHEST_THREAT }
+## Quy tắc boss chọn skill nào để cast (BOSS.md / COMBAT.md).
+enum SkillSelectRule { LOWEST_CD, HIGHEST_THREAT, ON_CLUSTER, PHASE_FIXED }
+## Hiệu ứng khống chế cứng — STUN có thể ngắt cast (interrupt).
+enum CcType { NONE, STUN }
+## Ngưỡng kích hoạt chuyển phase boss.
+enum BossTrigger { HP_PCT, TIME_ELAPSED, MINION_COUNT, BREAK_FULL }
+enum BossType { MINI, REGION, DUNGEON, WORLD, EVENT, STORY }
+enum Difficulty { NORMAL, HARD, NIGHTMARE, HELL, MYTHIC, CHAOS }
+## Máy trạng thái sự kiện World Boss.
+enum BossEventState { ANNOUNCED, ACTIVE, WON, FAILED, COOLDOWN }
+## Kết quả 1 trận Đấu Trường (timeout xử theo HP còn lại).
+enum ArenaOutcome { WIN, LOSE, TIMEOUT_WIN, TIMEOUT_LOSE }
+
 const EQUIP_SLOT_COUNT := 8
 const RARITY_NAMES := ["Common", "Elite", "Epic", "Legend", "Mythic"]
 const CLASS_NAMES := ["Tank", "Warrior", "Assassin", "Ranger", "Mage", "Support", "Summoner"]

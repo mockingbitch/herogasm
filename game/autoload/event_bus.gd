@@ -39,5 +39,12 @@ signal expedition_started(exp_id: String)
 signal expedition_resolved(summary: Dictionary)
 signal expeditions_batch_resolved(summary: Dictionary)
 
+# Encounter / competitive (P4) — KHÔNG phát mỗi tick (signal-rules.md)
+signal world_boss_spawned(boss_id: String)
+signal world_boss_phase_changed(boss_id: String, phase_idx: int)
+signal world_boss_ended(boss_id: String, event_state: int)
+signal arena_match_finished(result: Dictionary)
+signal stage_cleared(stage_id: String, stars: int)
+
 # Save
 signal save_completed(ok: bool)

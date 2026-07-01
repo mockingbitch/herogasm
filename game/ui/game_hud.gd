@@ -14,6 +14,7 @@ var _world_panel: WorldPanel
 var _build_panel: BuildPanel
 var _summon_panel: SummonPanel
 var _hero_panel: HeroDetailPanel
+var _battle_panel: BattlePanel
 
 func _ready() -> void:
 	_build()
@@ -25,6 +26,10 @@ func _ready() -> void:
 	EventBus.expedition_resolved.connect(_on_exp_resolved)
 	EventBus.expeditions_batch_resolved.connect(func(b): _flash("Offline: %d expedition hoàn tất" % int(b.get("count", 0)), 7.0))
 	EventBus.zone_cleared.connect(func(z, s): _flash("Clear %s (%d★)" % [z, s]))
+	EventBus.world_boss_spawned.connect(func(id): _flash("⚔ World Boss xuất hiện: %s" % id, 6.0))
+	EventBus.world_boss_ended.connect(func(id, st): _flash("World Boss %s kết thúc (%d)" % [id, st], 6.0))
+	EventBus.stage_cleared.connect(func(sid, s): _flash("Ải %s: %d★" % [sid, s]))
+	EventBus.arena_match_finished.connect(func(r): _flash("Đấu Trường: MMR%+d, +%d honor" % [int(r.get("mmr_delta", 0)), int(r.get("honor_gained", 0))]))
 	_gold.text = "Vàng %d" % PlayerProfile.gold
 	_gems.text = "Gem %d" % PlayerProfile.gems
 	_energy.text = "NL %d/%d" % [PlayerProfile.energy, PlayerProfile.max_energy]
@@ -114,6 +119,10 @@ func _build() -> void:
 	_hero_panel.position = Vector2(220, 34)
 	_hero_panel.visible = false
 	add_child(_hero_panel)
+	_battle_panel = BattlePanel.new()
+	_battle_panel.position = Vector2(220, 34)
+	_battle_panel.visible = false
+	add_child(_battle_panel)
 
 	# nav
 	var nav := HBoxContainer.new()
@@ -125,9 +134,10 @@ func _build() -> void:
 	_nav_btn(nav, "Thế Giới", func(): _show(_world_panel))
 	_nav_btn(nav, "Xây Dựng", func(): _show(_build_panel))
 	_nav_btn(nav, "Triệu Hồi", func(): _show(_summon_panel))
+	_nav_btn(nav, "Trận Đấu", func(): _show(_battle_panel))
 
 func _show(panel) -> void:
-	for p in [_world_panel, _build_panel, _summon_panel, _hero_panel]:
+	for p in [_world_panel, _build_panel, _summon_panel, _hero_panel, _battle_panel]:
 		p.visible = (p == panel)
 	if panel != null and panel.has_method("refresh"):
 		panel.refresh()
