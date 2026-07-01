@@ -16,6 +16,18 @@ signal equipment_changed
 signal consumables_changed
 signal item_picked_up(item_id: String)
 
+# Build (P3)
+signal stats_recomputed(hero_id: String)
+signal rune_changed(hero_id: String)
+
+# Gacha / collection (P3-cont)
+signal hero_summoned(hero_def_id: String, is_dup: bool)
+signal pity_reset(banner_id: String)
+signal duplicate_to_shard(hero_def_id: String, shards: int)
+signal awaken_completed(hero_id: String)
+signal talent_respec(hero_id: String)
+signal collection_updated
+
 # Hero (living-world)
 signal hero_spawned(hero_id: String)
 signal hero_knocked_out(hero_id: String)

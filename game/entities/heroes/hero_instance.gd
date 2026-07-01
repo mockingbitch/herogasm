@@ -26,6 +26,10 @@ const TALENTS := {
 	"ferocity":  {"name": "Hung Tàn (+CritDmg%)",  "stat": "crit_damage",  "per": 0.10, "max": 5},
 	"swiftness": {"name": "Nhanh Nhẹn (+Tốc độ)",  "stat": "bonus_speed",  "per": 6.0,  "max": 3},
 	"vampirism": {"name": "Hút Máu (+Lifesteal%)", "stat": "lifesteal",    "per": 0.02, "max": 3},
+	# P3-cont: thêm nhánh (vẫn point-buy phẳng)
+	"toughness": {"name": "Kiên Cường (+DEF)",     "stat": "bonus_defense", "per": 1.0,  "max": 5},
+	"bloodlust": {"name": "Khát Máu (+ATK)",       "stat": "bonus_attack",  "per": 1.0,  "max": 3},
+	"fortune":   {"name": "May Mắn (+CritDmg)",    "stat": "crit_damage",   "per": 0.05, "max": 3},
 }
 
 var hero_id: String = ""
@@ -46,6 +50,17 @@ var injury_recover_at: float = 0.0                  # epoch (TimeService) tự h
 var mood: float = 70.0                              # 0..100 -> 5 mặt cảm xúc; thấp giảm hiệu suất
 var is_ko: bool = false                             # bất tỉnh (KHÔNG permadeath) -> về thành hồi
 var state: int = State.IDLE
+
+# --- P3: build depth ---
+var equipped: Array = [null, null, null, null, null, null, null, null]  # 8 slot, EquipmentInstance|null
+var runes: Array = [null, null, null, null, null]                       # 0=core, 1..4=slot
+var race: String = ""                               # từ HeroDef (áp qua _apply_def, KHÔNG serialize)
+var class_role: String = ""                         # từ HeroDef (KHÔNG serialize)
+var team_context: Dictionary = {}                   # runtime synergy ctx (set trước khi dựng BattleUnit)
+var shards: int = 0                                 # shard khi summon trùng hero này (feed awaken)
+var awaken_state: Dictionary = {}                   # {rank, passive_id, ultimate_id, stat_bonus}
+var _final_dirty: bool = true
+var _final_cache: FinalStats = null
 
 var ai_weights: Dictionary = {}                     # runtime, áp từ HeroDef (không serialize)
 var _constants: CombatConstants
@@ -121,6 +136,20 @@ func recover_injury() -> void:
 func set_fatigue(v: float) -> void: fatigue = clampf(v, 0.0, 100.0)
 func set_mood(v: float) -> void: mood = clampf(v, 0.0, 100.0)
 
+# --- P3: FinalStats (aggregator) — đường mới song song eff_* (eff_* GIỮ nguyên) ---
+func mark_stats_dirty() -> void:
+	_final_dirty = true
+
+## FinalStats team-aware. Cache CHỈ khi solo (team_ctx rỗng) vì synergy đổi theo đội.
+func get_final_stats(team_ctx: Dictionary = {}) -> FinalStats:
+	if team_ctx.is_empty() and not _final_dirty and _final_cache != null:
+		return _final_cache
+	var fs := StatAggregator.aggregate(self, team_ctx)
+	if team_ctx.is_empty():
+		_final_cache = fs
+		_final_dirty = false
+	return fs
+
 ## Đặt máu về đầy (khi tạo mới / hồi ở Nhà Trọ).
 func reset_hp() -> void:
 	current_hp = eff_max_hp()
@@ -176,12 +205,14 @@ func equip(inv_index: int) -> bool:
 	if equipment[slot] != null:
 		inventory.append(equipment[slot])
 	equipment[slot] = inst
+	mark_stats_dirty()
 	return true
 
 func unequip(slot: String) -> bool:
 	if equipment.get(slot) != null:
 		inventory.append(equipment[slot])
 		equipment[slot] = null
+		mark_stats_dirty()
 		return true
 	return false
 
@@ -197,6 +228,7 @@ func upgrade_gear(slot: String) -> bool:
 	if inst == null:
 		return false
 	inst["level"] = int(inst["level"]) + 1
+	mark_stats_dirty()
 	return true
 
 # --- xp -------------------------------------------------------------------
@@ -213,6 +245,7 @@ func gain_xp(amount: int) -> int:
 	var gained := level - before
 	if gained > 0:
 		talent_points += gained
+		mark_stats_dirty()
 	return gained
 
 # --- talents --------------------------------------------------------------
@@ -227,6 +260,7 @@ func spend_talent(id: String) -> bool:
 		return false
 	talents[id] = rank + 1
 	talent_points -= 1
+	mark_stats_dirty()
 	return true
 
 func _talent_total(stat: String) -> float:
@@ -261,8 +295,22 @@ func _affix_total(stat: String) -> float:
 				total += float(a.get("value", 0))
 	return total
 
+func _awaken_total(stat: String) -> float:
+	var sb = awaken_state.get("stat_bonus", {})
+	return float(sb.get(stat, 0.0)) if typeof(sb) == TYPE_DICTIONARY else 0.0
+
 func _stat(stat: String) -> float:
-	return _equip_base(stat) + _affix_total(stat) + _talent_total(stat)
+	return _equip_base(stat) + _affix_total(stat) + _talent_total(stat) + _awaken_total(stat)
+
+## Hoàn talent, trả điểm về talent_points (respec). Trả số điểm hoàn.
+func respec_talents() -> int:
+	var refunded := 0
+	for k in talents.keys():
+		refunded += int(talents[k])
+	talent_points += refunded
+	talents = {}
+	mark_stats_dirty()
+	return refunded
 
 func eff_attack() -> int:
 	return _c().base_attack + _c().atk_per_level * (level - 1) + int(round(_stat("bonus_attack")))
@@ -343,7 +391,17 @@ func to_dict() -> Dictionary:
 		"mood": mood,
 		"is_ko": is_ko,
 		"state": state,
+		"equipped": _serialize_slots(equipped),
+		"runes": _serialize_slots(runes),
+		"shards": shards,
+		"awaken_state": awaken_state,
 	}
+
+func _serialize_slots(slots: Array) -> Array:
+	var out: Array = []
+	for it in slots:
+		out.append(it.to_dict() if it != null else null)
+	return out
 
 static func from_dict(d: Dictionary) -> HeroInstance:
 	var h := HeroInstance.new()
@@ -373,7 +431,25 @@ static func from_dict(d: Dictionary) -> HeroInstance:
 	h.current_hp = int(d.get("current_hp", -1))
 	if h.current_hp < 0:
 		h.reset_hp()
+	h.equipped = _parse_slots(d.get("equipped", []), 8, true)
+	h.runes = _parse_slots(d.get("runes", []), 5, false)
+	h.shards = maxi(int(d.get("shards", 0)), 0)
+	h.awaken_state = d.get("awaken_state", {}) if typeof(d.get("awaken_state")) == TYPE_DICTIONARY else {}
 	return h
+
+## Parse mảng slot -> [EquipmentInstance|RuneInstance|null] cố định độ dài.
+static func _parse_slots(arr, count: int, is_equip: bool) -> Array:
+	var out: Array = []
+	out.resize(count)
+	for i in count:
+		out[i] = null
+	if typeof(arr) != TYPE_ARRAY:
+		return out
+	for i in mini(count, arr.size()):
+		var v = arr[i]
+		if typeof(v) == TYPE_DICTIONARY and v.has("def_id"):
+			out[i] = EquipmentInstance.from_dict(v) if is_equip else RuneInstance.from_dict(v)
+	return out
 
 func _norm_instance(v) -> Variant:
 	if typeof(v) != TYPE_DICTIONARY or not v.has("id"):

@@ -72,6 +72,7 @@ func resolve(e: ExpeditionState, offline: bool = false) -> Dictionary:
 	# RNG cục bộ seed từ e.seed -> KHÔNG đụng global RandomService (tái lập offline==online).
 	var rng := RandomNumberGenerator.new()
 	rng.seed = e.seed
+	h.team_context = PlayerProfile.team_context()   # synergy đội áp vào expedition
 	var team_a: Array = [BattleUnit.from_hero(h, 0)]
 	var team_b: Array = []
 	for i in maxi(1, z.enemy_count):

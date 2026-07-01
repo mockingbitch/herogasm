@@ -22,6 +22,15 @@ var consumables: Dictionary = {}                   # id -> count (kho chung town
 var materials: Dictionary = {}                     # id -> count (kho chung town)
 var unlocks: Dictionary = {}                       # cờ mở khoá + guild bonus (energy_cap_bonus/roster_cap_bonus)
 var cleared_stars: Dictionary = {}                 # zone_id -> clear_count (gating world map)
+var owned_equipment: Dictionary = {}               # uid -> EquipmentInstance (P3)
+var owned_runes: Dictionary = {}                   # uid -> RuneInstance (P3)
+var collection: Dictionary = {}                    # hero_def_id -> {owned:int, first_at:float}
+var codex_seen: Dictionary = {}                    # cat -> {id:true}
+var pity_counters: Dictionary = {}                 # banner_id -> {since_guaranteed, total_pulls}
+var currency: Dictionary = {}                      # currency mềm gacha (shard_universal...)
+var _claimed_ids: Dictionary = {}                  # claim_id -> reward_hash (SAVE, chống double)
+var _summon: SummonService
+var _reward_guard: RewardProtection
 
 const CONDITIONS_PATH := "res://data/hero_condition_curves.tres"
 var _constants: CombatConstants
@@ -36,6 +45,9 @@ func _ready() -> void:
 	_conditions = load(CONDITIONS_PATH) as HeroConditionCurves
 	if _conditions == null:
 		_conditions = HeroConditionCurves.new()
+	_summon = SummonService.new()
+	_summon.setup(_constants)
+	_reward_guard = RewardProtection.new()
 	var data := SaveManager.load_game()
 	if data.is_empty():
 		new_game()
@@ -49,7 +61,7 @@ func _ready() -> void:
 
 func new_game() -> void:
 	gold = 0
-	gems = 0
+	gems = 800                                       # seed gem cho demo gacha (nguồn thật ở P5)
 	energy = max_energy
 	last_energy_ts = TimeService.now_unix()
 	hero_ids = []
@@ -58,9 +70,15 @@ func new_game() -> void:
 	materials = {}
 	unlocks = {}
 	_hero_seq = 0
+	collection = {}
+	codex_seen = {}
+	pity_counters = {}
+	currency = {}
+	_claimed_ids = {}
 	# Roster khởi tạo từ HeroDef (data-driven).
 	for def_id in Database.hero_def_ids():
 		spawn_hero(def_id)
+		_mark_owned(str(def_id))
 	add_consumable("health_potion", 2)
 	Telemetry.log_event("Player", "new_game", {"heroes": hero_ids.size()})
 	save()
@@ -97,6 +115,9 @@ func _apply_def(h: HeroInstance) -> void:
 	if h.display_name == "":
 		h.display_name = def.display_name
 	h.ai_weights = def.ai_weights
+	h.race = def.race                       # P3 synergy (KHÔNG serialize -> áp lại mỗi load)
+	h.class_role = def.role()
+	h.mark_stats_dirty()
 
 func get_hero(id: String) -> HeroInstance:
 	return heroes.get(id)
@@ -310,6 +331,131 @@ func apply_guild_bonuses(energy_bonus: int, roster_bonus: int) -> void:
 	max_energy = MAX_ENERGY + int(unlocks["energy_cap_bonus"])
 	EventBus.energy_changed.emit(energy, max_energy)
 
+# --- P3 build: team synergy context + owned serialize -----------------------
+func team_context() -> Dictionary:
+	var team: Array = []
+	for id in hero_ids:
+		var h: HeroInstance = heroes.get(id)
+		if h != null:
+			team.append(h)
+	return {"synergy": SynergyService.compute(team)}
+
+func _serialize_owned(d: Dictionary) -> Dictionary:
+	var out := {}
+	for uid in d:
+		out[uid] = d[uid].to_dict()
+	return out
+
+func _parse_owned(d, is_equip: bool) -> Dictionary:
+	var out := {}
+	if typeof(d) != TYPE_DICTIONARY:
+		return out
+	for uid in d:
+		var v = d[uid]
+		if typeof(v) == TYPE_DICTIONARY:
+			out[str(uid)] = EquipmentInstance.from_dict(v) if is_equip else RuneInstance.from_dict(v)
+	return out
+
+# --- P3-cont: gacha / collection / progression ------------------------------
+func currency_amount(cur: String) -> int:
+	return gems if cur == "gems" else int(currency.get(cur, 0))
+
+func _spend_currency(cur: String, amt: int) -> void:
+	if cur == "gems":
+		add_gems(-amt)
+	else:
+		currency[cur] = maxi(0, int(currency.get(cur, 0)) - amt)
+
+## Điều phối gacha: claim-protection -> cost -> pull -> áp dup/new -> save. claim_id do UI sinh.
+func summon(banner_id: String, count: int, claim_id: String) -> Dictionary:
+	var banner := Database.get_banner_def(banner_id)
+	if banner == null:
+		return {"ok": false, "reason": "no_banner"}
+	if _reward_guard.is_claimed(_claimed_ids, claim_id):
+		Telemetry.log_event("Gacha", "duplicate_claim_rejected", {"claim_id": claim_id})
+		return {"ok": false, "reason": "duplicate_claim"}
+	var cost := banner.cost_amount * count
+	if currency_amount(banner.cost_currency) < cost:
+		return {"ok": false, "reason": "insufficient"}
+	_spend_currency(banner.cost_currency, cost)
+	var st: Dictionary = pity_counters.get(banner_id, {"since_guaranteed": 0, "total_pulls": 0})
+	var results := _summon.pull(banner, count, st, collection)
+	pity_counters[banner_id] = st
+	for r in results:
+		if bool(r["is_dup"]):
+			_grant_shards(str(r["hero_def_id"]), int(r["shards_gained"]))
+			EventBus.duplicate_to_shard.emit(str(r["hero_def_id"]), int(r["shards_gained"]))
+		else:
+			spawn_hero(str(r["hero_def_id"]))
+			_mark_owned(str(r["hero_def_id"]))
+		_mark_seen("heroes", str(r["hero_def_id"]))
+		EventBus.hero_summoned.emit(str(r["hero_def_id"]), bool(r["is_dup"]))
+	var rhash := RewardProtection.reward_hash("account", banner_id, {"banner": banner_id, "count": count})
+	_reward_guard.mark(_claimed_ids, claim_id, rhash)
+	Telemetry.log_event("Gacha", "summon_pull", {"banner": banner_id, "count": count})
+	save()
+	return {"ok": true, "results": results, "pity": st}
+
+func _grant_shards(def_id: String, n: int) -> void:
+	for id in hero_ids:
+		var h: HeroInstance = heroes.get(id)
+		if h != null and h.hero_def_id == def_id:
+			h.shards += n
+			return
+
+func _mark_owned(def_id: String) -> void:
+	var e: Dictionary = collection.get(def_id, {"owned": 0, "first_at": 0.0})
+	if int(e["owned"]) == 0:
+		e["first_at"] = TimeService.now_unix()
+	e["owned"] = int(e["owned"]) + 1
+	collection[def_id] = e
+	EventBus.collection_updated.emit()
+
+func _mark_seen(cat: String, id: String) -> void:
+	var c: Dictionary = codex_seen.get(cat, {})
+	c[id] = true
+	codex_seen[cat] = c
+
+func collection_count() -> int:
+	var n := 0
+	for k in collection:
+		if int(collection[k].get("owned", 0)) > 0:
+			n += 1
+	return n
+
+func respec_hero_talents(hero_id: String) -> bool:
+	var h: HeroInstance = get_hero(hero_id)
+	if h == null:
+		return false
+	var spent := 0
+	for k in h.talents.keys():
+		spent += int(h.talents[k])
+	if spent == 0:
+		return true
+	var cost := _constants.respec_base_cost * spent
+	if gold < cost:
+		return false
+	add_gold(-cost)
+	h.respec_talents()
+	EventBus.talent_respec.emit(hero_id)
+	save()
+	return true
+
+func awaken_hero(hero_id: String) -> bool:
+	var h: HeroInstance = get_hero(hero_id)
+	if h == null:
+		return false
+	var adef := Database.get_awaken_def(h.hero_def_id)
+	if adef == null or int(h.awaken_state.get("rank", 0)) >= 1 or h.shards < adef.shard_cost:
+		return false
+	h.shards -= adef.shard_cost
+	h.awaken_state = {"rank": 1, "passive_id": adef.new_passive_id,
+		"ultimate_id": adef.upgraded_ultimate_id, "stat_bonus": adef.stat_bonus.duplicate(true)}
+	h.mark_stats_dirty()
+	EventBus.awaken_completed.emit(hero_id)
+	save()
+	return true
+
 # --- save / load ----------------------------------------------------------
 func save() -> void:
 	offline_ts = TimeService.now_unix()   # mốc cho offline khi mở lại
@@ -331,6 +477,13 @@ func to_dict() -> Dictionary:
 			"materials": materials,
 			"unlocks": unlocks,
 			"cleared_stars": cleared_stars,
+			"owned_equipment": _serialize_owned(owned_equipment),
+			"owned_runes": _serialize_owned(owned_runes),
+			"collection": collection,
+			"codex_seen": codex_seen,
+			"pity_counters": pity_counters,
+			"currency": currency,
+			"claimed_ids": _claimed_ids,
 		},
 		"hero_ids": hero_ids,
 		"heroes": hd,
@@ -360,6 +513,13 @@ func from_dict(d: Dictionary) -> void:
 	materials = _norm_counts(p.get("materials", {}))
 	unlocks = p.get("unlocks", {}) if typeof(p.get("unlocks")) == TYPE_DICTIONARY else {}
 	cleared_stars = _norm_counts(p.get("cleared_stars", {}))
+	owned_equipment = _parse_owned(p.get("owned_equipment", {}), true)
+	owned_runes = _parse_owned(p.get("owned_runes", {}), false)
+	collection = p.get("collection", {}) if typeof(p.get("collection")) == TYPE_DICTIONARY else {}
+	codex_seen = p.get("codex_seen", {}) if typeof(p.get("codex_seen")) == TYPE_DICTIONARY else {}
+	pity_counters = p.get("pity_counters", {}) if typeof(p.get("pity_counters")) == TYPE_DICTIONARY else {}
+	currency = p.get("currency", {}) if typeof(p.get("currency")) == TYPE_DICTIONARY else {}
+	_claimed_ids = p.get("claimed_ids", {}) if typeof(p.get("claimed_ids")) == TYPE_DICTIONARY else {}
 	max_energy = MAX_ENERGY + int(unlocks.get("energy_cap_bonus", 0))
 	energy = clampi(energy, 0, max_energy)
 

@@ -6,7 +6,7 @@ extends Node
 const SAVE_PATH := "user://save_0.json"
 const BAK_PATH := "user://save_0.bak"
 const TMP_PATH := "user://save_0.tmp"
-const SAVE_VERSION := 3
+const SAVE_VERSION := 4
 
 func save_game(data: Dictionary) -> bool:
 	var payload := data.duplicate(true)
@@ -114,7 +114,35 @@ func _migrate(d: Dictionary) -> Dictionary:
 		out = _migrate_v2_to_v3(out)
 		if has_node("/root/Telemetry"):
 			Telemetry.log_event("Save", "migration_run", {"from": 2, "to": 3})
+	if v <= 3:
+		out = _migrate_v3_to_v4(out)
+		if has_node("/root/Telemetry"):
+			Telemetry.log_event("Save", "migration_run", {"from": 3, "to": 4})
 	out["save_version"] = SAVE_VERSION
+	return out
+
+## v3 -> v4: thêm equipped[8]/runes[5] mỗi hero + owned_equipment/owned_runes. Không mất data.
+func _migrate_v3_to_v4(d: Dictionary) -> Dictionary:
+	var out := d.duplicate(true)
+	var heroes = out.get("heroes", {})
+	if typeof(heroes) == TYPE_DICTIONARY:
+		for id in heroes.keys():
+			var h = heroes[id]
+			if typeof(h) == TYPE_DICTIONARY:
+				if not h.has("equipped"): h["equipped"] = [null, null, null, null, null, null, null, null]
+				if not h.has("runes"): h["runes"] = [null, null, null, null, null]
+				if not h.has("shards"): h["shards"] = 0
+				if not h.has("awaken_state"): h["awaken_state"] = {}
+	var player = out.get("player", {})
+	if typeof(player) == TYPE_DICTIONARY:
+		if not player.has("owned_equipment"): player["owned_equipment"] = {}
+		if not player.has("owned_runes"): player["owned_runes"] = {}
+		if not player.has("collection"): player["collection"] = {}
+		if not player.has("codex_seen"): player["codex_seen"] = {}
+		if not player.has("pity_counters"): player["pity_counters"] = {}
+		if not player.has("currency"): player["currency"] = {}
+		if not player.has("claimed_ids"): player["claimed_ids"] = {}
+	out["player"] = player
 	return out
 
 ## v2 -> v3: thêm field vòng đời hero + cleared_stars + world.expeditions. Không mất data.

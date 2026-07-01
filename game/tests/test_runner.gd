@@ -20,6 +20,16 @@ const SUITES := [
 	preload("res://tests/unit/test_economy_curve.gd"),
 	preload("res://tests/unit/test_world_gate.gd"),
 	preload("res://tests/unit/test_expedition.gd"),
+	# --- Phase 3 (build depth) ---
+	preload("res://tests/unit/test_stat_aggregator.gd"),
+	preload("res://tests/unit/test_equipment.gd"),
+	preload("res://tests/unit/test_rune.gd"),
+	preload("res://tests/unit/test_synergy.gd"),
+	preload("res://tests/unit/test_build_save.gd"),
+	# --- P3-cont (gacha/progression) ---
+	preload("res://tests/unit/test_summon_service.gd"),
+	preload("res://tests/unit/test_talent_respec.gd"),
+	preload("res://tests/unit/test_migration_v4.gd"),
 	preload("res://tests/simulation/test_ai_simulation.gd"),
 ]
 

@@ -12,6 +12,8 @@ var _toast: Label
 var _toast_cd: float = 0.0
 var _world_panel: WorldPanel
 var _build_panel: BuildPanel
+var _summon_panel: SummonPanel
+var _hero_panel: HeroDetailPanel
 
 func _ready() -> void:
 	_build()
@@ -104,6 +106,14 @@ func _build() -> void:
 	_build_panel.position = Vector2(220, 34)
 	_build_panel.visible = false
 	add_child(_build_panel)
+	_summon_panel = SummonPanel.new()
+	_summon_panel.position = Vector2(220, 34)
+	_summon_panel.visible = false
+	add_child(_summon_panel)
+	_hero_panel = HeroDetailPanel.new()
+	_hero_panel.position = Vector2(220, 34)
+	_hero_panel.visible = false
+	add_child(_hero_panel)
 
 	# nav
 	var nav := HBoxContainer.new()
@@ -111,16 +121,16 @@ func _build() -> void:
 	nav.add_theme_constant_override("separation", 8)
 	add_child(nav)
 	_nav_btn(nav, "Đội hình", func(): _show(null))
+	_nav_btn(nav, "Anh Hùng", func(): _show(_hero_panel))
 	_nav_btn(nav, "Thế Giới", func(): _show(_world_panel))
 	_nav_btn(nav, "Xây Dựng", func(): _show(_build_panel))
+	_nav_btn(nav, "Triệu Hồi", func(): _show(_summon_panel))
 
 func _show(panel) -> void:
-	_world_panel.visible = (panel == _world_panel)
-	_build_panel.visible = (panel == _build_panel)
-	if _world_panel.visible:
-		_world_panel.refresh()
-	if _build_panel.visible:
-		_build_panel.refresh()
+	for p in [_world_panel, _build_panel, _summon_panel, _hero_panel]:
+		p.visible = (p == panel)
+	if panel != null and panel.has_method("refresh"):
+		panel.refresh()
 
 func _nav_btn(parent: Node, text: String, cb: Callable) -> void:
 	var b := Button.new()

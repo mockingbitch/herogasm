@@ -10,7 +10,7 @@ static func run(t) -> void:
 		"save_version": 1,
 	}
 	var out := SaveManager._migrate(v1)
-	t.eq(int(out["save_version"]), 3, "V1_MigratedToCurrent")   # chain v1->v2->v3
+	t.eq(int(out["save_version"]), SaveManager.SAVE_VERSION, "V1_MigratedToCurrent")   # chain tới bản mới nhất
 	t.eq(int(out["player"]["gold"]), 500, "V1_GoldPreserved")
 	t.truthy((out["heroes"] as Dictionary).has("hero_0"), "V1_Hero0Created")
 	t.eq(int(out["heroes"]["hero_0"]["level"]), 3, "V1_HeroLevelPreserved")

@@ -255,6 +255,7 @@ func _engage(monster: Monster) -> void:
 		Telemetry.log_event("Combat", "potion_used", {"hero": hero_id})
 	PlayerProfile.spend_energy(ENGAGE_ENERGY)
 
+	h.team_context = PlayerProfile.team_context()   # synergy đội áp vào combat
 	var hu := BattleUnit.from_hero(h, 0)
 	var mu := BattleUnit.from_enemy(monster.data, 1, monster.uid)
 	var seed_val := RandomService.randi()

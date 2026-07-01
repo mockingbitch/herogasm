@@ -28,3 +28,8 @@ extends Resource
 
 ## Trần hút máu (giữ nguyên hành vi cũ trong profile.gd).
 @export var lifesteal_cap: float = 0.8
+
+## Chi phí respec talent = respec_base_cost × số điểm đã tiêu (gold sink).
+@export var respec_base_cost: int = 30
+## Giá trị shard khi summon trùng, theo rarity (0..4). Data-driven, không magic.
+@export var dup_shard_by_rarity: Array[int] = [5, 10, 20, 40, 80]

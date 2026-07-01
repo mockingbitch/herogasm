@@ -28,15 +28,17 @@ static func from_hero(h: HeroInstance, team_: int) -> BattleUnit:
 	u.id = "h_" + h.hero_id
 	u.team = team_
 	u.display_name = h.display_name if h.display_name != "" else h.hero_id
-	u.max_hp = h.eff_max_hp()
+	# P3: chỉ số qua StatAggregator (FinalStats) — build (equip/rune/synergy) ảnh hưởng combat.
+	var fs := h.get_final_stats(h.team_context)
+	var ep := h.effective_power()                 # fatigue×mood×injury (P2) — giữ nhân vào attack
+	u.max_hp = maxi(1, int(round(fs.get_v("bonus_max_hp", 1.0))))
 	u.hp = h.current_hp if h.current_hp > 0 else u.max_hp
-	# effective_power (fatigue×mood×injury, ≤1.0) nhân vào attack — thuần state, giữ tất định.
-	u.attack = maxi(1, int(round(float(h.eff_attack()) * h.effective_power())))
-	u.defense = h.eff_defense()
-	u.crit_chance = h.eff_crit_chance()
-	u.crit_damage = h.eff_crit_damage()
-	u.lifesteal = h.eff_lifesteal()
-	u.attack_interval = clampf(100.0 / maxf(1.0, h.eff_speed()), 0.3, 3.0)
+	u.attack = maxi(1, int(round(fs.get_v("bonus_attack") * ep)))
+	u.defense = int(round(fs.get_v("bonus_defense")))
+	u.crit_chance = fs.get_v("crit_chance")
+	u.crit_damage = fs.get_v("crit_damage", 1.5)
+	u.lifesteal = fs.get_v("lifesteal")
+	u.attack_interval = clampf(100.0 / maxf(1.0, fs.get_v("bonus_speed", 92.0)), 0.3, 3.0)
 	u.source_hero_id = h.hero_id
 	return u
 

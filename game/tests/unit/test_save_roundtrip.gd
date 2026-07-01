@@ -26,11 +26,12 @@ static func run(t) -> void:
 	PlayerProfile.reset_progress()
 	PlayerProfile.add_gold(777)
 	PlayerProfile.add_gems(5)
+	var gems_expected := PlayerProfile.gems     # gồm gem seed từ new_game
 	var d := PlayerProfile.to_dict()
 	PlayerProfile.gold = 0
 	PlayerProfile.gems = 0
 	var roster := PlayerProfile.hero_ids.size()
 	PlayerProfile.from_dict(d)
 	t.eq(PlayerProfile.gold, 777, "Account_GoldRoundTrip")
-	t.eq(PlayerProfile.gems, 5, "Account_GemsRoundTrip")
+	t.eq(PlayerProfile.gems, gems_expected, "Account_GemsRoundTrip")
 	t.eq(PlayerProfile.hero_ids.size(), roster, "Account_HeroCountRoundTrip")

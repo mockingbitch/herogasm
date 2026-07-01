@@ -8,6 +8,13 @@ var hero_defs: Dictionary = {} # id -> HeroDef
 var building_defs: Dictionary = {} # id -> BuildingDef
 var region_defs: Dictionary = {} # id -> RegionDef
 var zone_defs: Dictionary = {} # id -> ZoneDef
+var equip_defs: Dictionary = {} # id -> EquipDef (P3)
+var rune_defs: Dictionary = {} # id -> RuneDef
+var synergy_defs: Dictionary = {} # id -> SynergyDef
+var set_bonuses: Dictionary = {} # set_id -> {2:{stat:pct},4:{...}}
+var resonances: Dictionary = {} # Element(int) -> {stat:pct}
+var banner_defs: Dictionary = {} # id -> BannerDef (P3-cont gacha)
+var awaken_defs: Dictionary = {} # hero_def_id -> AwakenDef
 var monster_pool: Array[String] = ["slime", "bat", "skeleton"]   # Bãi Săn MVP
 var shop_stock: Array[String] = ["health_potion", "leather_armor", "iron_sword", "chain_armor", "knight_blade"]
 
@@ -21,6 +28,7 @@ func _ready() -> void:
 	_build_heroes()
 	_build_buildings()
 	_build_world()
+	_build_p3()
 
 func get_building_def(id: String) -> BuildingDef:
 	return building_defs.get(id)
@@ -85,6 +93,103 @@ func _zone(id: String, region: String, nm: String, req_lv: int, unlock_stars: in
 	z.reward_gold_min = gmin; z.reward_gold_max = gmax; z.reward_xp = xp
 	zone_defs[id] = z
 
+# --- P3 build content (equipment/rune/synergy/set/resonance) ----------------
+func get_equip_def(id: String) -> EquipDef:
+	return equip_defs.get(id)
+
+func get_rune_def(id: String) -> RuneDef:
+	return rune_defs.get(id)
+
+func get_synergy_def(id: String) -> SynergyDef:
+	return synergy_defs.get(id)
+
+func get_set_bonus(set_id: String) -> Variant:
+	return set_bonuses.get(set_id)
+
+func get_resonance(element: int) -> Dictionary:
+	return resonances.get(element, {})
+
+func _build_p3() -> void:
+	_equip("warrior_sword", Enums.EquipSlot.WEAPON, Enums.WeaponType.SWORD, "Kiếm Chiến Binh", ["tank", "warrior"], ItemData.Rarity.RARE, "bonus_attack", 30.0, "")
+	_equip("mage_staff", Enums.EquipSlot.WEAPON, Enums.WeaponType.STAFF, "Trượng Pháp Sư", ["mage"], ItemData.Rarity.RARE, "bonus_attack", 26.0, "")
+	_equip("guardian_armor", Enums.EquipSlot.ARMOR, Enums.WeaponType.SHIELD, "Giáp Vệ Thần", [], ItemData.Rarity.EPIC, "bonus_defense", 22.0, "guardian")
+	_equip("guardian_helm", Enums.EquipSlot.HELMET, Enums.WeaponType.SHIELD, "Mũ Vệ Thần", [], ItemData.Rarity.EPIC, "bonus_defense", 12.0, "guardian")
+	_equip("shadow_gloves", Enums.EquipSlot.GLOVES, Enums.WeaponType.DAGGER, "Găng Bóng Tối", [], ItemData.Rarity.EPIC, "bonus_speed", 6.0, "shadow")
+	_equip("shadow_boots", Enums.EquipSlot.BOOTS, Enums.WeaponType.DAGGER, "Giày Bóng Tối", [], ItemData.Rarity.EPIC, "bonus_speed", 8.0, "shadow")
+	_equip("hp_necklace", Enums.EquipSlot.NECKLACE, Enums.WeaponType.ORB, "Dây Chuyền Sinh Lực", [], ItemData.Rarity.RARE, "bonus_max_hp", 40.0, "")
+	_equip("crit_ring", Enums.EquipSlot.RING, Enums.WeaponType.ORB, "Nhẫn Chí Mạng", [], ItemData.Rarity.LEGENDARY, "bonus_attack", 15.0, "")
+
+	set_bonuses["guardian"] = {2: {"bonus_defense": 0.10}, 4: {"bonus_max_hp": 0.15}}
+	set_bonuses["shadow"] = {2: {"crit_chance": 0.05}, 4: {"crit_damage": 0.30}}
+
+	_rune_core("berserker_core", Enums.RuneCategory.OFFENSIVE, {"bonus_attack": 0.25, "bonus_defense": -0.15})
+	_rune_core("guardian_core", Enums.RuneCategory.DEFENSIVE, {"bonus_defense": 0.20})
+	_rune("fire_atk", Enums.RuneCategory.OFFENSIVE, Enums.Element.FIRE, "bonus_attack", 8.0, 1.0, {5: {"crit_chance": 0.05}, 10: {"bonus_attack": 0.10}})
+	_rune("fire_hp", Enums.RuneCategory.DEFENSIVE, Enums.Element.FIRE, "bonus_max_hp", 20.0, 3.0, {10: {"bonus_max_hp": 0.10}})
+	_rune("ice_def", Enums.RuneCategory.DEFENSIVE, Enums.Element.ICE, "bonus_defense", 6.0, 0.8, {5: {"bonus_defense": 0.08}})
+	_rune("util_speed", Enums.RuneCategory.UTILITY, Enums.Element.WIND, "bonus_speed", 5.0, 0.5, {})
+
+	resonances[Enums.Element.FIRE] = {"bonus_attack": 0.15}
+	resonances[Enums.Element.ICE] = {"bonus_defense": 0.15}
+
+	_synergy("human_syn", "race", "human", {3: {"bonus_max_hp": 0.10}, 5: {"bonus_max_hp": 0.15}})
+	_synergy("elf_syn", "race", "elf", {3: {"crit_chance": 0.10}})
+	_synergy("mage_syn", "class", "mage", {3: {"bonus_attack": 0.10}})
+
+	# Gacha banner + awaken (P3-cont)
+	_banner("standard", "Triệu Hồi Thường", [
+		{"hero_def_id": "knight", "rarity": 3, "weight": 1.0},
+		{"hero_def_id": "rogue", "rarity": 2, "weight": 3.0},
+		{"hero_def_id": "mage", "rarity": 2, "weight": 3.0},
+		{"hero_def_id": "archer", "rarity": 1, "weight": 8.0},
+		{"hero_def_id": "cleric", "rarity": 1, "weight": 8.0},
+	])
+	_awaken("knight", 40, "battle_lord", "guardian_wall_plus", {"bonus_attack": 10.0})
+
+func get_banner_def(id: String) -> BannerDef:
+	return banner_defs.get(id)
+
+func get_awaken_def(hero_def_id: String) -> AwakenDef:
+	return awaken_defs.get(hero_def_id)
+
+func banner_ids() -> Array:
+	return banner_defs.keys()
+
+func _banner(id: String, nm: String, pool: Array) -> void:
+	var b := BannerDef.new()
+	b.id = id; b.display_name = nm; b.pool = pool
+	banner_defs[id] = b
+
+func _awaken(hero_def_id: String, cost: int, passive: String, ult: String, bonus: Dictionary) -> void:
+	var a := AwakenDef.new()
+	a.hero_def_id = hero_def_id; a.shard_cost = cost
+	a.new_passive_id = passive; a.upgraded_ultimate_id = ult; a.stat_bonus = bonus
+	awaken_defs[hero_def_id] = a
+
+func _equip(id: String, slot: int, wtype: int, nm: String, allowed: Array, rarity: int, main_key: String, main_base: float, set_id: String) -> void:
+	var e := EquipDef.new()
+	e.id = id; e.slot = slot; e.weapon_type = wtype; e.display_name = nm
+	e.allowed_class.assign(allowed); e.rarity = rarity
+	e.main_stat_key = main_key; e.main_stat_base = main_base; e.set_id = set_id
+	equip_defs[id] = e
+
+func _rune(id: String, cat: int, elem: int, main_key: String, main_base: float, per_lvl: float, unlocks: Dictionary) -> void:
+	var r := RuneDef.new()
+	r.id = id; r.category = cat; r.element = elem; r.main_stat_key = main_key
+	r.main_stat_base = main_base; r.per_level_gain = per_lvl; r.level_unlock_effects = unlocks
+	rune_defs[id] = r
+
+func _rune_core(id: String, cat: int, core_pct: Dictionary) -> void:
+	var r := RuneDef.new()
+	r.id = id; r.category = cat; r.is_core = true; r.core_percent = core_pct
+	r.main_stat_base = 0.0; r.per_level_gain = 0.0   # core chỉ cho % (core_percent), không main flat
+	rune_defs[id] = r
+
+func _synergy(id: String, kind: String, key: String, thresholds: Dictionary) -> void:
+	var s := SynergyDef.new()
+	s.id = id; s.kind = kind; s.key = key; s.thresholds = thresholds
+	synergy_defs[id] = s
+
 func get_item(id: String) -> ItemData:
 	return items.get(id)
 
@@ -102,17 +207,17 @@ func _build_heroes() -> void:
 	_hero("knight", "Rogan", "tank", "iron_sword", "knight_m",
 		{"aggression": 0.85, "rest_threshold": 0.55, "repair_threshold": 0.30})
 	_hero("rogue", "Luna", "rogue", "iron_sword", "elf_f",
-		{"aggression": 1.15, "rest_threshold": 0.40, "repair_threshold": 0.25})
+		{"aggression": 1.15, "rest_threshold": 0.40, "repair_threshold": 0.25}, "elf")
 	_hero("archer", "Beo", "ranger", "rusty_sword", "elf_m",
-		{"aggression": 1.05, "rest_threshold": 0.42, "repair_threshold": 0.30})
+		{"aggression": 1.05, "rest_threshold": 0.42, "repair_threshold": 0.30}, "elf")
 	_hero("mage", "Mira", "mage", "rusty_sword", "wizard_m",
 		{"aggression": 1.0, "rest_threshold": 0.45, "repair_threshold": 0.30})
 	_hero("cleric", "Kane", "support", "rusty_sword", "knight_f",
 		{"aggression": 0.7, "rest_threshold": 0.6, "repair_threshold": 0.35})
 
-func _hero(id: String, nm: String, cls: String, weapon: String, sprite: String, weights: Dictionary) -> void:
+func _hero(id: String, nm: String, cls: String, weapon: String, sprite: String, weights: Dictionary, race: String = "human") -> void:
 	var h := HeroDef.new()
-	h.id = id; h.display_name = nm; h.hero_class = cls
+	h.id = id; h.display_name = nm; h.hero_class = cls; h.class_role = cls; h.race = race
 	h.start_weapon = weapon; h.sprite = sprite; h.ai_weights = weights
 	hero_defs[id] = h
 
