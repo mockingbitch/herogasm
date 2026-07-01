@@ -16,6 +16,7 @@ var _summon_panel: SummonPanel
 var _hero_panel: HeroDetailPanel
 var _battle_panel: BattlePanel
 var _season_panel: SeasonPanel
+var _panel_bg: Panel
 
 func _ready() -> void:
 	_build()
@@ -91,65 +92,79 @@ func _flash(msg: String, dur: float = 4.0) -> void:
 	_toast.text = msg
 	_toast_cd = dur
 
-# --- build UI --------------------------------------------------------------
+# --- build UI (dark-fantasy: top bar · roster panel · content · bottom nav) --
+const VW := 540.0
+const VH := 960.0
+
 func _build() -> void:
+	# Top resource bar
+	var topbar := Panel.new()
+	topbar.position = Vector2(0, 0)
+	topbar.size = Vector2(VW, 48)
+	add_child(topbar)
 	var top := HBoxContainer.new()
-	top.position = Vector2(10, 8)
-	top.add_theme_constant_override("separation", 14)
-	add_child(top)
-	_gold = _mk(top, Color(0.95, 0.8, 0.3))
-	_gems = _mk(top, Color(0.65, 0.45, 0.9))
-	_energy = _mk(top, Color(0.5, 0.85, 0.4))
-	_exp = _mk(top, Color(0.7, 0.75, 0.85))
+	top.position = Vector2(14, 12)
+	top.add_theme_constant_override("separation", 22)
+	topbar.add_child(top)
+	_gold = _mk(top, Color(0.98, 0.82, 0.32))
+	_gems = _mk(top, Color(0.7, 0.5, 0.95))
+	_energy = _mk(top, Color(0.55, 0.88, 0.45))
+	_exp = _mk(top, Color(0.72, 0.78, 0.9))
 
-	_roster = _lbl(Vector2(10, 34), 11, Color(0.9, 0.88, 0.8))
-	add_child(_roster)
+	# Roster panel (trái, dưới top bar)
+	var roster_bg := Panel.new()
+	roster_bg.position = Vector2(8, 56)
+	roster_bg.size = Vector2(240, 196)
+	add_child(roster_bg)
+	_roster = _lbl(Vector2(10, 8), 12, Color(0.92, 0.9, 0.82))
+	roster_bg.add_child(_roster)
 
-	_toast = _lbl(Vector2(10, 210), 12, Color(0.6, 0.9, 0.6))
-	add_child(_toast)
+	# Nền panel nội dung dùng chung (hiện khi mở 1 panel)
+	_panel_bg = Panel.new()
+	_panel_bg.position = Vector2(256, 56)
+	_panel_bg.size = Vector2(278, 786)
+	_panel_bg.visible = false
+	add_child(_panel_bg)
 
 	# panels (ẩn mặc định)
-	_world_panel = WorldPanel.new()
-	_world_panel.position = Vector2(220, 34)
-	_world_panel.visible = false
-	add_child(_world_panel)
-	_build_panel = BuildPanel.new()
-	_build_panel.position = Vector2(220, 34)
-	_build_panel.visible = false
-	add_child(_build_panel)
-	_summon_panel = SummonPanel.new()
-	_summon_panel.position = Vector2(220, 34)
-	_summon_panel.visible = false
-	add_child(_summon_panel)
-	_hero_panel = HeroDetailPanel.new()
-	_hero_panel.position = Vector2(220, 34)
-	_hero_panel.visible = false
-	add_child(_hero_panel)
-	_battle_panel = BattlePanel.new()
-	_battle_panel.position = Vector2(220, 34)
-	_battle_panel.visible = false
-	add_child(_battle_panel)
-	_season_panel = SeasonPanel.new()
-	_season_panel.position = Vector2(220, 34)
-	_season_panel.visible = false
-	add_child(_season_panel)
+	for p in _make_panels():
+		p.position = Vector2(268, 66)
+		p.visible = false
+		add_child(p)
 
-	# nav
+	_toast = _lbl(Vector2(14, VH - 96), 13, Color(0.75, 0.95, 0.7))
+	add_child(_toast)
+
+	# Bottom nav bar
+	var navbar := Panel.new()
+	navbar.position = Vector2(0, VH - 56)
+	navbar.size = Vector2(VW, 56)
+	add_child(navbar)
 	var nav := HBoxContainer.new()
-	nav.position = Vector2(10, 180)
-	nav.add_theme_constant_override("separation", 8)
-	add_child(nav)
+	nav.position = Vector2(8, 10)
+	nav.add_theme_constant_override("separation", 4)
+	navbar.add_child(nav)
 	_nav_btn(nav, "Đội hình", func(): _show(null))
-	_nav_btn(nav, "Anh Hùng", func(): _show(_hero_panel))
+	_nav_btn(nav, "Hero", func(): _show(_hero_panel))
 	_nav_btn(nav, "Thế Giới", func(): _show(_world_panel))
 	_nav_btn(nav, "Xây Dựng", func(): _show(_build_panel))
 	_nav_btn(nav, "Triệu Hồi", func(): _show(_summon_panel))
-	_nav_btn(nav, "Trận Đấu", func(): _show(_battle_panel))
+	_nav_btn(nav, "Trận", func(): _show(_battle_panel))
 	_nav_btn(nav, "Chiến Dịch", func(): _show(_season_panel))
+
+func _make_panels() -> Array:
+	_world_panel = WorldPanel.new()
+	_build_panel = BuildPanel.new()
+	_summon_panel = SummonPanel.new()
+	_hero_panel = HeroDetailPanel.new()
+	_battle_panel = BattlePanel.new()
+	_season_panel = SeasonPanel.new()
+	return [_world_panel, _build_panel, _summon_panel, _hero_panel, _battle_panel, _season_panel]
 
 func _show(panel) -> void:
 	for p in [_world_panel, _build_panel, _summon_panel, _hero_panel, _battle_panel, _season_panel]:
 		p.visible = (p == panel)
+	_panel_bg.visible = panel != null
 	if panel != null and panel.has_method("refresh"):
 		panel.refresh()
 
