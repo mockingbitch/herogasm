@@ -24,6 +24,13 @@ var stage_defs: Dictionary = {}        # id -> StageDef
 var boss_minion_groups: Dictionary = {} # group_id -> Array[enemy_id]
 var world_boss_rotation: Array = []    # day_of_week(0..6) -> boss_def_id
 var arena_bot_pool: Array = []         # Array[Dictionary] snapshot bot mẫu (seed vòng đời PvP)
+# --- P5: story / season / event ---
+var chapter_defs: Dictionary = {}      # id -> ChapterDef
+var season_defs: Dictionary = {}       # id -> SeasonDef
+var event_defs: Dictionary = {}        # id -> EventDef
+var battle_pass_defs: Dictionary = {}  # id -> BattlePassDef
+var dialogue_defs: Dictionary = {}     # id -> DialogueDef
+var seasonal_shops: Dictionary = {}    # shop_id -> Array[{cost,currency,reward}]
 var monster_pool: Array[String] = ["slime", "bat", "skeleton"]   # Bãi Săn MVP
 var shop_stock: Array[String] = ["health_potion", "leather_armor", "iron_sword", "chain_armor", "knight_blade"]
 
@@ -39,6 +46,7 @@ func _ready() -> void:
 	_build_world()
 	_build_p3()
 	ContentP4.build(self)                  # boss/stage/formation/arena (tách file, <300 dòng)
+	ContentP5.build(self)                  # story/season/event (campaign + Season of Frost)
 
 func get_building_def(id: String) -> BuildingDef:
 	return building_defs.get(id)
@@ -197,6 +205,36 @@ func world_boss_for_day(dow: int) -> String:
 	if world_boss_rotation.is_empty():
 		return ""
 	return str(world_boss_rotation[dow % world_boss_rotation.size()])
+
+# --- P5 getters -----------------------------------------------------------
+func get_chapter_def(id: String) -> ChapterDef:
+	return chapter_defs.get(id)
+
+func chapters_ordered() -> Array:
+	var arr: Array = chapter_defs.values()
+	arr.sort_custom(func(a, b): return a.order_index < b.order_index)
+	return arr
+
+func get_season_def(id: String) -> SeasonDef:
+	return season_defs.get(id)
+
+func season_ids() -> Array:
+	return season_defs.keys()
+
+func get_event_def(id: String) -> EventDef:
+	return event_defs.get(id)
+
+func event_ids() -> Array:
+	return event_defs.keys()
+
+func get_battle_pass_def(id: String) -> BattlePassDef:
+	return battle_pass_defs.get(id)
+
+func get_dialogue_def(id: String) -> DialogueDef:
+	return dialogue_defs.get(id)
+
+func get_seasonal_shop(shop_id: String) -> Array:
+	return seasonal_shops.get(shop_id, [])
 
 func get_banner_def(id: String) -> BannerDef:
 	return banner_defs.get(id)

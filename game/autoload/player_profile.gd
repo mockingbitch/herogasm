@@ -30,6 +30,9 @@ var pity_counters: Dictionary = {}                 # banner_id -> {since_guarant
 var currency: Dictionary = {}                      # currency mềm gacha + honor (P4 arena/boss)
 var stage_stars: Dictionary = {}                   # stage_id -> best stars (P4 stage 3/3)
 var stage_claims: Dictionary = {}                  # stage_id -> true nếu đã nhận first-clear
+var story: Dictionary = {}                         # tiến trình campaign (P5, StoryManager sở hữu)
+var battlepass: Dictionary = {}                    # tiến trình battle pass season (P5)
+var cosmetics: Dictionary = {}                     # id -> true (skin/emote/avatar — cosmetic, không power)
 var _claimed_ids: Dictionary = {}                  # claim_id -> reward_hash (SAVE, chống double)
 var _summon: SummonService
 var _reward_guard: RewardProtection
@@ -78,6 +81,9 @@ func new_game() -> void:
 	currency = {}
 	stage_stars = {}
 	stage_claims = {}
+	story = {}
+	battlepass = {}
+	cosmetics = {}
 	_claimed_ids = {}
 	# Roster khởi tạo từ HeroDef (data-driven).
 	for def_id in Database.hero_def_ids():
@@ -157,6 +163,51 @@ func add_currency(cur: String, amount: int) -> void:
 
 func honor() -> int:
 	return int(currency.get("honor", 0))
+
+## Tiêu currency mềm (kiểm tra đủ). Trả true nếu trừ được. gems đi qua add_gems.
+func spend_currency(cur: String, amount: int) -> bool:
+	if amount <= 0 or currency_amount(cur) < amount:
+		return false
+	_spend_currency(cur, amount)
+	return true
+
+func add_cosmetic(id: String) -> void:
+	cosmetics[id] = true
+
+func has_cosmetic(id: String) -> bool:
+	return bool(cosmetics.get(id, false))
+
+## Router thưởng dùng chung (event/story/battle-pass/shop). reward = {type,id,amount}.
+## KHÔNG gold-only (events.md); type: gold/gems/currency/material/consumable/item/hero/cosmetic/feature.
+func grant_reward(reward: Dictionary) -> void:
+	var typ := str(reward.get("type", ""))
+	var id := str(reward.get("id", ""))
+	var amount := int(reward.get("amount", 1))
+	match typ:
+		"gold": add_gold(amount)
+		"gems": add_gems(amount)
+		"currency": add_currency(id, amount)
+		"material": add_material(id, amount)
+		"consumable": add_consumable(id, amount)
+		"item":
+			for i in maxi(1, amount):
+				add_item(id)
+		"hero":
+			if not _owns_hero_def(id):
+				spawn_hero(id); _mark_owned(id)
+		"cosmetic": add_cosmetic(id)
+		"feature":
+			if has_node("/root/StoryManager"):
+				StoryManager.unlock_feature(id)
+		_:
+			add_gold(amount)   # fallback an toàn
+
+func _owns_hero_def(def_id: String) -> bool:
+	for hid in hero_ids:
+		var h: HeroInstance = heroes.get(hid)
+		if h != null and h.hero_def_id == def_id:
+			return true
+	return false
 
 # --- team hiện hành (đội hình stage/arena) ---------------------------------
 ## N hero khoẻ nhất (không KO) theo power — dựng đội cho stage/arena mặc định.
@@ -388,7 +439,17 @@ func team_context() -> Dictionary:
 		var h: HeroInstance = heroes.get(id)
 		if h != null:
 			team.append(h)
-	return {"synergy": SynergyService.compute(team)}
+	var synergy := SynergyService.compute(team)
+	var meta: Dictionary = {}
+	# P5: Season meta rotation buff rune/equip/synergy (KHÔNG hero base) — inject qua ctx.
+	if has_node("/root/SeasonManager") and SeasonManager.meta_rotation().is_active():
+		var mr := SeasonManager.meta_rotation()
+		meta = mr.rules()
+		for sid in SynergyService.active_ids(team):
+			var b := mr.synergy_percent_for(sid)
+			for k in b:
+				synergy[str(k)] = float(synergy.get(k, 0.0)) + float(b[k])
+	return {"synergy": synergy, "meta": meta}
 
 func _serialize_owned(d: Dictionary) -> Dictionary:
 	var out := {}
@@ -535,6 +596,9 @@ func to_dict() -> Dictionary:
 			"currency": currency,
 			"stage_stars": stage_stars,
 			"stage_claims": stage_claims,
+			"story": story,
+			"battlepass": battlepass,
+			"cosmetics": cosmetics,
 			"claimed_ids": _claimed_ids,
 		},
 		"hero_ids": hero_ids,
@@ -551,6 +615,12 @@ func _world_dict() -> Dictionary:
 		w.merge(WorldBossService.export_world(), true)
 	if has_node("/root/ArenaService"):
 		w.merge(ArenaService.export_world(), true)
+	if has_node("/root/EventManager"):
+		w.merge(EventManager.export_world(), true)
+	if has_node("/root/WorldEvolutionService"):
+		w.merge(WorldEvolutionService.export_world(), true)
+	if has_node("/root/SeasonManager"):
+		w.merge(SeasonManager.export_world(), true)
 	return w
 
 func world_state() -> Dictionary:
@@ -578,6 +648,9 @@ func from_dict(d: Dictionary) -> void:
 	currency = p.get("currency", {}) if typeof(p.get("currency")) == TYPE_DICTIONARY else {}
 	stage_stars = _norm_counts(p.get("stage_stars", {}))
 	stage_claims = p.get("stage_claims", {}) if typeof(p.get("stage_claims")) == TYPE_DICTIONARY else {}
+	story = p.get("story", {}) if typeof(p.get("story")) == TYPE_DICTIONARY else {}
+	battlepass = p.get("battlepass", {}) if typeof(p.get("battlepass")) == TYPE_DICTIONARY else {}
+	cosmetics = p.get("cosmetics", {}) if typeof(p.get("cosmetics")) == TYPE_DICTIONARY else {}
 	_claimed_ids = p.get("claimed_ids", {}) if typeof(p.get("claimed_ids")) == TYPE_DICTIONARY else {}
 	max_energy = MAX_ENERGY + int(unlocks.get("energy_cap_bonus", 0))
 	energy = clampi(energy, 0, max_energy)

@@ -51,13 +51,35 @@ static func aggregate(hero: HeroInstance, team_ctx: Dictionary = {}) -> FinalSta
 			s.add_percent_dict(rdef.core_percent, "rune_core")
 	s.add_percent_dict(RuneService.resonance(hero.runes), "resonance")
 
-	# 5) synergy aura -> percent
+	# 5) synergy aura -> percent (đã gộp meta synergy_buffs ở team_context)
 	s.add_percent_dict(team_ctx.get("synergy", {}), "synergy")
+
+	# 5b) Season meta rotation: buff rune/equip (theo id sở hữu) -> percent (KHÔNG hero base)
+	_apply_meta(s, hero, team_ctx.get("meta", {}))
 
 	# 6) final = flat*(1+Σpercent) + clamp
 	s.finalize()
 	_clamp(s, c)
 	return s
+
+## Áp buff Season lên rune/equip mà hero ĐANG sở hữu. Không match -> không đổi (chống power-creep).
+static func _apply_meta(s: FinalStats, hero: HeroInstance, meta: Dictionary) -> void:
+	if meta.is_empty():
+		return
+	for b in meta.get("rune_buffs", []):
+		var rid := str(b.get("rune_id", ""))
+		for r in hero.runes:
+			if r != null and r.def_id == rid:
+				s.add_percent(str(b.get("stat", "")), float(b.get("mult", 0.0)), "season")
+	var set_counts := {}
+	for e in hero.equipped:
+		if e != null:
+			var def: EquipDef = Database.get_equip_def(e.def_id)
+			if def != null and def.set_id != "":
+				set_counts[def.set_id] = int(set_counts.get(def.set_id, 0)) + 1
+	for b in meta.get("equip_buffs", []):
+		if int(set_counts.get(str(b.get("set_id", "")), 0)) >= 2:
+			s.add_percent(str(b.get("stat", "")), float(b.get("mult", 0.0)), "season")
 
 static func _clamp(s: FinalStats, c: CombatConstants) -> void:
 	s.value["crit_chance"] = clampf(s.value.get("crit_chance", 0.0), 0.0, 0.8)

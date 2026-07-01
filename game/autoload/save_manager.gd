@@ -6,7 +6,7 @@ extends Node
 const SAVE_PATH := "user://save_0.json"
 const BAK_PATH := "user://save_0.bak"
 const TMP_PATH := "user://save_0.tmp"
-const SAVE_VERSION := 5
+const SAVE_VERSION := 6
 
 func save_game(data: Dictionary) -> bool:
 	var payload := data.duplicate(true)
@@ -122,7 +122,29 @@ func _migrate(d: Dictionary) -> Dictionary:
 		out = _migrate_v4_to_v5(out)
 		if has_node("/root/Telemetry"):
 			Telemetry.log_event("Save", "migration_run", {"from": 4, "to": 5})
+	if v <= 5:
+		out = _migrate_v5_to_v6(out)
+		if has_node("/root/Telemetry"):
+			Telemetry.log_event("Save", "migration_run", {"from": 5, "to": 6})
 	out["save_version"] = SAVE_VERSION
+	return out
+
+## v5 -> v6: thêm story/battlepass/cosmetics (player) + season/events/world_state (world). Không mất data.
+func _migrate_v5_to_v6(d: Dictionary) -> Dictionary:
+	var out := d.duplicate(true)
+	var player = out.get("player", {})
+	if typeof(player) == TYPE_DICTIONARY:
+		if not player.has("story"): player["story"] = {}
+		if not player.has("battlepass"): player["battlepass"] = {}
+		if not player.has("cosmetics"): player["cosmetics"] = {}
+		out["player"] = player
+	var world = out.get("world", {})
+	if typeof(world) != TYPE_DICTIONARY:
+		world = {}
+	if not world.has("season"): world["season"] = {}
+	if not world.has("events"): world["events"] = []
+	if not world.has("world_state"): world["world_state"] = {}
+	out["world"] = world
 	return out
 
 ## v4 -> v5: thêm stage_stars/stage_claims + honor currency + world.{world_boss,arena}. Không mất data.

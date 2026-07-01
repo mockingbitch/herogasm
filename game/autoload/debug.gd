@@ -8,6 +8,7 @@ var _commands: Dictionary = {}                     # name -> {callable, help}
 func _ready() -> void:
 	_register_defaults()
 	_register_p4()
+	_register_p5()
 
 func register_command(name: String, callable: Callable, help: String = "") -> void:
 	_commands[name] = {"callable": callable, "help": help}
@@ -163,3 +164,82 @@ func _cmd_replay_last(_a: Array) -> String:
 		return "no_replay"
 	var res: SimResult = ArenaService.watch(str(ArenaService.last_result.replay_id))
 	return "replay winner=%d" % (res.winner if res != null else -1)
+
+# --- P5: story / season / event (debug-tools.md) --------------------------
+func _register_p5() -> void:
+	register_command("start_event", _cmd_start_event, "bắt đầu event <id>")
+	register_command("end_event", _cmd_end_event, "kết mọi event active")
+	register_command("show_active_events", _cmd_show_events, "event đang active")
+	register_command("claim_event_reward", _cmd_claim_event, "nhận thưởng event <id>")
+	register_command("trigger_festival", _cmd_festival, "khởi động frost_festival")
+	register_command("set_chapter", _cmd_set_chapter, "start chapter <id>")
+	register_command("complete_current_chapter", _cmd_complete_chapter, "hoàn thành chapter hiện tại")
+	register_command("unlock_feature", _cmd_unlock_feature, "mở feature <key>")
+	register_command("start_season", _cmd_start_season, "bắt đầu season <id>")
+	register_command("skip_season_days", _cmd_skip_days, "tua <n> ngày game")
+	register_command("force_season_rollover", _cmd_rollover, "ép rollover season")
+	register_command("set_world_state", _cmd_set_world_state, "<region> <key> <value>")
+	register_command("add_seasonal_currency", _cmd_add_scurrency, "<currency> <n>")
+	register_command("set_battlepass_level", _cmd_set_bp, "đặt level battle pass <n>")
+
+func _cmd_start_event(a: Array) -> String:
+	return str(EventManager.start_event(str(a[0]))) if a.size() > 0 else "cần <id>"
+
+func _cmd_end_event(_a: Array) -> String:
+	EventManager.end_all(); return "ended"
+
+func _cmd_show_events(_a: Array) -> String:
+	return str(EventManager.active_event_ids())
+
+func _cmd_claim_event(a: Array) -> String:
+	return str(EventManager.claim_reward(str(a[0]))) if a.size() > 0 else "cần <id>"
+
+func _cmd_festival(_a: Array) -> String:
+	return str(EventManager.start_event("frost_festival"))
+
+func _cmd_set_chapter(a: Array) -> String:
+	return "start=%s" % str(StoryManager.start_chapter(str(a[0]))) if a.size() > 0 else "cần <id>"
+
+func _cmd_complete_chapter(_a: Array) -> String:
+	var cd: ChapterDef = StoryManager.get_current_chapter()
+	if cd == null:
+		return "hết chapter"
+	return "complete %s = %s" % [str(cd.id), str(StoryManager.complete_chapter(str(cd.id)))]
+
+func _cmd_unlock_feature(a: Array) -> String:
+	if a.is_empty():
+		return "cần <key>"
+	StoryManager.unlock_feature(str(a[0]))
+	return "unlocked=%s" % str(a[0])
+
+func _cmd_start_season(a: Array) -> String:
+	var id := str(a[0]) if a.size() > 0 else "season_of_frost"
+	return "season=%s" % str(SeasonManager.start_season(id))
+
+func _cmd_skip_days(a: Array) -> String:
+	var n := int(a[0]) if a.size() > 0 else 1
+	TimeService.advance_game_time(float(n) * TimeService.SECONDS_PER_GAME_DAY)
+	if SeasonManager.should_rollover():
+		SeasonManager.rollover()
+		return "skipped %d ngày -> rollover" % n
+	return "skipped %d ngày (còn %d)" % [n, SeasonManager.time_remaining_days()]
+
+func _cmd_rollover(_a: Array) -> String:
+	SeasonManager.rollover(); return "rollover"
+
+func _cmd_set_world_state(a: Array) -> String:
+	if a.size() < 3:
+		return "cần <region> <key> <value>"
+	WorldEvolutionService.set_state(str(a[0]), str(a[1]), str(a[2]))
+	return "%s.%s=%s" % [a[0], a[1], a[2]]
+
+func _cmd_add_scurrency(a: Array) -> String:
+	if a.size() < 2:
+		return "cần <currency> <n>"
+	PlayerProfile.add_currency(str(a[0]), int(a[1]))
+	return "%s=%d" % [a[0], PlayerProfile.currency_amount(str(a[0]))]
+
+func _cmd_set_bp(a: Array) -> String:
+	var lvl := int(a[0]) if a.size() > 0 else 1
+	PlayerProfile.battlepass["level"] = maxi(1, lvl)
+	return "bp_level=%d" % int(PlayerProfile.battlepass.get("level", 1))

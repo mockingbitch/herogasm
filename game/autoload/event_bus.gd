@@ -46,5 +46,17 @@ signal world_boss_ended(boss_id: String, event_state: int)
 signal arena_match_finished(result: Dictionary)
 signal stage_cleared(stage_id: String, stars: int)
 
+# Story / Season / Event (P5) — lớp keo điều phối
+signal story_chapter_started(chapter_id: String)
+signal story_chapter_completed(chapter_id: String)
+signal story_feature_unlocked(feature_key: String)
+signal season_started(season_id: String)
+signal season_ended(season_id: String)
+signal event_scheduled(event_id: String)
+signal event_started(event_id: String)
+signal event_ended(event_id: String, success: bool)
+signal event_reward_claimed(event_id: String)
+signal world_state_changed(region: String, key: String, value: Variant)
+
 # Save
 signal save_completed(ok: bool)

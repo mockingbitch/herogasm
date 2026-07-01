@@ -39,6 +39,12 @@ const SUITES := [
 	preload("res://tests/unit/test_stage.gd"),
 	preload("res://tests/unit/test_replay_regression.gd"),
 	preload("res://tests/simulation/test_boss_arena_simulation.gd"),
+	# --- Phase 5 (story · season · event) ---
+	preload("res://tests/unit/test_story.gd"),
+	preload("res://tests/unit/test_event.gd"),
+	preload("res://tests/unit/test_season.gd"),
+	preload("res://tests/unit/test_migration_v6.gd"),
+	preload("res://tests/simulation/test_season_simulation.gd"),
 ]
 
 var _pass: int = 0

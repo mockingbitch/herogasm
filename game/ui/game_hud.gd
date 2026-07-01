@@ -15,6 +15,7 @@ var _build_panel: BuildPanel
 var _summon_panel: SummonPanel
 var _hero_panel: HeroDetailPanel
 var _battle_panel: BattlePanel
+var _season_panel: SeasonPanel
 
 func _ready() -> void:
 	_build()
@@ -30,6 +31,11 @@ func _ready() -> void:
 	EventBus.world_boss_ended.connect(func(id, st): _flash("World Boss %s kết thúc (%d)" % [id, st], 6.0))
 	EventBus.stage_cleared.connect(func(sid, s): _flash("Ải %s: %d★" % [sid, s]))
 	EventBus.arena_match_finished.connect(func(r): _flash("Đấu Trường: MMR%+d, +%d honor" % [int(r.get("mmr_delta", 0)), int(r.get("honor_gained", 0))]))
+	EventBus.story_chapter_completed.connect(func(id): _flash("📖 Hoàn thành chương: %s" % id, 6.0))
+	EventBus.story_feature_unlocked.connect(func(key): _flash("🔓 Mở khoá: %s" % key, 6.0))
+	EventBus.season_started.connect(func(id): _flash("❄ Mùa mới bắt đầu: %s" % id, 7.0))
+	EventBus.event_started.connect(func(id): _flash("🎉 Sự kiện: %s" % id, 5.0))
+	EventBus.world_state_changed.connect(func(reg, k, v): _flash("🌍 %s: %s = %s" % [reg, k, str(v)], 6.0))
 	_gold.text = "Vàng %d" % PlayerProfile.gold
 	_gems.text = "Gem %d" % PlayerProfile.gems
 	_energy.text = "NL %d/%d" % [PlayerProfile.energy, PlayerProfile.max_energy]
@@ -123,6 +129,10 @@ func _build() -> void:
 	_battle_panel.position = Vector2(220, 34)
 	_battle_panel.visible = false
 	add_child(_battle_panel)
+	_season_panel = SeasonPanel.new()
+	_season_panel.position = Vector2(220, 34)
+	_season_panel.visible = false
+	add_child(_season_panel)
 
 	# nav
 	var nav := HBoxContainer.new()
@@ -135,9 +145,10 @@ func _build() -> void:
 	_nav_btn(nav, "Xây Dựng", func(): _show(_build_panel))
 	_nav_btn(nav, "Triệu Hồi", func(): _show(_summon_panel))
 	_nav_btn(nav, "Trận Đấu", func(): _show(_battle_panel))
+	_nav_btn(nav, "Chiến Dịch", func(): _show(_season_panel))
 
 func _show(panel) -> void:
-	for p in [_world_panel, _build_panel, _summon_panel, _hero_panel, _battle_panel]:
+	for p in [_world_panel, _build_panel, _summon_panel, _hero_panel, _battle_panel, _season_panel]:
 		p.visible = (p == panel)
 	if panel != null and panel.has_method("refresh"):
 		panel.refresh()

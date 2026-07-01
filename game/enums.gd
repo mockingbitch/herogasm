@@ -29,6 +29,10 @@ enum BossEventState { ANNOUNCED, ACTIVE, WON, FAILED, COOLDOWN }
 ## Kết quả 1 trận Đấu Trường (timeout xử theo HP còn lại).
 enum ArenaOutcome { WIN, LOSE, TIMEOUT_WIN, TIMEOUT_LOSE }
 
+# --- P5: story / season / event ---
+## Vòng đời event (build-events): Scheduled→Preparation→Active→Reward→Cooldown→Done.
+enum EventPhase { SCHEDULED, PREPARATION, ACTIVE, REWARD, COOLDOWN, DONE }
+
 const EQUIP_SLOT_COUNT := 8
 const RARITY_NAMES := ["Common", "Elite", "Epic", "Legend", "Mythic"]
 const CLASS_NAMES := ["Tank", "Warrior", "Assassin", "Ranger", "Mage", "Support", "Summoner"]
