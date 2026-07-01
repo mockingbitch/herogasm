@@ -21,5 +21,11 @@ signal hero_spawned(hero_id: String)
 signal hero_knocked_out(hero_id: String)
 signal hero_recovered(hero_id: String)
 
+# World / expedition (P2)
+signal zone_cleared(zone_id: String, stars: int)
+signal expedition_started(exp_id: String)
+signal expedition_resolved(summary: Dictionary)
+signal expeditions_batch_resolved(summary: Dictionary)
+
 # Save
 signal save_completed(ok: bool)

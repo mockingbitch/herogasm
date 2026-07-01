@@ -20,5 +20,22 @@ var repair_threshold: float = 0.30 # durability dưới mức này -> muốn s�
 var potion_price: int = 0
 var repair_cost: int = 0
 
+# --- P2: vòng đời + dịch vụ mới ---
+var fatigue01: float = 0.0
+var injury_level: int = 0
+var injury_ready: bool = false
+var mood01: float = 0.7
+var xp_pct: float = 0.0                    # xp / xp_to_next (gần lên cấp -> muốn train)
+var fatigue_rest_threshold: float = 0.80
+var train_threshold: float = 0.85
+var mood_care: float = 1.0
+var has_alchemy_service: bool = false
+var has_training_service: bool = false
+var heal_cost: int = 0
+var train_cost: int = 0
+
 func inventory_full() -> bool:
 	return inventory_count >= inventory_cap
+
+func is_injured() -> bool:
+	return injury_level > 0

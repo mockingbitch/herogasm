@@ -31,3 +31,7 @@ func has_service(type: String) -> bool:
 		if s["type"] == type and is_instance_valid(s["node"]):
 			return true
 	return false
+
+## Toàn bộ service đang đăng ký (cho UI liệt kê building). Trả bản sao.
+func all() -> Array:
+	return _services.filter(func(s): return is_instance_valid(s["node"]))

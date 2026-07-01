@@ -1,6 +1,10 @@
-; Herogasm — Godot 4 project config
-; Living-world idle RPG (Evil Hunter Tycoon-inspired). Mobile-first, portrait.
-; Autoload order = dependency order (xem PLAN.md P0 §Autoload).
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
 
 config_version=5
 
@@ -23,9 +27,11 @@ TimeService="*res://autoload/time_service.gd"
 SeasonManager="*res://autoload/season_manager.gd"
 ServiceRegistry="*res://core/service_registry.gd"
 AIScheduler="*res://ai/scheduler/ai_scheduler.gd"
+EconomyService="*res://autoload/economy_service.gd"
 Database="*res://autoload/database.gd"
 SaveManager="*res://autoload/save_manager.gd"
 PlayerProfile="*res://autoload/player_profile.gd"
+ExpeditionService="*res://systems/expedition/expedition_service.gd"
 AudioManager="*res://autoload/audio_manager.gd"
 NetManager="*res://autoload/net_manager.gd"
 
@@ -36,11 +42,10 @@ window/size/viewport_height=960
 window/size/window_width_override=405
 window/size/window_height_override=720
 window/stretch/mode="canvas_items"
-window/stretch/aspect="keep"
 window/handheld/orientation="portrait"
 
 [rendering]
 
+textures/canvas_textures/default_texture_filter=0
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
-textures/canvas_textures/default_texture_filter=0

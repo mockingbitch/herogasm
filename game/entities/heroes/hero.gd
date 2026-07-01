@@ -4,7 +4,7 @@ extends Node2D
 ## movement/combat thực thi ở _process. Combat giải bằng Battle Engine (mỗi encounter 1 sim
 ## tất định). KO thay vì permadeath: hp=0 -> về Nhà Trọ hồi. Data-driven từ HeroInstance/HeroDef.
 
-enum St { IDLE, TRAVEL_FIELD, HUNT, GO_INN, REST, GO_MARKET, BUY, GO_BLACKSMITH, REPAIR }
+enum St { IDLE, TRAVEL_FIELD, HUNT, GO_INN, REST, GO_MARKET, BUY, GO_BLACKSMITH, REPAIR, GO_ALCHEMY, HEAL, GO_TRAIN, TRAIN }
 
 const MOVE_SPEED := 80.0
 const HUNT_RANGE := 18.0
@@ -53,13 +53,19 @@ func ai_tick() -> void:
 	var h := hero()
 	if h == null:
 		return
+	# hero đang đi expedition idle -> không tự field-hunt (orthogonal)
+	if has_node("/root/ExpeditionService") and ExpeditionService.is_on_expedition(hero_id):
+		return
+	# thương tự lành khi tới hạn
+	if h.injury_ready(TimeService.now_unix()):
+		h.recover_injury()
 	# KO -> luôn về Inn hồi
 	if h.is_ko:
 		if state != St.GO_INN and state != St.REST:
 			goal = "rest"; reason = "KO"; _go_service("inn", St.GO_INN)
 		return
 	# đang thực thi hành động dịch vụ -> để hoàn tất, không đổi goal
-	if state == St.REST or state == St.BUY or state == St.REPAIR:
+	if state == St.REST or state == St.BUY or state == St.REPAIR or state == St.HEAL or state == St.TRAIN:
 		return
 	var ctx := _build_context(h)
 	var d := _evaluator.evaluate(ctx, goal)
@@ -73,6 +79,8 @@ func ai_tick() -> void:
 		"rest": _go_service("inn", St.GO_INN)
 		"buy_potion": _go_service("market", St.GO_MARKET)
 		"repair": _go_service("blacksmith", St.GO_BLACKSMITH)
+		"heal_injury": _go_service("alchemy", St.GO_ALCHEMY)
+		"train": _go_service("training", St.GO_TRAIN)
 		_:
 			state = St.IDLE
 			destination = home_pos
@@ -91,10 +99,25 @@ func _build_context(h: HeroInstance) -> DecisionContext:
 	c.aggression = h.aggression()
 	c.rest_threshold = h.rest_threshold()
 	c.repair_threshold = h.repair_threshold()
+	# P2: vòng đời
+	c.fatigue01 = h.fatigue01()
+	c.injury_level = h.injury_level
+	c.injury_ready = h.injury_ready(TimeService.now_unix())
+	c.mood01 = h.mood01()
+	c.xp_pct = float(h.xp) / float(maxi(1, h.xp_to_next()))
+	c.train_threshold = h.ai_weight_f("train_threshold", 0.85)
+	c.mood_care = h.ai_weight_f("mood_care", 1.0)
+	c.fatigue_rest_threshold = h._cv().fatigue_rest_threshold
 	var mk := ServiceRegistry.find_nearest("market", position)
 	c.potion_price = (mk["node"] as Building).potion_price() if mk.has("node") else 40
 	var bs := ServiceRegistry.find_nearest("blacksmith", position)
 	c.repair_cost = (bs["node"] as Building).repair_price() if bs.has("node") else 30
+	var al := ServiceRegistry.find_nearest("alchemy", position)
+	c.has_alchemy_service = al.has("node")
+	c.heal_cost = (al["node"] as Building).heal_injury_price() if al.has("node") else 60
+	var tr := ServiceRegistry.find_nearest("training", position)
+	c.has_training_service = tr.has("node")
+	c.train_cost = (tr["node"] as Building).train_price() if tr.has("node") else 25
 	return c
 
 func _go_service(type: String, st: int) -> void:
@@ -112,34 +135,50 @@ func _process(delta: float) -> void:
 	if h == null:
 		queue_free()
 		return
+	# Đang đi expedition idle -> park ở thành, không field-hunt.
+	if has_node("/root/ExpeditionService") and ExpeditionService.is_on_expedition(hero_id):
+		_move(home_pos, delta)
+		_refresh_label(h)
+		return
 	match state:
 		St.IDLE:
 			_move(home_pos, delta)
 		St.TRAVEL_FIELD:
 			_decay_stamina(h, STAM_DECAY_MOVE, delta)
+			h.set_fatigue(h.fatigue + h._cv().fatigue_decay_move * delta)
 			if _move(field_center, delta):
 				state = St.HUNT
 		St.HUNT:
 			_tick_hunt(h, delta)
-		St.GO_INN:
+		St.GO_INN, St.GO_MARKET, St.GO_BLACKSMITH, St.GO_ALCHEMY, St.GO_TRAIN:
+			h.set_fatigue(h.fatigue + h._cv().fatigue_decay_move * delta)
 			if _move(destination, delta):
-				state = St.REST
+				state = _arrive_state()
 		St.REST:
 			_tick_rest(h, delta)
-		St.GO_MARKET:
-			if _move(destination, delta):
-				state = St.BUY
 		St.BUY:
 			_do_buy(h)
-		St.GO_BLACKSMITH:
-			if _move(destination, delta):
-				state = St.REPAIR
 		St.REPAIR:
 			_do_repair(h)
+		St.HEAL:
+			_do_heal(h)
+		St.TRAIN:
+			_do_train(h)
 	_refresh_label(h)
+
+## Trạng thái hành động khi tới đích (theo state di chuyển hiện tại).
+func _arrive_state() -> int:
+	match state:
+		St.GO_INN: return St.REST
+		St.GO_MARKET: return St.BUY
+		St.GO_BLACKSMITH: return St.REPAIR
+		St.GO_ALCHEMY: return St.HEAL
+		St.GO_TRAIN: return St.TRAIN
+		_: return St.IDLE
 
 func _tick_hunt(h: HeroInstance, delta: float) -> void:
 	_decay_stamina(h, STAM_DECAY_HUNT, delta)
+	h.set_fatigue(h.fatigue + h._cv().fatigue_decay_hunt * delta)
 	if spawner == null:
 		return
 	if target_monster == null or not is_instance_valid(target_monster) or not target_monster.is_alive():
@@ -155,7 +194,9 @@ func _tick_rest(h: HeroInstance, delta: float) -> void:
 	var rate: float = (inn["node"] as Building).heal_rate() if inn.has("node") else 30.0
 	h.current_hp = mini(h.current_hp + int(ceil(rate * delta)), h.eff_max_hp())
 	h.stamina = minf(h.stamina + 25.0 * delta, 100.0)
-	if h.current_hp >= h.eff_max_hp() and h.stamina >= 100.0:
+	h.set_fatigue(h.fatigue - h._cv().fatigue_recover_rest * delta)
+	h.set_mood(h.mood + h._cv().mood_gain_rest * delta)
+	if h.current_hp >= h.eff_max_hp() and h.stamina >= 100.0 and h.fatigue <= 5.0:
 		if h.is_ko:
 			h.is_ko = false
 			EventBus.hero_recovered.emit(hero_id)
@@ -175,8 +216,30 @@ func _do_repair(h: HeroInstance) -> void:
 	var price: int = (bs["node"] as Building).repair_price() if bs.has("node") else 30
 	if PlayerProfile.gold >= price and h.durability < 100.0:
 		PlayerProfile.add_gold(-price)
-		h.durability = 100.0
+		h.durability = EconomyService.repair_full()
 		Telemetry.log_event("Economy", "repair", {"hero": hero_id, "cost": price})
+	state = St.IDLE
+	goal = "idle"
+
+func _do_heal(h: HeroInstance) -> void:
+	var al := ServiceRegistry.find_nearest("alchemy", position)
+	var price: int = (al["node"] as Building).heal_injury_price() if al.has("node") else 60
+	if h.is_injured() and PlayerProfile.gold >= price:
+		PlayerProfile.add_gold(-price)
+		h.recover_injury()
+		Telemetry.log_event("Economy", "heal_injury", {"hero": hero_id, "cost": price})
+	state = St.IDLE
+	goal = "idle"
+
+func _do_train(h: HeroInstance) -> void:
+	var tr := ServiceRegistry.find_nearest("training", position)
+	var price: int = (tr["node"] as Building).train_price() if tr.has("node") else 25
+	if PlayerProfile.gold >= price:
+		PlayerProfile.add_gold(-price)
+		PlayerProfile.grant_xp(hero_id, EconomyService.train_xp(30.0))   # ~1 buổi 30s quy đổi
+		h.set_fatigue(h.fatigue + h._cv().train_fatigue_add)
+		h.set_mood(h.mood + h._cv().mood_train_gain)
+		Telemetry.log_event("Progression", "train", {"hero": hero_id, "cost": price})
 	state = St.IDLE
 	goal = "idle"
 
@@ -203,13 +266,15 @@ func _engage(monster: Monster) -> void:
 	Telemetry.log_event("Combat", "fight", {"hero": hero_id, "won": res.hero_won(), "dur": res.duration})
 
 	if res.hero_won() and h.current_hp > 0:
+		h.set_mood(h.mood + h._cv().mood_gain_victory)
 		_loot(monster.data, h)
 		monster.die()
 		target_monster = null
 	else:
-		# thua/KO -> không permadeath
+		# thua/KO -> không permadeath (bất tỉnh + thương nhẹ, hồi được)
+		h.set_mood(h.mood - h._cv().mood_loss_defeat)
+		h.apply_injury(1, TimeService.now_unix())
 		h.current_hp = 0
-		h.is_ko = true
 		PlayerProfile.knock_out(hero_id)
 		target_monster = null
 		goal = "rest"
@@ -266,6 +331,6 @@ func _build_visual() -> void:
 func _refresh_label(h: HeroInstance) -> void:
 	if _label == null:
 		return
-	var names: Array[String] = ["idle", "→field", "hunt", "→inn", "rest", "→mkt", "buy", "→smith", "repair"]
-	var st_name: String = names[state]
+	var names: Array[String] = ["idle", "→field", "hunt", "→inn", "rest", "→mkt", "buy", "→smith", "repair", "→dược", "heal", "→luyện", "train"]
+	var st_name: String = names[state] if state >= 0 and state < names.size() else "?"
 	_label.text = "%s\n%s hp%d" % [h.display_name, st_name, h.current_hp]

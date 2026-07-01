@@ -30,7 +30,8 @@ static func from_hero(h: HeroInstance, team_: int) -> BattleUnit:
 	u.display_name = h.display_name if h.display_name != "" else h.hero_id
 	u.max_hp = h.eff_max_hp()
 	u.hp = h.current_hp if h.current_hp > 0 else u.max_hp
-	u.attack = h.eff_attack()
+	# effective_power (fatigue×mood×injury, ≤1.0) nhân vào attack — thuần state, giữ tất định.
+	u.attack = maxi(1, int(round(float(h.eff_attack()) * h.effective_power())))
 	u.defense = h.eff_defense()
 	u.crit_chance = h.eff_crit_chance()
 	u.crit_damage = h.eff_crit_damage()

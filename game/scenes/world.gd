@@ -16,7 +16,25 @@ func _ready() -> void:
 	_spawn_heroes()
 	_build_camera()
 	add_child(GameHud.new())
+	# Điều phối expedition idle: giữ ~MAX_EXPEDITIONS hero đi zone (số còn lại field-hunt).
+	TimeService.register_slice(_dispatch_tick, 8.0)
 	F6_hint()
+
+const MAX_EXPEDITIONS := 2
+
+func _dispatch_tick() -> void:
+	if ExpeditionService.active_count() >= MAX_EXPEDITIONS:
+		return
+	for id in PlayerProfile.hero_ids:
+		var h: HeroInstance = PlayerProfile.get_hero(id)
+		if h == null or h.is_ko or ExpeditionService.is_on_expedition(id):
+			continue
+		var zone: String = WorldMap.best_unlocked_zone_for(h, PlayerProfile)
+		if zone == "":
+			zone = WorldMap.easiest_unlocked_zone(PlayerProfile)
+		if zone != "" and ExpeditionService.can_start(id, zone)["ok"]:
+			ExpeditionService.start(id, zone)
+			return   # 1 dispatch / tick
 
 func F6_hint() -> void:
 	Debug.log("World P1 ready — %d hero, %d monster" % [PlayerProfile.hero_ids.size(), _spawner.alive_count()])
@@ -27,9 +45,13 @@ func _build_ground() -> void:
 	_rect(FIELD_RECT.grow(20), Color(0.22, 0.18, 0.12))
 
 func _build_town() -> void:
-	_building("inn", Vector2(-330, -30))
-	_building("market", Vector2(-260, 55))
-	_building("blacksmith", Vector2(-195, -30))
+	_building("inn", Vector2(-350, -40))
+	_building("market", Vector2(-280, 55))
+	_building("blacksmith", Vector2(-210, -40))
+	_building("training", Vector2(-350, 55))
+	_building("alchemy", Vector2(-210, 55))
+	_building("kitchen", Vector2(-280, -45))
+	_building("guild", Vector2(-140, 5))
 
 func _building(id: String, pos: Vector2) -> void:
 	var def: BuildingDef = Database.get_building_def(id)

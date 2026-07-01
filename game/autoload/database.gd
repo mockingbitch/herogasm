@@ -6,6 +6,8 @@ var items: Dictionary = {}     # id -> ItemData
 var enemies: Dictionary = {}   # id -> EnemyData
 var hero_defs: Dictionary = {} # id -> HeroDef
 var building_defs: Dictionary = {} # id -> BuildingDef
+var region_defs: Dictionary = {} # id -> RegionDef
+var zone_defs: Dictionary = {} # id -> ZoneDef
 var monster_pool: Array[String] = ["slime", "bat", "skeleton"]   # Bãi Săn MVP
 var shop_stock: Array[String] = ["health_potion", "leather_armor", "iron_sword", "chain_armor", "knight_blade"]
 
@@ -18,20 +20,70 @@ func _ready() -> void:
 	_build_enemies()
 	_build_heroes()
 	_build_buildings()
+	_build_world()
 
 func get_building_def(id: String) -> BuildingDef:
 	return building_defs.get(id)
 
 func _build_buildings() -> void:
-	_building("inn", "inn", "Nhà Trọ", 3, {"heal_rate": 30.0}, {"heal_rate": 20.0}, 150)
-	_building("market", "market", "Cửa Hàng", 1, {"potion_price": 40.0}, {}, 200)
-	_building("blacksmith", "blacksmith", "Xưởng Rèn", 1, {"repair_price": 30.0, "durability_restore": 100.0}, {}, 200)
+	# 7 building — mỗi cái 1 service (type = khóa ServiceRegistry). Cost curve số mũ.
+	_building("inn", "Nhà Trọ", 5, {"heal_rate": 30.0}, {"heal_rate": 20.0}, 150, 1.6)
+	_building("market", "Cửa Hàng", 3, {"potion_price": 40.0}, {}, 200, 1.5)
+	_building("blacksmith", "Xưởng Rèn", 3, {"repair_price": 30.0}, {"repair_price": -3.0}, 200, 1.6)
+	_building("training", "Sân Huấn Luyện", 3, {"train_price": 25.0}, {}, 220, 1.6)
+	_building("alchemy", "Phòng Chế Dược", 3, {"heal_injury_price": 60.0}, {"heal_injury_price": -8.0}, 240, 1.6)
+	_building("kitchen", "Nhà Bếp", 3, {"food_yield": 3.0}, {"food_yield": 2.0}, 180, 1.5)
+	_building("guild", "Hội Quán", 3, {"energy_cap_bonus": 20.0, "roster_cap_bonus": 1.0}, {"energy_cap_bonus": 20.0, "roster_cap_bonus": 1.0}, 300, 1.8)
 
-func _building(id: String, type: String, nm: String, mx: int, base: Dictionary, per: Dictionary, cost: int) -> void:
+func _building(id: String, nm: String, mx: int, base: Dictionary, per: Dictionary, cost: int, growth: float) -> void:
 	var b := BuildingDef.new()
-	b.id = id; b.type = type; b.display_name = nm; b.max_level = mx
-	b.base_params = base; b.per_level = per; b.upgrade_cost_base = cost
+	b.id = id; b.type = id; b.display_name = nm; b.max_level = mx
+	b.base_params = base; b.per_level = per
+	b.upgrade_cost_base = cost; b.cost_base = cost; b.cost_growth = growth
 	building_defs[id] = b
+
+# --- World map: regions + zones (data-driven, reuse EnemyData P1) ----------
+func get_region_def(id: String) -> RegionDef:
+	return region_defs.get(id)
+
+func get_zone_def(id: String) -> ZoneDef:
+	return zone_defs.get(id)
+
+func region_ids() -> Array:
+	return region_defs.keys()
+
+func zone_ids() -> Array:
+	return zone_defs.keys()
+
+func _build_world() -> void:
+	_region("valoria", "Vương Quốc Valoria", "plains", 1, ["beginner_field", "goblin_camp", "wolf_hill"])
+	_region("silverwood", "Rừng Bạc", "forest", 8, ["whisper_grove", "ancient_tree"])
+	_region("iron_mountain", "Núi Sắt", "mountain", 15, ["mine_entrance"])
+
+	#     id, region, name, req_lv, unlock_stars, prereq, rec_power, pool, e_count, dur, energy, gmin, gmax, xp
+	_zone("beginner_field", "valoria", "Cánh Đồng Tân Thủ", 1, 0, "", 10, ["slime", "bat"], 2, 180.0, 15, 15, 40, 12)
+	_zone("goblin_camp", "valoria", "Trại Goblin", 3, 2, "beginner_field", 30, ["slime", "skeleton"], 3, 240.0, 20, 30, 70, 20)
+	_zone("wolf_hill", "valoria", "Đồi Sói", 6, 2, "goblin_camp", 60, ["skeleton", "bat"], 3, 300.0, 25, 50, 110, 32)
+	_zone("whisper_grove", "silverwood", "Rừng Thì Thầm", 8, 3, "wolf_hill", 90, ["skeleton", "slime"], 4, 360.0, 30, 80, 160, 45)
+	_zone("ancient_tree", "silverwood", "Cổ Thụ", 12, 3, "whisper_grove", 140, ["skeleton", "bat"], 4, 420.0, 35, 120, 220, 60)
+	_zone("mine_entrance", "iron_mountain", "Cửa Mỏ", 15, 3, "ancient_tree", 200, ["skeleton"], 5, 480.0, 40, 180, 320, 80)
+
+func _region(id: String, nm: String, theme: String, req_lv: int, zones: Array) -> void:
+	var r := RegionDef.new()
+	r.id = id; r.display_name = nm; r.theme = theme; r.required_level = req_lv
+	r.zone_ids.assign(zones)
+	region_defs[id] = r
+
+func _zone(id: String, region: String, nm: String, req_lv: int, unlock_stars: int, prereq: String,
+		rec_power: int, pool: Array, e_count: int, dur: float, energy: int, gmin: int, gmax: int, xp: int) -> void:
+	var z := ZoneDef.new()
+	z.id = id; z.region_id = region; z.display_name = nm
+	z.required_level = req_lv; z.unlock_by_stars = unlock_stars; z.prereq_zone_id = prereq
+	z.recommended_power = rec_power
+	z.monster_pool.assign(pool)
+	z.enemy_count = e_count; z.duration_sec = dur; z.energy_cost = energy
+	z.reward_gold_min = gmin; z.reward_gold_max = gmax; z.reward_xp = xp
+	zone_defs[id] = z
 
 func get_item(id: String) -> ItemData:
 	return items.get(id)
@@ -74,9 +126,12 @@ func _build_items() -> void:
 	_armor("chain_armor", "Giáp Xích", ItemData.Rarity.UNCOMMON, C_UNCOMMON, 18, 8, 25)
 	# Tiêu hao
 	_consumable("health_potion", "Bình Máu", C_COMMON, 4, 45)
+	_consumable("food_ration", "Suất Ăn", Color(0.8, 0.7, 0.4), 3, 0)     # +stamina (Nhà Bếp)
+	_consumable("medicine", "Thuốc Trị Thương", Color(0.6, 0.85, 0.6), 6, 0)  # trị injury (Chế Dược)
 	# Nguyên liệu
 	_material("slime_gel", "Nhớt Slime", Color(0.5, 0.8, 0.5), 2)
 	_material("bone", "Xương", Color(0.9, 0.9, 0.8), 3)
+	_material("herb", "Thảo Dược", Color(0.4, 0.8, 0.5), 3)               # input chế dược
 
 func _build_enemies() -> void:
 	_enemy("slime", "Slime", 24, 40.0, 6, 0.9, 140.0, 4, 2, 5, Color(0.4, 0.8, 0.4), 7.0,

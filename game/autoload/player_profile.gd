@@ -20,15 +20,22 @@ var hero_ids: Array[String] = []                   # thứ tự roster
 var heroes: Dictionary = {}                        # hero_id -> HeroInstance
 var consumables: Dictionary = {}                   # id -> count (kho chung town)
 var materials: Dictionary = {}                     # id -> count (kho chung town)
-var unlocks: Dictionary = {}                       # cờ mở khoá (region/building) — placeholder
+var unlocks: Dictionary = {}                       # cờ mở khoá + guild bonus (energy_cap_bonus/roster_cap_bonus)
+var cleared_stars: Dictionary = {}                 # zone_id -> clear_count (gating world map)
 
+const CONDITIONS_PATH := "res://data/hero_condition_curves.tres"
 var _constants: CombatConstants
+var _conditions: HeroConditionCurves
+var _pending_world: Dictionary = {}                # world block chờ ExpeditionService import
 var _hero_seq: int = 0                             # sinh hero_id duy nhất
 
 func _ready() -> void:
 	_constants = load(CONSTANTS_PATH) as CombatConstants
 	if _constants == null:
 		_constants = CombatConstants.new()
+	_conditions = load(CONDITIONS_PATH) as HeroConditionCurves
+	if _conditions == null:
+		_conditions = HeroConditionCurves.new()
 	var data := SaveManager.load_game()
 	if data.is_empty():
 		new_game()
@@ -70,6 +77,7 @@ func spawn_hero(def_id: String) -> HeroInstance:
 	_hero_seq += 1
 	h.hero_def_id = def_id
 	h.set_constants(_constants)
+	h.set_curves(_conditions)
 	_apply_def(h)
 	# Trang bị khởi đầu từ def (không affix).
 	var def: HeroDef = Database.get_hero_def(def_id)
@@ -153,12 +161,18 @@ func _apply_offline_progress() -> void:
 	if elapsed < 60.0 or hero_ids.is_empty():
 		return
 	var n := hero_ids.size()
-	var gold_gain := int(elapsed * OFFLINE_GOLD_PER_SEC * n)
-	var xp_each := int(elapsed * OFFLINE_XP_PER_SEC)
+	# Trần idle ≤80% qua EconomyService (economy.md).
+	var gold_gain := int(EconomyService.clamp_idle(elapsed * OFFLINE_GOLD_PER_SEC * n))
+	var xp_each := int(EconomyService.clamp_idle(elapsed * OFFLINE_XP_PER_SEC))
 	add_gold(gold_gain)
 	for id in hero_ids:
 		grant_xp(id, xp_each)
-	last_offline_reward = {"seconds": int(elapsed), "gold": gold_gain, "xp_each": xp_each, "clamped": (now - offline_ts) >= MAX_OFFLINE_SEC}
+	# Resolve expedition đã xong trong lúc offline (reward tự chặn ≤80% trong service).
+	var exp_count := 0
+	if has_node("/root/ExpeditionService"):
+		var batch: Dictionary = ExpeditionService.compute_offline(elapsed)
+		exp_count = int(batch.get("count", 0))
+	last_offline_reward = {"seconds": int(elapsed), "gold": gold_gain, "xp_each": xp_each, "expeditions": exp_count}
 	EventBus.offline_reward.emit(last_offline_reward)
 	Telemetry.log_event("Economy", "offline_reward", last_offline_reward)
 
@@ -265,6 +279,37 @@ func grant_xp(hero_id: String, amount: int) -> void:
 		EventBus.level_changed.emit(h.level)
 	EventBus.xp_changed.emit(h.level, h.xp, h.xp_to_next())
 
+# --- world map / gating ---------------------------------------------------
+func zone_clears(zone_id: String) -> int:
+	return int(cleared_stars.get(zone_id, 0))
+
+func zone_stars(zone_id: String) -> int:
+	var z: ZoneDef = Database.get_zone_def(zone_id)
+	return z.star_for(zone_clears(zone_id)) if z != null else 0
+
+func record_zone_clear(zone_id: String) -> void:
+	cleared_stars[zone_id] = zone_clears(zone_id) + 1
+	EventBus.zone_cleared.emit(zone_id, zone_stars(zone_id))
+
+func roster_max_level() -> int:
+	var mx := 0
+	for id in hero_ids:
+		var h: HeroInstance = heroes.get(id)
+		if h != null:
+			mx = maxi(mx, h.level)
+	return mx
+
+func is_zone_unlocked(zone_id: String) -> bool:
+	return WorldMap.is_zone_unlocked(zone_id, self)
+
+## Guild bonus: recompute (maxi) — KHÔNG cộng dồn khi reload/gọi lại.
+func apply_guild_bonuses(energy_bonus: int, roster_bonus: int) -> void:
+	unlocks["energy_cap_bonus"] = maxi(int(unlocks.get("energy_cap_bonus", 0)), energy_bonus)
+	unlocks["roster_cap_bonus"] = maxi(int(unlocks.get("roster_cap_bonus", 0)), roster_bonus)
+	unlocks["guild_level"] = maxi(int(unlocks.get("guild_level", 0)), 1)
+	max_energy = MAX_ENERGY + int(unlocks["energy_cap_bonus"])
+	EventBus.energy_changed.emit(energy, max_energy)
+
 # --- save / load ----------------------------------------------------------
 func save() -> void:
 	offline_ts = TimeService.now_unix()   # mốc cho offline khi mở lại
@@ -285,11 +330,21 @@ func to_dict() -> Dictionary:
 			"consumables": consumables,
 			"materials": materials,
 			"unlocks": unlocks,
+			"cleared_stars": cleared_stars,
 		},
 		"hero_ids": hero_ids,
 		"heroes": hd,
-		"world": {},
+		"world": _world_dict(),
 	}
+
+## World block do ExpeditionService sở hữu; giữ _pending_world nếu service chưa sẵn sàng.
+func _world_dict() -> Dictionary:
+	if has_node("/root/ExpeditionService"):
+		return ExpeditionService.export_world()
+	return _pending_world
+
+func world_state() -> Dictionary:
+	return _pending_world
 
 func from_dict(d: Dictionary) -> void:
 	var p = d.get("player", {})
@@ -304,6 +359,9 @@ func from_dict(d: Dictionary) -> void:
 	consumables = _norm_counts(p.get("consumables", {}))
 	materials = _norm_counts(p.get("materials", {}))
 	unlocks = p.get("unlocks", {}) if typeof(p.get("unlocks")) == TYPE_DICTIONARY else {}
+	cleared_stars = _norm_counts(p.get("cleared_stars", {}))
+	max_energy = MAX_ENERGY + int(unlocks.get("energy_cap_bonus", 0))
+	energy = clampi(energy, 0, max_energy)
 
 	hero_ids = []
 	for id in d.get("hero_ids", []):
@@ -319,9 +377,11 @@ func from_dict(d: Dictionary) -> void:
 				var h := HeroInstance.from_dict(hd[id])
 				h.hero_id = id
 				h.set_constants(_constants)
+				h.set_curves(_conditions)
 				_apply_def(h)
 				heroes[id] = h
 	_hero_seq = _max_hero_index() + 1
+	_pending_world = d.get("world", {}) if typeof(d.get("world")) == TYPE_DICTIONARY else {}
 
 func _max_hero_index() -> int:
 	var mx := -1

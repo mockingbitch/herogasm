@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="EconomyConstants" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://data/economy_constants.gd" id="1_ec"]
+
+[resource]
+script = ExtResource("1_ec")
+idle_cap_ratio = 0.75
+default_cost_growth = 1.6
+train_xp_per_sec = 0.8
+train_gold_per_sec = 0.02
+market_tax = 0.05
+repair_full = 100.0

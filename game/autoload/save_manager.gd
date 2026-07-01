@@ -6,7 +6,7 @@ extends Node
 const SAVE_PATH := "user://save_0.json"
 const BAK_PATH := "user://save_0.bak"
 const TMP_PATH := "user://save_0.tmp"
-const SAVE_VERSION := 2
+const SAVE_VERSION := 3
 
 func save_game(data: Dictionary) -> bool:
 	var payload := data.duplicate(true)
@@ -106,11 +106,39 @@ func _migrate(d: Dictionary) -> Dictionary:
 	if v >= SAVE_VERSION:
 		return d
 	var out := d
-	if v == 1:
+	if v <= 1:
 		out = _migrate_v1_to_v2(out)
 		if has_node("/root/Telemetry"):
 			Telemetry.log_event("Save", "migration_run", {"from": 1, "to": 2})
+	if v <= 2:
+		out = _migrate_v2_to_v3(out)
+		if has_node("/root/Telemetry"):
+			Telemetry.log_event("Save", "migration_run", {"from": 2, "to": 3})
 	out["save_version"] = SAVE_VERSION
+	return out
+
+## v2 -> v3: thêm field vòng đời hero + cleared_stars + world.expeditions. Không mất data.
+func _migrate_v2_to_v3(d: Dictionary) -> Dictionary:
+	var out := d.duplicate(true)
+	var heroes = out.get("heroes", {})
+	if typeof(heroes) == TYPE_DICTIONARY:
+		for id in heroes.keys():
+			var h = heroes[id]
+			if typeof(h) == TYPE_DICTIONARY:
+				if not h.has("fatigue"): h["fatigue"] = 0.0
+				if not h.has("injury_level"): h["injury_level"] = 0
+				if not h.has("injury_recover_at"): h["injury_recover_at"] = 0.0
+				if not h.has("mood"): h["mood"] = 70.0
+	var player = out.get("player", {})
+	if typeof(player) == TYPE_DICTIONARY:
+		if not player.has("cleared_stars"): player["cleared_stars"] = {}
+		if not player.has("injuries"): player["injuries"] = {}
+	var world = out.get("world", {})
+	if typeof(world) != TYPE_DICTIONARY:
+		world = {}
+	if not world.has("expeditions"): world["expeditions"] = []
+	if not world.has("exp_seq"): world["exp_seq"] = 0
+	out["world"] = world
 	return out
 
 ## v1 (phẳng: gold/xp/level/equipment...) -> v2 (lồng player/heroes/world).

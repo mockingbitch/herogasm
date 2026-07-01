@@ -40,6 +40,10 @@ var equipment: Dictionary = {"weapon": null, "armor": null}
 var current_hp: int = -1                            # -1 = chưa init (sẽ = eff_max_hp)
 var stamina: float = 100.0                          # 0..100, giảm khi săn, hồi khi nghỉ
 var durability: float = 100.0                       # 0..100, độ bền gear tổng, hồi khi sửa
+var fatigue: float = 0.0                            # 0..100, săn/đi xa tăng, Inn giảm; cao -> hiệu suất giảm
+var injury_level: int = 0                           # 0=lành, 1..3 mức thương (Alchemy/Inn hồi)
+var injury_recover_at: float = 0.0                  # epoch (TimeService) tự hồi thương nếu để yên
+var mood: float = 70.0                              # 0..100 -> 5 mặt cảm xúc; thấp giảm hiệu suất
 var is_ko: bool = false                             # bất tỉnh (KHÔNG permadeath) -> về thành hồi
 var state: int = State.IDLE
 
@@ -62,6 +66,60 @@ func _c() -> CombatConstants:
 
 func set_constants(c: CombatConstants) -> void:
 	_constants = c
+
+# --- P2: vòng đời (curves data-driven) ------------------------------------
+const CURVES_PATH := "res://data/hero_condition_curves.tres"
+var _curves: HeroConditionCurves
+
+func _cv() -> HeroConditionCurves:
+	if _curves == null:
+		_curves = load(CURVES_PATH) as HeroConditionCurves
+		if _curves == null:
+			_curves = HeroConditionCurves.new()
+	return _curves
+
+func set_curves(c: HeroConditionCurves) -> void:
+	_curves = c
+
+func ai_weight_f(key: String, default_val: float) -> float:
+	return float(ai_weights.get(key, default_val))
+
+func fatigue01() -> float: return fatigue / 100.0
+func mood01() -> float: return mood / 100.0
+
+## fatigue=0 -> 1.0 ; fatigue=100 -> (1 - fatigue_full_penalty). Tuyến tính.
+func fatigue_mult() -> float:
+	return 1.0 - _cv().fatigue_full_penalty * fatigue01()
+
+## mult=1.0 khi mood>=pivot; giảm tuyến tính tới mood_min_mult ở mood=0.
+func mood_mult() -> float:
+	var p := _cv().mood_pivot
+	if mood >= p:
+		return 1.0
+	return _cv().mood_min_mult + (1.0 - _cv().mood_min_mult) * (mood / maxf(1.0, p))
+
+func injury_mult() -> float:
+	return maxf(0.1, 1.0 - _cv().injury_power_penalty_per_level * injury_level)
+
+## Nhân tố sức chiến (fatigue×mood×injury), cap trần 1.0 (không mạnh hơn baseline).
+func effective_power() -> float:
+	return clampf(fatigue_mult() * mood_mult() * injury_mult(), 0.1, 1.0)
+
+func is_injured() -> bool: return injury_level > 0
+
+func injury_ready(now: float) -> bool:
+	return injury_level > 0 and injury_recover_at > 0.0 and now >= injury_recover_at
+
+func apply_injury(level: int, now: float) -> void:
+	injury_level = clampi(maxi(injury_level, level), 0, 3)
+	injury_recover_at = now + _cv().injury_recover_base_sec * float(injury_level)
+
+func recover_injury() -> void:
+	injury_level = 0
+	injury_recover_at = 0.0
+
+func set_fatigue(v: float) -> void: fatigue = clampf(v, 0.0, 100.0)
+func set_mood(v: float) -> void: mood = clampf(v, 0.0, 100.0)
 
 ## Đặt máu về đầy (khi tạo mới / hồi ở Nhà Trọ).
 func reset_hp() -> void:
@@ -279,6 +337,10 @@ func to_dict() -> Dictionary:
 		"current_hp": current_hp,
 		"stamina": stamina,
 		"durability": durability,
+		"fatigue": fatigue,
+		"injury_level": injury_level,
+		"injury_recover_at": injury_recover_at,
+		"mood": mood,
 		"is_ko": is_ko,
 		"state": state,
 	}
@@ -303,6 +365,10 @@ static func from_dict(d: Dictionary) -> HeroInstance:
 	h.state = int(d.get("state", State.IDLE))
 	h.stamina = clampf(float(d.get("stamina", 100.0)), 0.0, 100.0)
 	h.durability = clampf(float(d.get("durability", 100.0)), 0.0, 100.0)
+	h.fatigue = clampf(float(d.get("fatigue", 0.0)), 0.0, 100.0)
+	h.injury_level = clampi(int(d.get("injury_level", 0)), 0, 3)
+	h.injury_recover_at = float(d.get("injury_recover_at", 0.0))
+	h.mood = clampf(float(d.get("mood", 70.0)), 0.0, 100.0)
 	h.is_ko = bool(d.get("is_ko", false))
 	h.current_hp = int(d.get("current_hp", -1))
 	if h.current_hp < 0:

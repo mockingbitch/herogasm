@@ -1,0 +1,6 @@
+[gd_resource type="Resource" script_class="HeroConditionCurves" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://data/hero_condition_curves.gd" id="1_hcc"]
+
+[resource]
+script = ExtResource("1_hcc")
