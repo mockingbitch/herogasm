@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "template": "Template A (Layer 1 + 2 only), Style Lock 32x48",
+  "reference_style": [
+    "images/mage/mage-01.png",
+    "images/mage/mage-01-motions.png"
+  ],
+  "notes": [
+    "All heroes are generated as base sheets (Layer 1 Identity + Layer 2 Class Default Outfit).",
+    "No unique weapons/armor baked into base art (Layer 3 Equipment is separate).",
+    "Races and Classes are restricted to the existing 8 races and 7 classes."
+  ],
+  "allowed_classes": ["Tank", "Warrior", "Assassin", "Ranger", "Mage", "Support", "Summoner"],
+  "allowed_races": ["Human", "Elf", "Orc", "Dwarf", "Undead", "Angel", "Demon", "Dragonkin"],
+  "heroes": [
+    {"id":"hero-01","name":"Asha","class":"Ranger","race":"Elf","height_cm":169,"hair":"ash brown side braid","build":"slender, long-limbed","face":"soft cheeks, sharp focused eyes","skin_tone":"warm fair","element_color":"emerald green"},
+    {"id":"hero-02","name":"Borin","class":"Tank","race":"Dwarf","height_cm":158,"hair":"black short crop","build":"short, stocky, broad shoulders","face":"thick beard, determined brow","skin_tone":"ruddy tan","element_color":"steel blue"},
+    {"id":"hero-03","name":"Cyra","class":"Mage","race":"Human","height_cm":166,"hair":"silver wavy bob","build":"average, agile","face":"bright eyes, curious smile","skin_tone":"olive","element_color":"arcane purple"},
+    {"id":"hero-04","name":"Drevan","class":"Warrior","race":"Orc","height_cm":179,"hair":"dark green mohawk","build":"bulky, muscular","face":"tusks, scar on cheek","skin_tone":"green-grey","element_color":"blood red"},
+    {"id":"hero-05","name":"Elowen","class":"Support","race":"Angel","height_cm":172,"hair":"golden long straight","build":"tall, gentle posture","face":"calm smile, serene eyes","skin_tone":"pale warm","element_color":"sun gold"},
+    {"id":"hero-06","name":"Fenn","class":"Assassin","race":"Undead","height_cm":171,"hair":"white messy spikes","build":"lean, wiry","face":"ashen skin, faint glowing eyes","skin_tone":"pale ashen","element_color":"shadow violet"},
+    {"id":"hero-07","name":"Garrick","class":"Tank","race":"Human","height_cm":177,"hair":"brown undercut","build":"broad, sturdy","face":"square jaw, stern look","skin_tone":"tan","element_color":"steel blue"},
+    {"id":"hero-08","name":"Hikari","class":"Ranger","race":"Human","height_cm":165,"hair":"black high ponytail","build":"athletic, compact","face":"confident grin","skin_tone":"light east-asian","element_color":"forest green"},
+    {"id":"hero-09","name":"Ivo","class":"Summoner","race":"Dragonkin","height_cm":174,"hair":"teal swept-back","build":"lean, poised","face":"scale patches on cheeks, focused eyes","skin_tone":"warm tan","element_color":"teal cyan"},
+    {"id":"hero-10","name":"Juna","class":"Mage","race":"Elf","height_cm":170,"hair":"lavender twin braids","build":"slender frame","face":"long pointed ears, calm eyes","skin_tone":"fair","element_color":"arcane purple"},
+
+    {"id":"hero-11","name":"Kellan","class":"Warrior","race":"Human","height_cm":175,"hair":"ginger tousled","build":"athletic","face":"freckles, bold grin","skin_tone":"freckled fair","element_color":"blood red"},
+    {"id":"hero-12","name":"Lys","class":"Support","race":"Elf","height_cm":168,"hair":"white flowing long","build":"slender","face":"pointed ears, gentle eyes","skin_tone":"pale","element_color":"soft gold"},
+    {"id":"hero-13","name":"Mako","class":"Assassin","race":"Demon","height_cm":173,"hair":"midnight blue slicked back","build":"tall, lean","face":"small horns, red eyes","skin_tone":"dark-tinted warm brown","element_color":"shadow violet"},
+    {"id":"hero-14","name":"Nara","class":"Summoner","race":"Human","height_cm":162,"hair":"chestnut curly","build":"petite, energetic","face":"big curious eyes","skin_tone":"warm tan","element_color":"teal cyan"},
+    {"id":"hero-15","name":"Orrin","class":"Tank","race":"Orc","height_cm":176,"hair":"black top knot","build":"bulky frame","face":"tusks, heavy brow","skin_tone":"green-grey","element_color":"steel blue"},
+    {"id":"hero-16","name":"Phae","class":"Ranger","race":"Angel","height_cm":171,"hair":"blonde short bob","build":"slim","face":"small halo, bright eyes","skin_tone":"pale warm","element_color":"emerald green"},
+    {"id":"hero-17","name":"Quinn","class":"Warrior","race":"Dwarf","height_cm":160,"hair":"brown messy","build":"short, sturdy","face":"thick beard, lively eyes","skin_tone":"ruddy tan","element_color":"blood red"},
+    {"id":"hero-18","name":"Riven","class":"Assassin","race":"Human","height_cm":168,"hair":"black spiky","build":"lean","face":"sharp jaw, intense eyes","skin_tone":"tan","element_color":"shadow violet"},
+    {"id":"hero-19","name":"Sera","class":"Mage","race":"Demon","height_cm":167,"hair":"black-red asymmetric","build":"slim","face":"small horns, red eyes","skin_tone":"dark-tinted","element_color":"arcane purple"},
+    {"id":"hero-20","name":"Thrain","class":"Summoner","race":"Undead","height_cm":169,"hair":"grey long swept","build":"thin, eerie","face":"ashen skin, glowing eyes","skin_tone":"pale ashen","element_color":"teal cyan"},
+
+    {"id":"hero-21","name":"Una","class":"Support","race":"Human","height_cm":164,"hair":"dark brown bun","build":"average","face":"kind smile","skin_tone":"olive","element_color":"soft gold"},
+    {"id":"hero-22","name":"Varek","class":"Mage","race":"Demon","height_cm":176,"hair":"midnight blue-black slicked back","build":"tall, lean","face":"angular jaw, cold gaze, red eyes, small horns","skin_tone":"dark-tinted warm brown","element_color":"arcane purple"},
+    {"id":"hero-23","name":"Wren","class":"Ranger","race":"Dwarf","height_cm":157,"hair":"honey blonde feathered","build":"short, nimble","face":"short beard stubble, cheerful","skin_tone":"ruddy tan","element_color":"forest green"},
+    {"id":"hero-24","name":"Xara","class":"Assassin","race":"Elf","height_cm":170,"hair":"silver long ponytail","build":"slender","face":"pointed ears, sharp eyes","skin_tone":"fair","element_color":"shadow violet"},
+    {"id":"hero-25","name":"Yorik","class":"Tank","race":"Angel","height_cm":178,"hair":"white short crop","build":"broad, upright","face":"small halo, stern eyes","skin_tone":"pale warm","element_color":"steel blue"},
+    {"id":"hero-26","name":"Zane","class":"Warrior","race":"Demon","height_cm":180,"hair":"ember orange mohawk fade","build":"muscular broad","face":"small horns, red eyes, bold grin","skin_tone":"dark-tinted","element_color":"blood red"},
+    {"id":"hero-27","name":"Aerin","class":"Support","race":"Dragonkin","height_cm":171,"hair":"aqua long braid","build":"slim","face":"scale patches, small tail","skin_tone":"warm tan","element_color":"soft gold"},
+    {"id":"hero-28","name":"Bex","class":"Summoner","race":"Elf","height_cm":167,"hair":"green messy crop","build":"slender","face":"pointed ears, playful eyes","skin_tone":"fair","element_color":"teal cyan"},
+    {"id":"hero-29","name":"Cruz","class":"Ranger","race":"Orc","height_cm":177,"hair":"dark shaved sides","build":"athletic bulky","face":"tusks, focused stare","skin_tone":"green-grey","element_color":"emerald green"},
+    {"id":"hero-30","name":"Dahlia","class":"Mage","race":"Angel","height_cm":169,"hair":"golden curls shoulder-length","build":"slim graceful","face":"small halo, warm smile","skin_tone":"pale warm","element_color":"arcane purple"}
+  ]
+}
+
