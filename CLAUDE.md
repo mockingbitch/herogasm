@@ -276,7 +276,11 @@ rules/events.md
 
 rules/balancing.md
 
+rules/hero-stats.md
+
 rules/pixel-art.md
+
+rules/character-asset-pipeline.md
 
 rules/testing.md
 
