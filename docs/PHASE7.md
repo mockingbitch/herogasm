@@ -1,8 +1,27 @@
-# Phase 7 — Cửa Trước: Lãnh Chúa · Tân Thủ · Nhiệm Vụ · Minigame
+# Phase 7+ — Lộ trình hoàn thiện game (Plan hợp nhất)
 
-> Tài liệu **plan** (chưa build) theo `prompts/feature.md`, chi tiết **tới từng unit** (file/class/API/field/save/EventBus/test).
-> Hiện thực hoá **tầng cửa trước** mô tả trong `docs/scripts/FLOW.md` (mục A–D + H).
-> Trạng thái: **CHƯA BẮT ĐẦU**. Baseline: P0–P6 xong, save v7, 464 test xanh.
+> **File plan forward DUY NHẤT** (chống phân mảnh). Bao trọn mọi việc còn lại sau P6.
+> Baseline: P0–P6 xong, save v7, 464 test xanh. Trạng thái toàn bộ: **CHƯA BẮT ĐẦU**.
+> Nguyên tắc độ sâu: **Phase 7 (PHẦN A) đã spec tới từng unit vì làm trước; Phase 8–12 (PHẦN B–F) spec ở mức slice + unit chính — sẽ đào sâu tới-từng-unit KHI tới lượt** (tránh over-spec việc xa, tránh lãng phí khi thiết kế đổi).
+
+## Mục lục (Parts = Phases)
+
+| Phần | Phase | Nội dung | Nhóm FEATURES | Ưu tiên | Độ sâu |
+|---|---|---|---|---|---|
+| **A** | **P7** | Cửa trước: Lãnh Chúa · Tân thủ · Quest · Minigame · Formation-5+Loadout · Raid | T1/T2/T4-SF/T7 | #1 (chạm đầu) | tới-từng-unit (§1–§18) |
+| **B** | **P8** | T4 chiều sâu combat: Synergy hoàn thiện + **Skill-Kit hero trong engine** | T4 | #2 | slice + unit chính (§19) |
+| **C** | **P9** | T6 nội dung PvE: Dungeon (resource/equip/rune/endless/elite/challenge) + Ancient Boss | T6 | #3 | §20 |
+| **D** | **P10** | T5 chiều sâu collection: Pet · Hero questline · Relationships | T5 | #4 | §21 |
+| **E** | **P11** | T10/T11/T13: Crafting/Salvage/Shop · Endgame · Art/Audio/i18n (production) | T10/11/13 | #5 | §22 |
+| **F** | **P12** | T12: Backend Supabase thật + Network UI + Release (ops) | T12 | #6 (cuối) | §23 |
+
+> Quyết định mở của PHẦN A: xem `docs/PHASE7_OPTIONS.md`. Danh mục trạng thái toàn game: `docs/scripts/FEATURES.md`.
+
+---
+
+# ══════════ PHẦN A — Phase 7 (Cửa Trước) ══════════
+
+> Chi tiết tới từng unit. `prompts/feature.md`. Hiện thực `FLOW.md` mục A–D + H.
 
 ---
 
@@ -48,6 +67,7 @@ Người chơi vẫn **không điều khiển hero trong trận**. P7 chỉ thê
 | Slice | Tên | Phụ thuộc | Ship được độc lập? |
 |---|---|---|---|
 | **S0** | Nền: Lãnh Chúa + Lord Level/Perk + save v8 | — | Có (Lord panel chạy) |
+| **SF** | **Formation Core: team 3→5 + Loadouts + Deploy Lock** | S0 | Có (đội hình chạy) |
 | **S1** | Dialogue Runner + View | S0 | Có (chạy 1 đoạn thoại) |
 | **S2** | Hệ Nhiệm Vụ (daily/weekly/milestone/achievement + điểm-HĐ) | S0 | Có (quest panel chạy) |
 | **S3** | Tân Thủ (progressive disclosure + tốt nghiệp) | S0,S1,S2 | Có |
@@ -55,7 +75,8 @@ Người chơi vẫn **không điều khiển hero trong trận**. P7 chỉ thê
 | **S5** | Minigame (Câu Cá + Rèn Nhịp) | S0,S2 | Có |
 | **S6** | Raid Dungeon (composition trên Boss/Stage) | S0 | Có |
 
-DAG: `S0 → {S1, S2, S6}`; `S1,S2 → S3`; `S3 → S4`; `S2 → S5`.
+DAG: `S0 → {SF, S1, S2}`; `SF → {S3, S4, S6}` (tân thủ dạy formation; raid cần deploy-lock); `S1,S2 → S3`; `S3 → S4`; `S2 → S5`.
+**Thứ tự build đề xuất:** S0 → **SF** → S1 → S2 → S3 → S4 → S5 → S6 (SF sớm vì số team=5 phải đúng trước khi tân thủ dạy đội hình).
 
 ---
 
@@ -81,7 +102,40 @@ DAG: `S0 → {S1, S2, S6}`; `S1,S2 → S3`; `S3 → S4`; `S2 → S5`.
 |---|---|---|---|
 | `game/systems/lord/lord_progression.gd` | `LordProgression extends Object` (static) | `xp_to_level(level:int) -> int`, `level_for_xp(total_xp:int) -> int`, `perks_unlocked_at(level:int) -> Array[LordPerkDef]` | thuần, tất định, test được |
 
-Đường cong XP data-driven: đọc hằng từ `CombatConstants`/`economy_constants` hoặc thêm `lord_xp_base`/`lord_xp_growth` vào `EconomyConstants` (`.tres`). **Không hardcode.**
+Đường cong XP data-driven: thêm `lord_xp_base:int=80` + `lord_xp_growth:float=1.12` vào `EconomyConstants` (`.tres`). **Không hardcode.**
+
+**Công thức:** `xp_to_level(L) = round(lord_xp_base * lord_xp_growth^(L-1))` = XP cần để đi từ level L→L+1.
+
+**Bảng số (khởi điểm, base=80 growth=1.12):**
+
+| Lv→next | XP mốc | Cộng dồn tới Lv | Ghi chú |
+|---|---|---|---|
+| 1→2 | 80 | 80 | |
+| 2→3 | 90 | 170 | |
+| 3→4 | 100 | 270 | |
+| 5→6 | 126 | 486 | mở perk expedition slot |
+| 10→11 | 222 | 1.330 | |
+| 15→16 | 391 | 3.100 | **mốc tốt nghiệp tân thủ** (~3.1k XP dồn) |
+| 20→21 | 690 | 5.900 | |
+| 30→31 | 2.140 | 21.500 | |
+| 50→51 | 20.600 | ~205k | end-game trần mềm |
+
+Nguồn Lord XP: quest (daily ~40-80, weekly ~300, milestone ~200-500), story chapter (~300), tutorial step (~50-150). Tune sao cho **chơi đều tới Lv15 trong ~5-7 ngày** (khớp graduation ~1 tuần onboarding).
+
+### 4.2b Bảng Đặc Ân Lord (LordPerkDef seed — buff tiện ích, no-P2W)
+
+| id | unlock_level | effect_key | effect_value | Hiệu ứng |
+|---|---|---|---|---|
+| `perk_energy_1` | 2 | `energy_cap` | 20 | max_energy 120→140 |
+| `perk_gold_1` | 4 | `loot_gold_pct` | 0.05 | +5% vàng loot |
+| `perk_expedition_1` | 6 | `expedition_slots` | 1 | MAX_EXPEDITIONS 2→3 |
+| `perk_inn_1` | 8 | `inn_heal_rate` | 0.10 | +10% tốc hồi Nhà Trọ |
+| `perk_quest_1` | 10 | `daily_quest_slots` | 1 | +1 slot nhiệm vụ ngày |
+| `perk_gold_2` | 12 | `loot_gold_pct` | 0.05 | +5% (cộng dồn +10%) |
+| `perk_energy_2` | 15 | `energy_cap` | 30 | +30 (cộng dồn +50) |
+| `perk_expedition_2` | 20 | `expedition_slots` | 1 | (cộng dồn +2 → 4 slot) |
+
+`lord_perk_value(key)` = tổng `effect_value` các perk cùng key đã unlock (cộng dồn). Tất cả là buff **town/economy**, tuyệt đối không đụng `FinalStats`.
 
 ### 4.3 PlayerProfile — field & method mới
 
@@ -576,6 +630,425 @@ Architecture tôn trọng · Component/Service tách · Resource dùng · Save v
 1. Ngưỡng tốt nghiệp: **Lord 15 + đủ 13 feature lõi** (mục 7.2).
 2. Đặc Ân Lord: chỉ buff tiện ích (energy/loot%/expedition-slot/quest-slot) — **không** đụng FinalStats.
 3. Bộ minigame MVP: **Câu Cá + Rèn Nhịp** (S5). Raid = S6 (lát cuối).
-4. Team size expedition/combat: giữ nguyên (3 active-team hiện tại; expedition qua service).
+4. **Team size = 5 (CHỐT)** cho formation combat; nâng 3→5 + hệ **Loadouts nhiều đội** + **deploy-lock** ở slice **SF** (§18). Expedition/field-hunt vẫn per-hero. Xem `docs/scripts/TEAMBUILD.md`.
 5. Điểm-HĐ mốc rương ngày/tuần: seed trong `QuestTrackDef` (mục 6.1) — cần bảng số cụ thể.
 6. First-summon đảm bảo: free x10, ≥1 rarity≥`guaranteed_rarity` (S4).
+7. Số preset đội tối đa: đề xuất **10** (mở thêm theo Lord level?). Arena defense = snapshot → **KHÔNG** khoá hero (cần xác nhận).
+
+---
+
+## 18. SF — Formation Core (team 3→5 + Loadouts + Deploy Lock)
+
+**Mục tiêu:** nâng đội hình formation 3→**5**; cho lưu **nhiều preset đội** (overlap thoải mái); enforce **1 hero chỉ ở 1 deploy-theo-thời-gian tại một thời điểm**. Nền cho tân thủ (dạy formation) + raid (deploy-lock). Chi tiết thiết kế: `docs/scripts/TEAMBUILD.md`.
+
+### 18.1 Nâng team 3 → 5
+
+| Đụng | Đổi |
+|---|---|
+| `PlayerProfile.active_team(size=3)` | default 5 (giữ param cho test cũ); dần thay bằng loadout đã chọn |
+| `data/content_p4.gd` FormationDef | thêm `balanced_5`/`offense_5` (5 slot + buff hàng front/back); giữ `*_3` cho test cũ |
+| `data/stage_def.gd` `team_size` | seed stage mới 5 (stage cũ giữ 3 để không vỡ `test_stage`) |
+| `systems/battle/battle_sim.gd` capacity | xác nhận nhận ≥5 hero/phe (đã 8-hero world boss → OK) |
+| Synergy seeds | seed theo `TEAMBUILD.md` (race giảm dần + class 2/3 + coalition) — tune bằng `SynergyBalanceSim` |
+
+### 18.2 Data & System units
+
+| Unit (path) | class_name / extends | API / field |
+|---|---|---|
+| `game/data/team_loadout.gd` | `TeamLoadout extends Resource` | `id:String`, `name:String`, `hero_ids:Array[String]` (≤5, index=slot), `formation_id:String`, `purpose:String="general"`; `to_dict()`/`from_dict()`; `is_full()`, `contains(hero_id)` |
+| `PlayerProfile` (mở rộng) | — | `teams:Array` + `deployments:Dictionary`(`hero_id→{activity,ref}`) vào block `player`. Methods: `create_team(name)`, `save_team(loadout)`, `delete_team(id)`, `rename_team(id,name)`, `get_team(id)`, `teams_all()`, `set_team_slot(id,slot,hero_id)`; `locked_heroes()→{hero_id:reason}`, `is_hero_available(hero_id)→bool`, `can_deploy(loadout)→{ok,conflicts:Array}`, `lock_team(loadout,activity,ref)`, `release(activity,ref)` |
+
+`deployments` là **sổ commit dùng chung**: expedition (`is_on_expedition` tổng quát hoá vào đây), raid, event đa-đội đều ghi/xoá qua `lock_team`/`release`. Instant battle & arena-defense snapshot **không** ghi.
+
+### 18.3 Gate & tích hợp
+
+- `ExpeditionService.can_start(hero,zone)` + `RaidService.can_enter(raid_id)` gọi `PlayerProfile.is_hero_available`/`can_deploy`; resolve/kết thúc → `release`.
+- `world.gd._dispatch_tick`: dispatch expedition qua `deployments` (thay cờ rời rạc), tôn trọng `MAX_EXPEDITIONS` + lord-perk `expedition_slots`.
+- Arena defense set → **snapshot**, không lock (cho overlap offense).
+
+### 18.4 Save v8
+
+Gộp vào migration `_migrate_v7_to_v8` (S0): thêm `teams=[]`, `deployments={}`. Migration seed 1 preset **"Đội Chính"** từ `active_team()` hiện tại để người chơi cũ có sẵn 1 đội. Không mất data.
+
+### 18.5 EventBus (SF)
+
+```
+team_saved(team_id:String)
+team_deleted(team_id:String)
+hero_locked(hero_id:String, activity:String)
+hero_released(hero_id:String)
+```
+
+### 18.6 UI
+
+`game/ui/team_loadout_panel.gd` `TeamLoadoutPanel extends Control` — gắn nav **"Đội hình"** (hiện `_show(null)`): list preset (tên + 5 chân dung + purpose), sửa (kéo hero vào 5 ô + chọn `FormationDef`), hero đang khoá hiện **xám + badge lý do**, nút **Deploy** cảnh báo `conflicts` nếu trùng. Tạo/xoá/đổi tên preset.
+
+### 18.7 Tests — `game/tests/unit/test_team_loadout.gd`
+
+| Case |
+|---|
+| create/save/rename/delete preset; roundtrip `to_dict/from_dict` |
+| overlap OK: cùng hero ở 2 preset không lỗi |
+| `can_deploy` báo conflict khi hero đang bận raid/expedition (concurrent) |
+| instant battle & arena-defense **KHÔNG** khoá (is_hero_available vẫn true) |
+| `lock_team` → không deploy được nơi khác; `release` → deploy lại được |
+| migration v8 seed "Đội Chính" từ active_team; team=5 không vỡ `test_stage`/`test_arena` cũ |
+
+Thêm vào `SUITES`.
+
+### 18.8 Acceptance SF
+
+- Test xanh + toàn suite xanh (đặc biệt `test_stage`/`test_arena`/`test_battle_sim` với team 5).
+- Smoke: lưu 2 preset chung 1 hero → deploy preset 1 vào raid → deploy preset 2 báo conflict đúng hero → raid resolve → hết conflict.
+
+---
+
+# ══════════ PHẦN B — Phase 8 (T4: Chiều sâu Combat) ══════════
+
+**Mục tiêu:** (1) hoàn thiện synergy cho đội-5 (coalition + soft-cap + validator + sim); (2) **Skill-Kit hero trong engine** — lát lớn nhất & rủi ro nhất của cả game (đã hoãn từ P3). Nguồn số: `docs/scripts/TEAMBUILD.md`. Design combat: `COMBAT.md`/`SKILLS.md`.
+**Save:** B2 bump **v8→v9** (per-hero skill state). B1 không đụng save (synergy runtime). **SIM_VERSION** bump khi B2 đổi công thức combat.
+
+---
+
+## 19.1 Slice B1 — Synergy Completion (nhỏ, làm trước)
+
+### Data
+- `data/synergy_def.gd` `SynergyDef`: thêm hằng `kind` hợp lệ `"coalition"` (ngoài `"race"`/`"class"`). Field giữ nguyên (`thresholds:Dictionary`).
+- Seed (trong `_build_p3`/`ContentP7`): 8 race-syn + 7 class-syn + 1 coalition-syn theo **bảng số TEAMBUILD** (increment-delta, vì `SynergyService` merge cộng dồn). Ví dụ đã có literal ở TEAMBUILD §Seed Data.
+
+### System
+| Unit | Sửa |
+|---|---|
+| `systems/build/synergy_service.gd` `compute` | thêm nhánh `sdef.kind == "coalition"` → `n = race_count.size()` (đếm **tộc khác nhau**); expand key `"all"` → cả 7 `StatAggregator.STATS` khi merge |
+| `systems/build/stat_aggregator.gd` | trong bước (5) synergy: **clamp mỗi key ≤ 0.15** trước khi `add_percent_dict` (soft-cap band). Ghi layer `"synergy"` để breakdown |
+| `systems/build/synergy_balance_validator.gd` `SynergyBalanceValidator` (mới, static) | `validate(defs:Array) -> {ok, errors}`: reject nếu tổng percent tối đa 1 tag-stack (mono-5) vào 1 key vượt cap; gọi ở `Database._ready` sau seed |
+
+### Test
+| File | Case |
+|---|---|
+| `test_synergy` (mở rộng) | coalition đếm đúng số tộc; `"all"` áp cả 7 key; soft-cap clamp ≤0.15; cộng-dồn threshold đúng (n=3 = th2+th3); determinism |
+| `game/tests/simulation/test_synergy_balance.gd` (mới) | dựng 3 comp benchmark (mono-5 / 3+2 / rainbow-5), mỗi comp đấu N trận seeded qua `BattleSim` → thu win-rate → **assert |wr - 0.5| ≤ 0.08** cho mỗi archetype vs benchmark trung dung |
+
+### Acceptance B1
+- 2 test xanh; `SynergyBalanceValidator` chặn được bảng lệch (test negative). Sim in ra win-rate 3 archetype trong band. **Không** bump save/SIM_VERSION.
+
+Deps: **SF** (team=5). Risk: **thấp**. Đây là bước "đo cân bằng" đã hứa ở TEAMBUILD.
+
+---
+
+## 19.2 Slice B2 — Skill-Kit hero trong engine (LỚN — tách 4 sub-slice)
+
+Hiện `BattleSim` chỉ basic-attack cho hero; `SkillDef`/`SkillRuntime` đã có nhưng chỉ boss dùng. B2 đưa **passive + 3 active + ultimate + energy + cooldown + status** cho hero, **GIỮ tất định**.
+
+### 19.2.0 Data model
+
+| Unit | Field / thay đổi |
+|---|---|
+| `data/skill_def.gd` `SkillDef` (mở rộng) | thêm `energy_cost:int=0`, `energy_gain_on_hit:int`, `is_ultimate:bool` (hoặc dùng `SkillKind.ULTIMATE` đã có); các field boss cũ (cast_time/cc/target_mode/select_rule) tái dùng nguyên |
+| `data/hero_def.gd` `HeroDef` | thêm `skill_ids:Array[StringName]` = [passive, active1, active2, active3, ultimate] |
+| `HeroInstance` | thêm `skill_order:Array[int]` (thứ tự ưu tiên auto-cast, tuỳ chọn người chơi) — **field duy nhất cần save** (v9) |
+| enums (đã có) | tái dùng `SkillKind/SkillType/SkillTarget/SkillSelectRule/CcType`; thêm `StatusType {BURN, STUN, SHIELD, BUFF, DEBUFF, HEAL_OVER_TIME}` nếu chưa đủ |
+
+Seed: mỗi hero roster (5) một bộ 5 skill (`ContentP8`) — passive + 3 active + ult, theo `SKILLS.md` (vd Assassin: Dash/Poison Blade/Smoke Bomb/Shadow Kill).
+
+### 19.2.1 Sub-slice a — Energy + Cooldown + 1 active
+| Unit | Việc |
+|---|---|
+| `systems/battle/sim_combatant.gd` (mở rộng) | thêm `energy:int`, `max_energy`, `skill_slots:Array[SkillRuntime]`; `gain_energy(n)`, `ready_skills()` |
+| `systems/battle/battle_sim.gd` | mỗi tick: trước basic-attack, nếu có active `ready_now()` & đủ energy → cast (chọn target theo `SkillTarget`, priority theo `skill_order`/`SkillSelectRule`); tick cooldown; energy +khi đánh & bị đánh |
+| `SkillRuntime` (đã có) | tái dùng `ready_now/tick_cd/trigger` |
+| Test | `test_skill_engine`: cast khi đủ energy+off-cd; không cast khi thiếu; 2 seed giống→giống |
+
+### 19.2.2 Sub-slice b — Ultimate + charge
+- Ultimate = skill `is_ultimate`, dùng energy đầy (charge) thay cooldown; cast khi `energy>=max_energy` → reset. Target/effect qua SkillDef.
+- Test: ult chỉ nổ khi đầy; reset energy; tất định.
+
+### 19.2.3 Sub-slice c — Status effects (module pure)
+| Unit | Việc |
+|---|---|
+| `systems/battle/status_effects.gd` `StatusEffects` (pure) | `apply(combatant, type, magnitude, duration, stacks)`, `tick(combatant)` (Burn dmg/turn, HoT heal, expire), `is_stunned`; stack rules (refresh vs stack) |
+| `battle_sim.gd` + `DamageFormula` | chèn Shield (hấp thụ trước HP), Burn (dmg cuối tick), Stun (skip turn — tái dùng `is_stunned` boss đã có), Buff/Debuff (mod stat tạm) |
+| Test | `test_status_effects`: Burn tick đúng tổng, Shield hấp thụ đúng, Stun skip, stack/refresh, expire |
+
+### 19.2.4 Sub-slice d — Rebalance + Replay
+- **SIM_VERSION bump** (công thức đổi). Cập nhật golden replay `test_replay_regression`.
+- Re-tune: stage/boss/arena/dungeon vì hero mạnh lên đáng kể; chạy lại `SynergyBalanceSim` + `test_boss_arena_simulation`.
+- Test: `test_skill_determinism` (batch nhiều seed, replay == gốc).
+
+### 19.2.5 Save v8 → v9
+`_migrate_v8_to_v9`: thêm `skill_order:[]` mặc định mỗi hero (auto theo `skill_ids`). Không mất data.
+
+### 19.2.6 UI
+- `hero_detail_panel`: hiện 5 skill + mô tả + cho kéo `skill_order` (auto-cast priority).
+- `battle_panel`/battle view: icon skill cast + status badge (Burn/Stun/Shield) trên unit.
+
+### 19.2.7 EventBus (B2)
+```
+skill_cast(hero_id:String, skill_id:String)     # tuỳ chọn, cho VFX/telemetry (không mỗi tick)
+status_applied(target_uid:int, status:int)      # client-only VFX
+```
+
+### Design forks B2 (chốt khi tới)
+- **Energy model:** ★ energy tăng khi đánh + bị đánh, ult khi đầy (dễ đọc, tất định) · vs regen-theo-thời-gian · vs mana-pool cổ điển.
+- **Auto-cast:** ★ AI priority + cho set `skill_order` đơn giản (giữ "xem, không điều khiển") · vs full-auto · vs người chơi bấm ult.
+- **Passive:** ★ tĩnh (áp vào FinalStats qua layer mới) khi đơn giản; điều kiện (trigger trong sim) khi cần "khi HP<30%".
+
+### Acceptance B2
+- Tất cả `test_skill_*` + `test_status_effects` xanh; `test_replay_regression` cập nhật golden xanh; `SynergyBalanceSim` + boss sim vẫn trong band sau rebalance. Save v9 migrate sạch.
+
+Deps: SF. Reuse: SkillDef/SkillRuntime/enums (P4). Risk: **CAO** — chạm engine lõi + rebalance toàn content. **Làm SAU khi PHẦN A ship** (game đã chơi được). Theo 4 sub-slice a→d, mỗi sub-slice test xanh mới sang bước kế.
+
+---
+
+# ══════════ PHẦN C — Phase 9 (T6: Nội dung PvE) ══════════
+
+**Mục tiêu:** các mode dungeon `DUNGEON.md` mô tả nhưng code CHƯA có + Ancient Boss. Tất cả **tái dùng `BattleSim`/`StageBattleService`/`BossController`/`FormationService`** — KHÔNG engine mới.
+**Save:** bump **v9→v10** (dungeon attempts + endless state).
+
+---
+
+## 20.1 Slice C1 — Dungeon Framework (generic, data-driven — 1 hệ, nhiều type)
+
+### Data
+| Unit | Field |
+|---|---|
+| `data/dungeon_def.gd` `DungeonDef` | `id:String`, `type:int` (enum `DungeonType`), `display_name`, `reward_table:Array` ([{type,id,amount,weight}]), `daily_attempts:int=3`, `rotation_dow:int=-1` (−1=mọi ngày), `recommended_power:int`, `enemy_waves:Array`, `boss_def_id:StringName`, `team_size:int=5`, `energy_cost:int=0` |
+| enums | `DungeonType {GOLD, EXP, CRYSTAL, MATERIAL, AWAKEN, EQUIPMENT, RUNE}` |
+
+Bao **Resource (gold/exp/crystal/material/awaken) + Equipment + Rune** = cùng `DungeonDef`, khác `type` → 1 hệ, seed nhiều data.
+
+### System
+| Unit | API |
+|---|---|
+| `systems/dungeon/dungeon_service.gd` `DungeonService` (autoload sau PlayerProfile) | `attempts_left(id)->int`, `can_enter(id)->{ok,reason}`, `run(id, team:Array, seed_val)->{cleared, rewards, replay}` (reuse `StageBattleService`/`BattleSim` + `grant_reward`), `available_today()->Array` (lọc theo `rotation_dow` = `TimeService.day_of_week`), `daily_reset()` |
+
+### Save v9→v10 + State
+`PlayerProfile.dungeons = {"day":int, "attempts":{id:int}}`. `_migrate_v9_to_v10` thêm `dungeons={}`. Reset theo **ngày lịch thực** (`now_unix`, giống quest), KHÔNG `game_day()`.
+
+### UI + EventBus + Test
+- `ui/dungeon_panel.gd`: list dungeon hôm nay (rotation) + lượt còn + Deploy (dùng loadout SF, tôn trọng deploy-lock).
+- EventBus: `dungeon_cleared(dungeon_id, rewards)`.
+- `test_dungeon_service`: rotation theo dow đúng, attempts cap + reset, reward trong bảng, determinism (seed giống→giống).
+
+**Acceptance C1:** test xanh; smoke chạy 1 dungeon mỗi type ra reward đúng focus; hết lượt → chặn; reset ngày → chơi lại.
+
+---
+
+## 20.2 Slice C2 — Endless Tower
+
+| Unit | Việc |
+|---|---|
+| `data/endless_def.gd` `EndlessDef` | scaling curve (hp/atk theo floor), `floor_buffs:Array` (buff chọn mỗi X tầng), `reset_policy` (season) |
+| `systems/dungeon/endless_service.gd` `EndlessService` | `current_floor()`, `attempt(team,seed)->{advanced, floor}`, `season_reset()`; scaling khó theo floor, hook `LeaderboardService` (P6) submit best-floor |
+| Save | `PlayerProfile.endless = {floor:int, best:int, season_key}` |
+| UI/Test | tab trong dungeon/battle panel; `test_endless`: scaling đơn điệu tăng, season_reset về floor 1 giữ `best`, determinism |
+
+Design fork: reset theo **season** (★ đề xuất — làm mới leaderboard) vs vĩnh viễn.
+
+---
+
+## 20.3 Slice C3 — Elite + Challenge Dungeon (modifier-driven)
+
+Tái dùng pattern `EventDef.modifiers` (reversible) + `BossPhaseDef.arena_hazard`.
+| Unit | Việc |
+|---|---|
+| `data/challenge_def.gd` `ChallengeDef` | `rule:int` (enum `ChallengeRule {CLASS_ONLY, NO_HEAL, ONE_LIFE, DOUBLE_SPEED, POISON_FIELD}`), `rule_param`, `modifier:Dictionary` (áp trong sim), `weekly_rotation:bool`, `reward` |
+| System | validate đội theo `rule` trước khi vào (CLASS_ONLY → team phải cùng class...) + apply modifier vào `BattleSim` (reversible) |
+| Test | `test_challenge`: rule-enforce chặn đội sai; modifier áp & gỡ sạch; weekly rotation |
+
+Elite = dungeon khó cao (difficulty tier + drop epic) — dùng `Enums.Difficulty` + reward table đậm, không luật riêng.
+
+---
+
+## 20.4 Slice C4 — Ancient Boss
+
+Reuse `BossDef`/`BossPhaseDef`/`WorldBossService`/`BossController` (đã có, đa-phase/break/enrage).
+| Unit | Việc |
+|---|---|
+| `data/ancient_boss_def.gd` `AncientBossDef` | wrap `boss_def_id` + `trigger:int` (enum `AncientTrigger {QUEST, SHRINE, SEASON, RANDOM}`), `trigger_param`, `first_clear_rewards`, `respawn_policy` |
+| System | `systems/boss/ancient_boss_service.gd`: kiểm trigger (subscribe quest_completed / season / shrine-interact) → spawn qua machinery WorldBoss; solo scale |
+| Data seed | **Ancient/Legendary rarity** equip + rune (drop độc quyền) — thêm vào `_build_p3`/ContentP9; `Enums.Rarity.LEGEND/MYTHIC` đã có |
+| Test | `test_ancient_boss`: trigger-once (không spawn lặp), drop table, first-clear reward once |
+
+---
+
+### Deps & Risk (PHẦN C)
+- Deps: **PHẦN A** (energy/quest gating, loadout deploy). Chạy được trên engine hiện tại; **đẹp hơn nếu sau B2** (skill-kit → dungeon mechanic sâu). 
+- Risk: **trung bình** — nhiều content/data, ít engine-mới (reuse tối đa BattleSim/Boss/Stage).
+- Design forks C: energy vs vé vs no-limit mỗi type (`DUNGEON.md`: thường không gate, khó thì cap lượt); Endless reset season vs vĩnh viễn.
+
+---
+
+# ══════════ PHẦN D — Phase 10 (T5: Chiều sâu Collection) ══════════
+
+**Mục tiêu:** làm roster "sống" hơn — Pet, cốt truyện riêng hero, quan hệ. Giữ **no-P2W & tất định**.
+**Save:** bump **v10→v11** (pets + relationships). D2 dùng state quest sẵn (P7).
+
+---
+
+## 21.1 Slice D1 — Pet
+
+| Loại | Unit | API / field |
+|---|---|---|
+| Data | `data/pet_def.gd` `PetDef` | `id`, `display_name`, `rarity:int`, `effect:Dictionary` (buff aura, **percent nhỏ**), `element:int`, `sprite` — **không có stat combat trực tiếp** (GDD §15: pet hỗ trợ) |
+| State | `systems/pet/pet_instance.gd` `PetInstance` | `pet_id`, `def_id`, `level`; `to_dict/from_dict` |
+| State | `PlayerProfile.pets:Dictionary` + `hero.pet_id` | gán 1 pet / hero (hoặc / đội — chốt ở fork) |
+| System | `StatAggregator` | thêm layer `"pet"` (percent) — **budget ≤ synergy scale**, `SynergyBalanceValidator` mở rộng kiểm cả pet |
+| Gacha | reuse `SummonService` | Pet Egg banner → pet (dup→pet-shard) |
+| UI/Test | `ui/pet_panel.gd`; `test_pet` | aggregate đúng + clamp + determinism; no-P2W (tổng pet% ≤ cap) |
+
+Save v10→v11: `pets={}`, `hero.pet_id=""`.
+
+---
+
+## 21.2 Slice D2 — Hero Personal Questline
+
+Tái dùng **Quest (P7 S2, `QuestCategory.CHARACTER`)** + **DialogueRunner (P7 S1)** + StoryManager feature-unlock pattern.
+| Unit | Việc |
+|---|---|
+| `data/hero_quest_def.gd` `HeroQuestDef` | `hero_def_id`, chuỗi `steps` (objective + dialogue_id), `rewards` (mở skill alt / rune-synergy / awaken material — `STORY.md`) |
+| System | reuse `QuestManager` (category CHARACTER) — không service mới; unlock ghi `story.features` |
+| Data seed | 1-2 hero questline demo (gắn lore roster) |
+| Test | `test_hero_quest`: tiến bước đúng, reward-once, unlock đúng |
+
+Deps: **P7 S1 (dialogue) + S2 (quest)**. Không đụng save mới (dùng quest state). Risk: **thấp** (reuse).
+
+---
+
+## 21.3 Slice D3 — Relationships
+
+| Unit | Việc |
+|---|---|
+| `data/relationship_def.gd` `RelationshipDef` | cặp/nhóm hero + bonus khi cùng đội (nhỏ) |
+| System | `systems/relationship/relationship_service.gd`: đồ thị affinity hero-hero; nguồn tăng = festival/inn/cùng-đội (subscribe EventBus event/expedition đã có); ảnh hưởng **mood nhỏ** (đã có mood) + synergy phụ khi cùng đội |
+| Save | `PlayerProfile.relationships:{pair_key:affinity}` (v11) |
+| EventBus | `relationship_changed(a,b,affinity)` |
+| Test | `test_relationship`: affinity tăng đúng nguồn, bonus áp khi cùng đội, roundtrip |
+
+Deps: mood (✅). Risk: **trung bình-thấp**.
+
+---
+
+### Design forks D (chốt khi tới)
+- **Pet gán:** ★ 1 pet / hero (sâu, nhiều lựa chọn) vs 1 pet / đội (đơn giản).
+- **Pet power:** ★ budget ≤ synergy scale, đưa vào `SynergyBalanceValidator` (no-P2W) vs pet chỉ cosmetic/utility.
+- **Relationship ảnh hưởng:** ★ nhẹ (mood + synergy phụ) vs chỉ social/cosmetic (an toàn nhất) vs combat rõ (rủi ro cân bằng).
+
+### Acceptance D
+- `test_pet`/`test_hero_quest`/`test_relationship` xanh; `SynergyBalanceSim` vẫn trong band sau khi thêm pet%; save v11 migrate sạch.
+
+---
+
+# ══════════ PHẦN E — Phase 11 (T10/T11/T13: Kinh tế · Endgame · Production) ══════════
+
+**Mục tiêu:** đóng vòng kinh tế (thêm sink), nội dung endgame, và **production polish** (art/audio/i18n).
+**Save:** bump **v11→v12** (crafting inv? không — dùng materials sẵn; achievements claimed). E4 không đụng save.
+
+---
+
+## 22.1 Slice E1 — Crafting + Salvage (sink kinh tế)
+
+| Loại | Unit | API |
+|---|---|---|
+| Data | `data/craft_recipe_def.gd` `CraftRecipeDef` | `id`, `output:{type,id,amount}`, `cost_gold`, `cost_materials:Dictionary`, `unlock_req` (`ECONOMY.md`: craft = gold+material, **không Diamond**) |
+| System | `systems/economy/craft_service.gd` `CraftService` (static) | `can_craft(recipe)->{ok}`, `craft(recipe_id)->{ok, output}` (trừ gold+material qua PlayerProfile, cấp qua `grant_reward`) |
+| System | `systems/economy/salvage_service.gd` `SalvageService` (static) | `salvage(equip_uid/rune_uid)->{materials, crystal, dust}` (đồ cũ → material/crystal/dust, mọi loot có giá trị — `ECONOMY.md`) |
+| Test | `test_craft`, `test_salvage` | transaction trừ đúng & **không âm**, reject khi thiếu, salvage value đúng theo rarity |
+
+Reuse: currency/materials của PlayerProfile (đã có). Đây là **sink** chống lạm phát (economy sim P6 giám sát).
+
+---
+
+## 22.2 Slice E2 — Shop (NPC / Premium / IAP scaffold)
+
+| Unit | Việc |
+|---|---|
+| `data/shop_def.gd` `ShopDef` | `id`, `entries:Array` ([{cost_currency, cost_amount, reward, stock, refresh_dow}]), `category` (daily/premium/exchange) |
+| `systems/economy/shop_service.gd` `ShopService` | `buy(shop_id, entry_idx, claim_id)->{ok}` (idempotent qua RewardProtection; trừ currency; stock/refresh) — **no-P2W** (chỉ cosmetic/tiện-ích/exchange, không hero-mạnh độc quyền, `ECONOMY.md`) |
+| IAP | **thật = ops** (store SDK) — P11 chỉ offline stub grant (debug `grant_pack`) |
+| UI/Test | `ui/shop_panel.gd`; `test_shop`: mua/trừ/stock/refresh/idempotent |
+
+---
+
+## 22.3 Slice E3 — Endgame
+
+| Mục | Unit | Việc |
+|---|---|---|
+| Achievements | `data/achievement_def.gd` + reuse `QuestManager` (category ACHIEVEMENT) | track dài hạn; UI **Sổ Thành Tựu** (nối "Advanced Objectives" sau tốt nghiệp P7) |
+| Collection completion | reuse codex (`collection`/`codex_seen`) | thưởng mốc % codex |
+| Titles / Cosmetics | UI cho `PlayerProfile.cosmetics` (storage đã có) | trang bị title/avatar-frame (no power) |
+| Difficulty Mythic/Chaos | reuse Elite/Challenge modifier (C3) + `Enums.Difficulty` | khó = AI/mechanic/modifier, **không +HP thuần** (`BOSS.md`) |
+
+Save v11→v12: `achievements_claimed={}`. Test: `test_achievement` (unlock+claim-once), collection reward once.
+
+---
+
+## 22.4 Slice E4 — Production (LIÊN TỤC — interleave sớm, không dồn cuối)
+
+> ⚠️ Đây là **art/content + polish trải suốt dự án**. Cần từ bản demo đầu tiên. KHÔNG phải 1 slice cuối.
+
+| Mảng | Việc | Nguồn/Công cụ |
+|---|---|---|
+| Audio | SFX/music thật thay `AudioManager` stub (`play_sfx/play_music` hiện pass) | `pixel-art.md` mood |
+| Pixel art / sprite | thay placeholder Polygon2D+Label; hero/monster/building/UI sprite | `pixel-art.md` + `character-asset-pipeline.md` + **PixelLab MCP** (AI-gen) |
+| Animation | idle/walk/attack/cast/hit/death (`SpriteLib` → sprite thật) | `Animator` agent |
+| UI/UX theme | art hoá panel qua `ui/theme.tres` | `ui.md` |
+| Localization (i18n) | tách chuỗi VN hardcode → bảng dịch | — |
+| Settings + Notifications | màn cài đặt (audio/graphics/lang) + push nhắc quay lại | — |
+
+Risk: **cao công sức (art), thấp logic**. Deps: gameplay ổn định (nhưng art placeholder thay dần từ sớm).
+
+### Acceptance E
+- E1-E3 test xanh; economy sim (P6) xác nhận source↔sink cân sau khi thêm craft/salvage/shop (no infinite gold). E4 = tiêu chí visual/manual (`unit-testing.md`: không unit-test art).
+
+---
+
+# ══════════ PHẦN F — Phase 12 (T12: Backend thật + Release) ══════════
+
+**Mục tiêu:** biến lớp online offline-first (P6, logic đã test qua `MockBackend` in-memory) thành **backend thật**. Chủ yếu **OPS + adapter mỏng** — logic đã có & đã test headless. Chi tiết nền: `docs/PHASE6.md §6`.
+**Save:** v12→v13 nếu cần field liên kết account online (device→cloud link); phần lớn account field đã có từ P6 (v6→v7).
+
+### F1 — Supabase provisioning (ops)
+Project + tables (leaderboard/guild/save/pvp_defense) + **RLS** (client KHÔNG insert bảng giá trị trực tiếp) + auth (anonymous→link). Config qua `data/network_config.gd` `NetworkConfig` (đã có: `supabase_url/anon_key/env/enable_online`).
+
+### F2 — Edge Functions (Deno) — port MockBackend 1:1
+Port từng handler `MockBackend` sang Edge Function **cùng logic**: `lb-submit` (chạy lại BattleSim seeded chống điểm giả), `save-upload/download` (checksum + chống progress-regression + conflict), `guild-create/join/boss-hit/shop-buy` (shared-HP & coin trừ server-side), `pvp-defense-set/submit` (verify `stat_hash` + replay seed), dedupe idempotent theo `command_id`, rate-limit. **Nguồn sự thật = mirror của `MockBackend`** → so khớp được bằng test.
+
+### F3 — HTTP adapter (thay MockBackend)
+| Unit | Việc |
+|---|---|
+| `systems/net/http_backend.gd` `HttpBackend` | cùng interface `MockBackend` (`invoke(command)->CommandResult`) nhưng qua `HTTPRequest` async tới Edge Function; retry/backoff theo `NetworkConfig` |
+| `NetManager` | chọn backend theo `NetworkConfig.enable_online` (offline→queue local; online→HttpBackend). Không đổi service tầng trên (Leaderboard/Guild/AsyncPvp gọi `NetManager` như cũ) |
+| Test | `test_http_backend` (mock HTTP): serialize roundtrip, offline→queue→reconnect replay idempotent (tái dùng `test_net` pattern) |
+
+### F4 — Network UI screens
+`ui/leaderboard_screen.gd`, `ui/guild_screen.gd`, `ui/arena_screen.gd`, `ui/conflict_dialog.gd`, `ui/network_inspector.gd` (dev-only, gate `ReleaseGate`). Offline → hiện "chưa kết nối", game KHÔNG phụ thuộc (read-only rỗng).
+
+### F5 — Release
+| Việc | Chi tiết |
+|---|---|
+| `BenchmarkWorld.tscn` | on-device 300 hero/1000 monster @60fps profiling (`performance.md`) |
+| Release runbook | 13-step + rollback + monitoring dashboard (`prompts/release.md`) |
+| ReleaseGate verify | build release TẮT toàn bộ Debug/cheat/network-inspector |
+| Store | IAP SDK (E2), quyền, đóng gói Android portrait |
+
+Deps: **mọi phase khác ổn định**. Risk: **thấp code / cao infra-dependency**. Reuse: toàn bộ `systems/net/` + `AntiCheatValidator` + `CloudSaveService` + `LeaderboardService`/`GuildService`/`AsyncPvpService` **đã test headless P6**. Nguyên tắc offline-first giữ nguyên: online chỉ là lớp verify + source-of-truth cho giá trị cạnh tranh (`multiplayer.md`).
+
+### Acceptance F
+- `test_http_backend` xanh + toàn suite xanh với `enable_online=false` (offline vẫn trọn vẹn). Edge Function so khớp output `MockBackend` trên bộ case chung. Benchmark đạt ≥45fps floor / 60fps target trên mid-range.
+
+---
+
+# ══════════ Tổng: thứ tự & phụ thuộc ══════════
+
+```
+P7 (cửa trước)  ─┬─→ P8 (combat depth) ─→ P9 (PvE content)
+                 │                          ↑
+                 └─→ P10 (collection depth) ┘   (P10 D2 cần P7 S1+S2)
+P9,P10 ─→ P11 (economy/endgame) ─→ P11.E4 art/audio (interleave sớm) ─→ P12 (backend/release)
+```
+
+- **Bắt buộc trước:** P7 (nền meta) → mọi thứ. SF (team-5) → B1 synergy. P7 S1+S2 → P10 D2 questline.
+- **Làm sau khi game chơi được:** B2 skill-kit (rebalance toàn content), P12 backend.
+- **Interleave, đừng dồn cuối:** E4 production (art/audio) — cần cho mọi bản demo/release.
+- **Độ sâu spec:** PHẦN B–F đào tới-từng-unit KHI tới lượt (tạo `## §` mới trong CHÍNH file này — không tách file), cập nhật `FEATURES.md` trạng thái.

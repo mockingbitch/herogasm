@@ -331,6 +331,8 @@ Mage Archer
 
 # 11. Synergy
 
+> ⚠️ **Superseded bởi `TEAMBUILD.md`.** Số dưới đây là bản phác cũ dùng đường cong **tăng dần** (ép mono, chống đa dạng). Hệ synergy chính thức (giảm dần + coalition + band cân bằng + sim) nằm ở `TEAMBUILD.md`.
+
 ## Theo Race
 
 3 Human

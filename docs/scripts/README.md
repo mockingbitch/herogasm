@@ -197,6 +197,8 @@ Người chơi luôn có mục tiêu mới:
 | File         | Description                 |
 | ------------ | --------------------------- |
 | FLOW.md      | **Kịch bản hành trình người chơi A→Z (offline-first) — bắt đầu đọc ở đây** |
+| FEATURES.md  | **Danh mục toàn bộ chức năng theo timeline + trạng thái (backlog thiết kế)** |
+| TEAMBUILD.md | **Synergy & deckbuild đa dạng-mà-cân-bằng (thay §11 GDD)** |
 | STORY.md     | Thế giới và cốt truyện      |
 | WORLD.md     | Quốc gia, bản đồ, chủng tộc |
 | HERO.md      | Hero, Class, Race           |
