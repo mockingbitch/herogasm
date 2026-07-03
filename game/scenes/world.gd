@@ -133,6 +133,7 @@ func _cells_in_rect(r: Rect2, origin: Vector2) -> Array[Vector2i]:
 # ---------------------------------------------------------------------------
 const NAT := "res://assets/iso/nature/"
 const DEC := "res://assets/iso/deco/"
+const ROCKS := "res://assets/tilesets/rocks/"
 
 func _decor(path: String, pos: Vector2, sc: float = 1.0) -> void:
 	var tex: Texture2D = load(path)
@@ -145,6 +146,12 @@ func _decor(path: String, pos: Vector2, sc: float = 1.0) -> void:
 	s.offset = Vector2(0, -tex.get_height() / 2.0)
 	s.position = pos
 	add_child(s)
+
+func _decor_rock(rng: RandomNumberGenerator, pos: Vector2, category: String, sc: float = 1.0, variant: String = "") -> void:
+	var path := RockTilesetCatalog.pick_path(rng, category, variant)
+	if path == "":
+		return
+	_decor(path, pos, sc)
 
 # ---------------------------------------------------------------------------
 # CITADEL: tường bao + cổng (arch + tháp + portal) + building trải rộng + decor
@@ -202,6 +209,12 @@ func _citadel_decor() -> void:
 	_decor(NAT + "flowers.png", TOWN + Vector2(-90, -80))
 	_decor(NAT + "flowers2.png", TOWN + Vector2(90, 70))
 	_decor(NAT + "campfire.png", TOWN + Vector2(0, 120))
+	# đá trang trí (tileset mới) — rải nhẹ quanh rìa nội thành
+	for i in 10:
+		var p := TOWN + Vector2(rng.randf_range(-CITADEL_HW + 40, CITADEL_HW - 40), rng.randf_range(-CITADEL_HH + 30, CITADEL_HH - 30))
+		if Rect2(TOWN.x - 150, TOWN.y - 110, 300, 220).has_point(p):
+			continue
+		_decor_rock(rng, p, ["pebble", "stone", "moss-rock"][rng.randi() % 3], rng.randf_range(0.85, 1.15))
 
 func _building(id: String, pos: Vector2) -> void:
 	var def: BuildingDef = Database.get_building_def(id)
@@ -237,8 +250,22 @@ func _build_field_decor() -> void:
 			continue
 		_decor(NAT + TREES[rng.randi() % TREES.size()] + ".png", p)
 		placed += 1
-	for r in [[Vector2(176, 60), "rock2"], [Vector2(392, -30), "rock1"], [Vector2(360, -60), "rock3"], [Vector2(300, 70), "rock2"], [Vector2(162, -42), "crystal-rock"], [Vector2(348, 40), "rock1"]]:
-		_decor(NAT + str(r[1]) + ".png", (r[0] as Vector2) + off)
+	# đá cố định (thay rock1/rock2/rock3/crystal-rock cũ)
+	for r in [
+		[Vector2(176, 60), "stone", 1.0, "medium"],
+		[Vector2(392, -30), "big-rock", 1.1, "medium"],
+		[Vector2(360, -60), "moss-rock", 1.0, "large"],
+		[Vector2(300, 70), "stone", 0.95, "medium"],
+		[Vector2(162, -42), "crystal-rock", 1.15, "large"],
+		[Vector2(348, 40), "big-rock", 1.0, "medium"],
+	]:
+		_decor_rock(rng, (r[0] as Vector2) + off, str(r[1]), float(r[2]), str(r[3]))
+	# đá rải ngẫu nhiên quanh Bãi Săn
+	for i in 18:
+		var p := Vector2(rng.randf_range(138, 452) + off.x, rng.randf_range(-142, 142) + off.y)
+		if clearing.has_point(p):
+			continue
+		_decor_rock(rng, p, ["pebble", "stone", "big-rock", "moss-rock"][rng.randi() % 4], rng.randf_range(0.8, 1.2))
 	for b in [[Vector2(214, 68), "flowers"], [Vector2(332, -58), "flowers2"], [Vector2(280, 84), "wheat"], [Vector2(232, -50), "flowers2"], [Vector2(356, 60), "flowers"], [Vector2(190, 44), "log"], [Vector2(320, 8), "flowers"]]:
 		_decor(NAT + str(b[1]) + ".png", (b[0] as Vector2) + off)
 	_decor(DEC + "crystal.png", Vector2(178, 20) + off)

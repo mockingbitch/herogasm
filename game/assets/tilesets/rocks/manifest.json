@@ -1,0 +1,1238 @@
+{
+  "source": "images/water-tileset/rock-tileset.png",
+  "source_size": [
+    1536,
+    1024
+  ],
+  "sprite_count": 69,
+  "categories": [
+    "big-rock",
+    "color-variations",
+    "crystal-rock",
+    "ground-integration",
+    "moss-rock",
+    "pebble",
+    "stone"
+  ],
+  "sprites": [
+    {
+      "id": "pebble_small-01",
+      "path": "res://assets/tilesets/rocks/pebble/small-01.png",
+      "source_box": [
+        334,
+        147,
+        353,
+        172
+      ],
+      "size": [
+        22,
+        28
+      ],
+      "category": "pebble",
+      "variant": "small",
+      "index": 1,
+      "type": "rock"
+    },
+    {
+      "id": "pebble_small-02",
+      "path": "res://assets/tilesets/rocks/pebble/small-02.png",
+      "source_box": [
+        243,
+        157,
+        269,
+        176
+      ],
+      "size": [
+        29,
+        22
+      ],
+      "category": "pebble",
+      "variant": "small",
+      "index": 2,
+      "type": "rock"
+    },
+    {
+      "id": "pebble_medium-01",
+      "path": "res://assets/tilesets/rocks/pebble/medium-01.png",
+      "source_box": [
+        470,
+        133,
+        527,
+        177
+      ],
+      "size": [
+        60,
+        47
+      ],
+      "category": "pebble",
+      "variant": "medium",
+      "index": 1,
+      "type": "rock"
+    },
+    {
+      "id": "pebble_medium-02",
+      "path": "res://assets/tilesets/rocks/pebble/medium-02.png",
+      "source_box": [
+        538,
+        133,
+        599,
+        177
+      ],
+      "size": [
+        64,
+        47
+      ],
+      "category": "pebble",
+      "variant": "medium",
+      "index": 2,
+      "type": "rock"
+    },
+    {
+      "id": "pebble_medium-03",
+      "path": "res://assets/tilesets/rocks/pebble/medium-03.png",
+      "source_box": [
+        609,
+        133,
+        665,
+        177
+      ],
+      "size": [
+        59,
+        47
+      ],
+      "category": "pebble",
+      "variant": "medium",
+      "index": 3,
+      "type": "rock"
+    },
+    {
+      "id": "pebble_medium-04",
+      "path": "res://assets/tilesets/rocks/pebble/medium-04.png",
+      "source_box": [
+        706,
+        133,
+        730,
+        153
+      ],
+      "size": [
+        27,
+        23
+      ],
+      "category": "pebble",
+      "variant": "medium",
+      "index": 4,
+      "type": "rock"
+    },
+    {
+      "id": "pebble_large-01",
+      "path": "res://assets/tilesets/rocks/pebble/large-01.png",
+      "source_box": [
+        852,
+        126,
+        915,
+        185
+      ],
+      "size": [
+        66,
+        62
+      ],
+      "category": "pebble",
+      "variant": "large",
+      "index": 1,
+      "type": "rock"
+    },
+    {
+      "id": "pebble_large-02",
+      "path": "res://assets/tilesets/rocks/pebble/large-02.png",
+      "source_box": [
+        927,
+        126,
+        991,
+        185
+      ],
+      "size": [
+        67,
+        62
+      ],
+      "category": "pebble",
+      "variant": "large",
+      "index": 2,
+      "type": "rock"
+    },
+    {
+      "id": "pebble_large-03",
+      "path": "res://assets/tilesets/rocks/pebble/large-03.png",
+      "source_box": [
+        779,
+        154,
+        795,
+        170
+      ],
+      "size": [
+        19,
+        19
+      ],
+      "category": "pebble",
+      "variant": "large",
+      "index": 3,
+      "type": "rock"
+    },
+    {
+      "id": "pebble_cluster",
+      "path": "res://assets/tilesets/rocks/pebble/cluster.png",
+      "source_box": [
+        974,
+        125,
+        1141,
+        188
+      ],
+      "size": [
+        170,
+        66
+      ],
+      "category": "pebble",
+      "variant": "cluster",
+      "type": "rock"
+    },
+    {
+      "id": "pebble_scatter",
+      "path": "res://assets/tilesets/rocks/pebble/scatter.png",
+      "source_box": [
+        1178,
+        131,
+        1220,
+        190
+      ],
+      "size": [
+        45,
+        62
+      ],
+      "category": "pebble",
+      "variant": "scatter",
+      "type": "rock"
+    },
+    {
+      "id": "stone_icon-01",
+      "path": "res://assets/tilesets/rocks/stone/icon-01.png",
+      "source_box": [
+        162,
+        280,
+        209,
+        329
+      ],
+      "size": [
+        50,
+        52
+      ],
+      "category": "stone",
+      "variant": "icon",
+      "index": 1,
+      "type": "rock"
+    },
+    {
+      "id": "stone_small-01",
+      "path": "res://assets/tilesets/rocks/stone/small-01.png",
+      "source_box": [
+        248,
+        276,
+        293,
+        330
+      ],
+      "size": [
+        48,
+        57
+      ],
+      "category": "stone",
+      "variant": "small",
+      "index": 1,
+      "type": "rock"
+    },
+    {
+      "id": "stone_small-02",
+      "path": "res://assets/tilesets/rocks/stone/small-02.png",
+      "source_box": [
+        310,
+        276,
+        365,
+        330
+      ],
+      "size": [
+        58,
+        57
+      ],
+      "category": "stone",
+      "variant": "small",
+      "index": 2,
+      "type": "rock"
+    },
+    {
+      "id": "stone_small-03",
+      "path": "res://assets/tilesets/rocks/stone/small-03.png",
+      "source_box": [
+        383,
+        276,
+        433,
+        330
+      ],
+      "size": [
+        53,
+        57
+      ],
+      "category": "stone",
+      "variant": "small",
+      "index": 3,
+      "type": "rock"
+    },
+    {
+      "id": "stone_medium-01",
+      "path": "res://assets/tilesets/rocks/stone/medium-01.png",
+      "source_box": [
+        463,
+        255,
+        526,
+        333
+      ],
+      "size": [
+        66,
+        81
+      ],
+      "category": "stone",
+      "variant": "medium",
+      "index": 1,
+      "type": "rock"
+    },
+    {
+      "id": "stone_medium-02",
+      "path": "res://assets/tilesets/rocks/stone/medium-02.png",
+      "source_box": [
+        538,
+        255,
+        600,
+        333
+      ],
+      "size": [
+        65,
+        81
+      ],
+      "category": "stone",
+      "variant": "medium",
+      "index": 2,
+      "type": "rock"
+    },
+    {
+      "id": "stone_medium-03",
+      "path": "res://assets/tilesets/rocks/stone/medium-03.png",
+      "source_box": [
+        609,
+        255,
+        678,
+        333
+      ],
+      "size": [
+        72,
+        81
+      ],
+      "category": "stone",
+      "variant": "medium",
+      "index": 3,
+      "type": "rock"
+    },
+    {
+      "id": "stone_medium-04",
+      "path": "res://assets/tilesets/rocks/stone/medium-04.png",
+      "source_box": [
+        686,
+        255,
+        740,
+        333
+      ],
+      "size": [
+        57,
+        81
+      ],
+      "category": "stone",
+      "variant": "medium",
+      "index": 4,
+      "type": "rock"
+    },
+    {
+      "id": "stone_large-01",
+      "path": "res://assets/tilesets/rocks/stone/large-01.png",
+      "source_box": [
+        849,
+        244,
+        994,
+        340
+      ],
+      "size": [
+        148,
+        99
+      ],
+      "category": "stone",
+      "variant": "large",
+      "index": 1,
+      "type": "rock"
+    },
+    {
+      "id": "stone_large-02",
+      "path": "res://assets/tilesets/rocks/stone/large-02.png",
+      "source_box": [
+        755,
+        257,
+        804,
+        334
+      ],
+      "size": [
+        52,
+        80
+      ],
+      "category": "stone",
+      "variant": "large",
+      "index": 2,
+      "type": "rock"
+    },
+    {
+      "id": "stone_cluster",
+      "path": "res://assets/tilesets/rocks/stone/cluster.png",
+      "source_box": [
+        1007,
+        245,
+        1102,
+        340
+      ],
+      "size": [
+        98,
+        98
+      ],
+      "category": "stone",
+      "variant": "cluster",
+      "type": "rock"
+    },
+    {
+      "id": "stone_scatter",
+      "path": "res://assets/tilesets/rocks/stone/scatter.png",
+      "source_box": [
+        1143,
+        247,
+        1219,
+        332
+      ],
+      "size": [
+        79,
+        88
+      ],
+      "category": "stone",
+      "variant": "scatter",
+      "type": "rock"
+    },
+    {
+      "id": "big-rock_icon-01",
+      "path": "res://assets/tilesets/rocks/big-rock/icon-01.png",
+      "source_box": [
+        159,
+        423,
+        216,
+        495
+      ],
+      "size": [
+        60,
+        75
+      ],
+      "category": "big-rock",
+      "variant": "icon",
+      "index": 1,
+      "type": "rock"
+    },
+    {
+      "id": "big-rock_small-01",
+      "path": "res://assets/tilesets/rocks/big-rock/small-01.png",
+      "source_box": [
+        358,
+        405,
+        422,
+        500
+      ],
+      "size": [
+        67,
+        98
+      ],
+      "category": "big-rock",
+      "variant": "small",
+      "index": 1,
+      "type": "rock"
+    },
+    {
+      "id": "big-rock_small-02",
+      "path": "res://assets/tilesets/rocks/big-rock/small-02.png",
+      "source_box": [
+        252,
+        412,
+        311,
+        494
+      ],
+      "size": [
+        62,
+        85
+      ],
+      "category": "big-rock",
+      "variant": "small",
+      "index": 2,
+      "type": "rock"
+    },
+    {
+      "id": "big-rock_medium-01",
+      "path": "res://assets/tilesets/rocks/big-rock/medium-01.png",
+      "source_box": [
+        462,
+        396,
+        553,
+        500
+      ],
+      "size": [
+        94,
+        107
+      ],
+      "category": "big-rock",
+      "variant": "medium",
+      "index": 1,
+      "type": "rock"
+    },
+    {
+      "id": "big-rock_medium-02",
+      "path": "res://assets/tilesets/rocks/big-rock/medium-02.png",
+      "source_box": [
+        563,
+        396,
+        647,
+        500
+      ],
+      "size": [
+        87,
+        107
+      ],
+      "category": "big-rock",
+      "variant": "medium",
+      "index": 2,
+      "type": "rock"
+    },
+    {
+      "id": "big-rock_large-01",
+      "path": "res://assets/tilesets/rocks/big-rock/large-01.png",
+      "source_box": [
+        834,
+        384,
+        955,
+        505
+      ],
+      "size": [
+        124,
+        124
+      ],
+      "category": "big-rock",
+      "variant": "large",
+      "index": 1,
+      "type": "rock"
+    },
+    {
+      "id": "big-rock_large-02",
+      "path": "res://assets/tilesets/rocks/big-rock/large-02.png",
+      "source_box": [
+        690,
+        402,
+        792,
+        506
+      ],
+      "size": [
+        105,
+        107
+      ],
+      "category": "big-rock",
+      "variant": "large",
+      "index": 2,
+      "type": "rock"
+    },
+    {
+      "id": "big-rock_cluster",
+      "path": "res://assets/tilesets/rocks/big-rock/cluster.png",
+      "source_box": [
+        969,
+        386,
+        1178,
+        501
+      ],
+      "size": [
+        212,
+        118
+      ],
+      "category": "big-rock",
+      "variant": "cluster",
+      "type": "rock"
+    },
+    {
+      "id": "big-rock_scatter",
+      "path": "res://assets/tilesets/rocks/big-rock/scatter.png",
+      "source_box": [
+        1160,
+        410,
+        1212,
+        504
+      ],
+      "size": [
+        55,
+        97
+      ],
+      "category": "big-rock",
+      "variant": "scatter",
+      "type": "rock"
+    },
+    {
+      "id": "crystal-rock_icon-01",
+      "path": "res://assets/tilesets/rocks/crystal-rock/icon-01.png",
+      "source_box": [
+        170,
+        565,
+        224,
+        655
+      ],
+      "size": [
+        57,
+        93
+      ],
+      "category": "crystal-rock",
+      "variant": "icon",
+      "index": 1,
+      "type": "rock"
+    },
+    {
+      "id": "crystal-rock_small-01",
+      "path": "res://assets/tilesets/rocks/crystal-rock/small-01.png",
+      "source_box": [
+        257,
+        560,
+        342,
+        657
+      ],
+      "size": [
+        88,
+        100
+      ],
+      "category": "crystal-rock",
+      "variant": "small",
+      "index": 1,
+      "type": "rock"
+    },
+    {
+      "id": "crystal-rock_small-02",
+      "path": "res://assets/tilesets/rocks/crystal-rock/small-02.png",
+      "source_box": [
+        349,
+        560,
+        425,
+        657
+      ],
+      "size": [
+        79,
+        100
+      ],
+      "category": "crystal-rock",
+      "variant": "small",
+      "index": 2,
+      "type": "rock"
+    },
+    {
+      "id": "crystal-rock_medium-01",
+      "path": "res://assets/tilesets/rocks/crystal-rock/medium-01.png",
+      "source_box": [
+        458,
+        559,
+        526,
+        657
+      ],
+      "size": [
+        71,
+        101
+      ],
+      "category": "crystal-rock",
+      "variant": "medium",
+      "index": 1,
+      "type": "rock"
+    },
+    {
+      "id": "crystal-rock_medium-02",
+      "path": "res://assets/tilesets/rocks/crystal-rock/medium-02.png",
+      "source_box": [
+        534,
+        559,
+        628,
+        657
+      ],
+      "size": [
+        97,
+        101
+      ],
+      "category": "crystal-rock",
+      "variant": "medium",
+      "index": 2,
+      "type": "rock"
+    },
+    {
+      "id": "crystal-rock_medium-03",
+      "path": "res://assets/tilesets/rocks/crystal-rock/medium-03.png",
+      "source_box": [
+        636,
+        559,
+        697,
+        657
+      ],
+      "size": [
+        64,
+        101
+      ],
+      "category": "crystal-rock",
+      "variant": "medium",
+      "index": 3,
+      "type": "rock"
+    },
+    {
+      "id": "crystal-rock_large-01",
+      "path": "res://assets/tilesets/rocks/crystal-rock/large-01.png",
+      "source_box": [
+        715,
+        546,
+        810,
+        660
+      ],
+      "size": [
+        98,
+        117
+      ],
+      "category": "crystal-rock",
+      "variant": "large",
+      "index": 1,
+      "type": "rock"
+    },
+    {
+      "id": "crystal-rock_large-02",
+      "path": "res://assets/tilesets/rocks/crystal-rock/large-02.png",
+      "source_box": [
+        822,
+        546,
+        895,
+        660
+      ],
+      "size": [
+        76,
+        117
+      ],
+      "category": "crystal-rock",
+      "variant": "large",
+      "index": 2,
+      "type": "rock"
+    },
+    {
+      "id": "crystal-rock_large-03",
+      "path": "res://assets/tilesets/rocks/crystal-rock/large-03.png",
+      "source_box": [
+        904,
+        546,
+        981,
+        660
+      ],
+      "size": [
+        80,
+        117
+      ],
+      "category": "crystal-rock",
+      "variant": "large",
+      "index": 3,
+      "type": "rock"
+    },
+    {
+      "id": "crystal-rock_cluster",
+      "path": "res://assets/tilesets/rocks/crystal-rock/cluster.png",
+      "source_box": [
+        1002,
+        546,
+        1192,
+        661
+      ],
+      "size": [
+        193,
+        118
+      ],
+      "category": "crystal-rock",
+      "variant": "cluster",
+      "type": "rock"
+    },
+    {
+      "id": "crystal-rock_scatter",
+      "path": "res://assets/tilesets/rocks/crystal-rock/scatter.png",
+      "source_box": [
+        1262,
+        576,
+        1347,
+        668
+      ],
+      "size": [
+        88,
+        95
+      ],
+      "category": "crystal-rock",
+      "variant": "scatter",
+      "type": "rock"
+    },
+    {
+      "id": "moss-rock_icon-01",
+      "path": "res://assets/tilesets/rocks/moss-rock/icon-01.png",
+      "source_box": [
+        170,
+        741,
+        216,
+        805
+      ],
+      "size": [
+        49,
+        67
+      ],
+      "category": "moss-rock",
+      "variant": "icon",
+      "index": 1,
+      "type": "rock"
+    },
+    {
+      "id": "moss-rock_small-01",
+      "path": "res://assets/tilesets/rocks/moss-rock/small-01.png",
+      "source_box": [
+        355,
+        713,
+        434,
+        808
+      ],
+      "size": [
+        82,
+        98
+      ],
+      "category": "moss-rock",
+      "variant": "small",
+      "index": 1,
+      "type": "rock"
+    },
+    {
+      "id": "moss-rock_small-02",
+      "path": "res://assets/tilesets/rocks/moss-rock/small-02.png",
+      "source_box": [
+        251,
+        726,
+        315,
+        801
+      ],
+      "size": [
+        67,
+        78
+      ],
+      "category": "moss-rock",
+      "variant": "small",
+      "index": 2,
+      "type": "rock"
+    },
+    {
+      "id": "moss-rock_medium-01",
+      "path": "res://assets/tilesets/rocks/moss-rock/medium-01.png",
+      "source_box": [
+        465,
+        710,
+        550,
+        813
+      ],
+      "size": [
+        88,
+        106
+      ],
+      "category": "moss-rock",
+      "variant": "medium",
+      "index": 1,
+      "type": "rock"
+    },
+    {
+      "id": "moss-rock_medium-02",
+      "path": "res://assets/tilesets/rocks/moss-rock/medium-02.png",
+      "source_box": [
+        560,
+        710,
+        625,
+        813
+      ],
+      "size": [
+        68,
+        106
+      ],
+      "category": "moss-rock",
+      "variant": "medium",
+      "index": 2,
+      "type": "rock"
+    },
+    {
+      "id": "moss-rock_medium-03",
+      "path": "res://assets/tilesets/rocks/moss-rock/medium-03.png",
+      "source_box": [
+        693,
+        736,
+        736,
+        800
+      ],
+      "size": [
+        46,
+        67
+      ],
+      "category": "moss-rock",
+      "variant": "medium",
+      "index": 3,
+      "type": "rock"
+    },
+    {
+      "id": "moss-rock_large-01",
+      "path": "res://assets/tilesets/rocks/moss-rock/large-01.png",
+      "source_box": [
+        725,
+        704,
+        780,
+        757
+      ],
+      "size": [
+        58,
+        56
+      ],
+      "category": "moss-rock",
+      "variant": "large",
+      "index": 1,
+      "type": "rock"
+    },
+    {
+      "id": "moss-rock_large-02",
+      "path": "res://assets/tilesets/rocks/moss-rock/large-02.png",
+      "source_box": [
+        455,
+        708,
+        551,
+        846
+      ],
+      "size": [
+        99,
+        141
+      ],
+      "category": "moss-rock",
+      "variant": "large",
+      "index": 2,
+      "type": "rock"
+    },
+    {
+      "id": "moss-rock_large-03",
+      "path": "res://assets/tilesets/rocks/moss-rock/large-03.png",
+      "source_box": [
+        559,
+        708,
+        665,
+        846
+      ],
+      "size": [
+        109,
+        141
+      ],
+      "category": "moss-rock",
+      "variant": "large",
+      "index": 3,
+      "type": "rock"
+    },
+    {
+      "id": "moss-rock_large-04",
+      "path": "res://assets/tilesets/rocks/moss-rock/large-04.png",
+      "source_box": [
+        674,
+        708,
+        812,
+        846
+      ],
+      "size": [
+        141,
+        141
+      ],
+      "category": "moss-rock",
+      "variant": "large",
+      "index": 4,
+      "type": "rock"
+    },
+    {
+      "id": "moss-rock_large-05",
+      "path": "res://assets/tilesets/rocks/moss-rock/large-05.png",
+      "source_box": [
+        820,
+        708,
+        1235,
+        846
+      ],
+      "size": [
+        418,
+        141
+      ],
+      "category": "moss-rock",
+      "variant": "large",
+      "index": 5,
+      "type": "rock"
+    },
+    {
+      "id": "moss-rock_cluster",
+      "path": "res://assets/tilesets/rocks/moss-rock/cluster.png",
+      "source_box": [
+        974,
+        702,
+        1184,
+        818
+      ],
+      "size": [
+        213,
+        119
+      ],
+      "category": "moss-rock",
+      "variant": "cluster",
+      "type": "rock"
+    },
+    {
+      "id": "moss-rock_scatter",
+      "path": "res://assets/tilesets/rocks/moss-rock/scatter.png",
+      "source_box": [
+        1260,
+        744,
+        1338,
+        807
+      ],
+      "size": [
+        81,
+        66
+      ],
+      "category": "moss-rock",
+      "variant": "scatter",
+      "type": "rock"
+    },
+    {
+      "id": "ground-integration_grass",
+      "path": "res://assets/tilesets/rocks/ground-integration/grass.png",
+      "source_box": [
+        500,
+        865,
+        565,
+        940
+      ],
+      "size": [
+        68,
+        78
+      ],
+      "category": "ground-integration",
+      "variant": "grass",
+      "type": "ground"
+    },
+    {
+      "id": "ground-integration_dirt",
+      "path": "res://assets/tilesets/rocks/ground-integration/dirt.png",
+      "source_box": [
+        565,
+        865,
+        650,
+        940
+      ],
+      "size": [
+        88,
+        78
+      ],
+      "category": "ground-integration",
+      "variant": "dirt",
+      "type": "ground"
+    },
+    {
+      "id": "ground-integration_sand",
+      "path": "res://assets/tilesets/rocks/ground-integration/sand.png",
+      "source_box": [
+        650,
+        865,
+        705,
+        940
+      ],
+      "size": [
+        58,
+        78
+      ],
+      "category": "ground-integration",
+      "variant": "sand",
+      "type": "ground"
+    },
+    {
+      "id": "ground-integration_snow",
+      "path": "res://assets/tilesets/rocks/ground-integration/snow.png",
+      "source_box": [
+        705,
+        865,
+        875,
+        940
+      ],
+      "size": [
+        173,
+        78
+      ],
+      "category": "ground-integration",
+      "variant": "snow",
+      "type": "ground"
+    },
+    {
+      "id": "ground-integration_swamp",
+      "path": "res://assets/tilesets/rocks/ground-integration/swamp.png",
+      "source_box": [
+        875,
+        865,
+        915,
+        940
+      ],
+      "size": [
+        43,
+        78
+      ],
+      "category": "ground-integration",
+      "variant": "swamp",
+      "type": "ground"
+    },
+    {
+      "id": "ground-integration_stone-floor",
+      "path": "res://assets/tilesets/rocks/ground-integration/stone-floor.png",
+      "source_box": [
+        915,
+        865,
+        1015,
+        940
+      ],
+      "size": [
+        103,
+        78
+      ],
+      "category": "ground-integration",
+      "variant": "stone-floor",
+      "type": "ground"
+    },
+    {
+      "id": "ground-integration_cliff-edge",
+      "path": "res://assets/tilesets/rocks/ground-integration/cliff-edge.png",
+      "source_box": [
+        1015,
+        865,
+        1505,
+        940
+      ],
+      "size": [
+        493,
+        78
+      ],
+      "category": "ground-integration",
+      "variant": "cliff-edge",
+      "type": "ground"
+    },
+    {
+      "id": "color-variations_gray",
+      "path": "res://assets/tilesets/rocks/color-variations/gray.png",
+      "source_box": [
+        60,
+        945,
+        150,
+        985
+      ],
+      "size": [
+        93,
+        43
+      ],
+      "category": "color-variations",
+      "variant": "gray",
+      "type": "palette"
+    },
+    {
+      "id": "color-variations_tan",
+      "path": "res://assets/tilesets/rocks/color-variations/tan.png",
+      "source_box": [
+        152,
+        945,
+        285,
+        985
+      ],
+      "size": [
+        136,
+        43
+      ],
+      "category": "color-variations",
+      "variant": "tan",
+      "type": "palette"
+    },
+    {
+      "id": "color-variations_brown",
+      "path": "res://assets/tilesets/rocks/color-variations/brown.png",
+      "source_box": [
+        288,
+        945,
+        423,
+        985
+      ],
+      "size": [
+        138,
+        43
+      ],
+      "category": "color-variations",
+      "variant": "brown",
+      "type": "palette"
+    },
+    {
+      "id": "color-variations_basalt",
+      "path": "res://assets/tilesets/rocks/color-variations/basalt.png",
+      "source_box": [
+        426,
+        945,
+        560,
+        985
+      ],
+      "size": [
+        137,
+        43
+      ],
+      "category": "color-variations",
+      "variant": "basalt",
+      "type": "palette"
+    },
+    {
+      "id": "color-variations_mossy",
+      "path": "res://assets/tilesets/rocks/color-variations/mossy.png",
+      "source_box": [
+        564,
+        945,
+        698,
+        985
+      ],
+      "size": [
+        137,
+        43
+      ],
+      "category": "color-variations",
+      "variant": "mossy",
+      "type": "palette"
+    },
+    {
+      "id": "color-variations_purple",
+      "path": "res://assets/tilesets/rocks/color-variations/purple.png",
+      "source_box": [
+        703,
+        945,
+        760,
+        985
+      ],
+      "size": [
+        60,
+        43
+      ],
+      "category": "color-variations",
+      "variant": "purple",
+      "type": "palette"
+    }
+  ]
+}
