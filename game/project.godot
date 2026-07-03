@@ -41,18 +41,18 @@ SeasonManager="*res://autoload/season_manager.gd"
 AudioManager="*res://autoload/audio_manager.gd"
 NetManager="*res://autoload/net_manager.gd"
 
-[gui]
-
-theme/custom="res://ui/theme.tres"
-
 [display]
 
 window/size/viewport_width=540
-window/size/viewport_height=960
+window/size/viewport_height=1138
 window/size/window_width_override=405
-window/size/window_height_override=720
+window/size/window_height_override=854
 window/stretch/mode="canvas_items"
 window/handheld/orientation="portrait"
+
+[gui]
+
+theme/custom="res://ui/theme.tres"
 
 [rendering]
 

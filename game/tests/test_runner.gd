@@ -13,6 +13,7 @@ const SUITES := [
 	preload("res://tests/unit/test_migration_v1.gd"),
 	preload("res://tests/unit/test_offline.gd"),
 	preload("res://tests/unit/test_bootstrap.gd"),
+	preload("res://tests/unit/test_camera_controller.gd"),
 	# --- Phase 2 ---
 	preload("res://tests/unit/test_hero_condition.gd"),
 	preload("res://tests/unit/test_migration_v2.gd"),

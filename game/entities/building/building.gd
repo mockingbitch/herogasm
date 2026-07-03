@@ -77,6 +77,7 @@ func upgrade() -> bool:
 var _label: Label
 
 const BUILD_DIR := "res://assets/generated/buildings/"
+const ISO_BUILDING_SCALE := 0.9
 
 func _build_visual() -> void:
 	var type := def.type if def != null else "inn"
@@ -85,8 +86,9 @@ func _build_visual() -> void:
 		var spr := Sprite2D.new()
 		spr.texture = tex
 		spr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-		spr.scale = Vector2(1.5, 1.5)
-		spr.position = Vector2(0, -8)     # gốc node ~ chân nhà
+		spr.scale = Vector2(ISO_BUILDING_SCALE, ISO_BUILDING_SCALE)
+		# Iso: neo đáy sprite vào gốc node -> Y-sort xếp theo chân nhà.
+		spr.offset = Vector2(0, -tex.get_height() / 2.0)
 		add_child(spr)
 	else:
 		var poly := Polygon2D.new()
@@ -95,7 +97,7 @@ func _build_visual() -> void:
 		add_child(poly)
 	_label = Label.new()
 	_label.add_theme_font_size_override("font_size", 8)
-	_label.position = Vector2(-24, -38)
+	_label.position = Vector2(-24, -104)   # iso: nhãn nổi trên nóc nhà
 	_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_label)
 	_refresh_label()

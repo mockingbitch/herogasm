@@ -10,9 +10,11 @@ var _spawner: MonsterSpawner
 
 func _ready() -> void:
 	ServiceRegistry.clear()   # scene mới -> đăng ký lại dịch vụ
+	y_sort_enabled = true     # ISO: xếp chiều sâu theo Y cho building/hero/monster
 	_build_ground()
 	_build_town()
 	_build_field()
+	_build_field_decor()
 	_spawn_heroes()
 	_build_camera()
 	add_child(GameHud.new())
@@ -39,60 +41,132 @@ func _dispatch_tick() -> void:
 func F6_hint() -> void:
 	Debug.log("World P1 ready — %d hero, %d monster" % [PlayerProfile.hero_ids.size(), _spawner.alive_count()])
 
-const TILE := 32
-const T_GRASS := Vector2i(0, 0)
-const T_GRASS_DK := Vector2i(1, 0)
-const T_DIRT := Vector2i(2, 0)
-const T_PATH := Vector2i(3, 0)
-const T_WATER := Vector2i(4, 0)
-const T_WALL := Vector2i(5, 0)
-const T_PLAZA := Vector2i(6, 0)
-const T_BUSH := Vector2i(7, 0)
+# --- ISO diorama ground -----------------------------------------------------
+# Cube tile ~52px rộng, diamond 2:1 -> half-width 26, half-height 13.
+const ISO_HW := 26
+const ISO_HH := 13
+const GRID_COLS := 26
+const GRID_ROWS := 18
+const GROUND_DIR := "res://assets/iso/ground/"
+const GROUND_KEYS := ["grass", "grass2", "dirt", "cobble", "stone", "path", "water", "snow"]
 
-## Nền TileMap từ atlas placeholder: thành có tường bao + quảng trường, Bãi Săn cỏ/đất + suối.
+func _iso(col: int, row: int) -> Vector2:
+	return Vector2((col - row) * ISO_HW, (col + row) * ISO_HH)
+
+## Chuyển pixel-space (toạ độ sim) -> ô iso gần nhất (để rải path/plaza quanh building).
+func _cell_at(p: Vector2, origin: Vector2) -> Vector2i:
+	var l := p - origin
+	var col := roundi((l.x / ISO_HW + l.y / ISO_HH) / 2.0)
+	var row := roundi((l.y / ISO_HH - l.x / ISO_HW) / 2.0)
+	return Vector2i(col, row)
+
+## Nền iso: diorama cỏ + quảng trường đá quanh thành + suối phía Bãi Săn.
 func _build_ground() -> void:
-	var ts := TileSet.new()
-	ts.tile_size = Vector2i(TILE, TILE)
-	var src := TileSetAtlasSource.new()
-	src.texture = load("res://assets/generated/tiles/atlas.png")
-	src.texture_region_size = Vector2i(TILE, TILE)
-	for i in 8:
-		src.create_tile(Vector2i(i, 0))
-	ts.add_source(src, 0)
-	var layer := TileMapLayer.new()
-	layer.tile_set = ts
-	layer.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	add_child(layer)                       # thêm đầu tiên -> vẽ dưới cùng (sau buildings/hero)
+	var ground := Node2D.new()
+	ground.name = "GroundLayer"
+	ground.z_index = -100                  # luôn dưới building/hero/monster
+	ground.y_sort_enabled = true           # cube xếp painter đúng theo Y
+	add_child(ground)
+	var center := _iso(GRID_COLS / 2, GRID_ROWS / 2)
+	ground.position = Vector2(20, -6) - center   # canh diorama dưới town+field
+
+	var tex := {}
+	for k in GROUND_KEYS:
+		tex[k] = load(GROUND_DIR + k + ".png")
+
+	# Ô đặc biệt theo pixel-space: quảng trường đá quanh thành, suối cột Bãi Săn.
+	var special := {}
+	var plaza_cells := _cells_in_rect(Rect2(TOWN.x - 90, TOWN.y - 70, 180, 150), ground.position)
+	for c in plaza_cells:
+		special[c] = "cobble"
+	for cy in range(-5, 6):                # suối dọc mép phải Bãi Săn
+		var wc := _cell_at(Vector2(FIELD_CENTER.x + 190, cy * 26.0), ground.position)
+		special[wc] = "water"
+	# Bãi Săn: mảng đất (clearing combat) + đường mòn nối town -> field
+	for c in _cells_in_rect(Rect2(FIELD_CENTER.x - 85, FIELD_CENTER.y - 58, 195, 122), ground.position):
+		if not special.has(c):
+			special[c] = "dirt"
+	for c in _cells_in_rect(Rect2(-40, -13, 300, 26), ground.position):
+		if not special.has(c):
+			special[c] = "path"
 
 	var rng := RandomNumberGenerator.new()
-	rng.seed = 20260702
-	# nền cỏ toàn bản đồ
-	for cy in range(-6, 7):
-		for cx in range(-15, 17):
-			layer.set_cell(Vector2i(cx, cy), 0, T_GRASS_DK if rng.randf() < 0.16 else T_GRASS)
+	rng.seed = 20260703
+	for col in GRID_COLS:
+		for row in GRID_ROWS:
+			var key: String = special.get(Vector2i(col, row), "")
+			if key == "":
+				key = "grass2" if rng.randf() < 0.12 else "grass"
+			var spr := Sprite2D.new()
+			spr.texture = tex[key]
+			spr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+			spr.position = _iso(col, row)
+			ground.add_child(spr)
 
-	# --- THÀNH (trái): tường bao + quảng trường + lối đá ---
-	var tx0 := -14; var tx1 := -2; var ty0 := -5; var ty1 := 4
-	for cx in range(tx0, tx1 + 1):
-		layer.set_cell(Vector2i(cx, ty0), 0, T_WALL)
-		layer.set_cell(Vector2i(cx, ty1), 0, T_WALL)
-	for cy in range(ty0, ty1 + 1):
-		layer.set_cell(Vector2i(tx0, cy), 0, T_WALL)
-		layer.set_cell(Vector2i(tx1, cy), 0, T_WALL)
-	for cy in range(-1, 2):                # quảng trường trung tâm
-		for cx in range(-9, -5):
-			layer.set_cell(Vector2i(cx, cy), 0, T_PLAZA)
-	for cx in range(tx0 + 1, tx1):         # lối đá ngang giữa thành
-		layer.set_cell(Vector2i(cx, 0), 0, T_PATH)
+## Các ô iso phủ 1 rect pixel-space (dùng canh quảng trường quanh building).
+func _cells_in_rect(r: Rect2, origin: Vector2) -> Array[Vector2i]:
+	var out: Array[Vector2i] = []
+	var step := 16.0
+	var y := r.position.y
+	while y <= r.end.y:
+		var x := r.position.x
+		while x <= r.end.x:
+			var c := _cell_at(Vector2(x, y), origin)
+			if not out.has(c):
+				out.append(c)
+			x += step
+		y += step
+	return out
 
-	# --- BÃI SĂN (phải): cỏ + mảng đất + suối + bụi cây ---
-	for i in 26:
-		layer.set_cell(Vector2i(rng.randi_range(4, 14), rng.randi_range(-4, 4)), 0, T_DIRT)
-	for cy in range(-5, 6):                # suối cột phải
-		layer.set_cell(Vector2i(15, cy), 0, T_WATER)
-		layer.set_cell(Vector2i(16, cy), 0, T_WATER)
-	for i in 14:
-		layer.set_cell(Vector2i(rng.randi_range(4, 13), rng.randi_range(-4, 4)), 0, T_BUSH)
+# --- Bãi Săn decor (rừng iso: cây/đá/bụi + điểm nhấn chest/crystal/wagon/lửa) ------
+const NAT := "res://assets/iso/nature/"
+const DEC := "res://assets/iso/deco/"
+
+func _decor(path: String, pos: Vector2, sc: float = 1.0) -> void:
+	var tex: Texture2D = load(path)
+	if tex == null:
+		return
+	var s := Sprite2D.new()
+	s.texture = tex
+	s.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	s.scale = Vector2(sc, sc)
+	s.offset = Vector2(0, -tex.get_height() / 2.0)   # neo đáy -> Y-sort theo gốc
+	s.position = pos
+	add_child(s)
+
+const TREES := ["tree-pine", "tree-pine2", "tree-oak", "tree-bush"]
+const CLEARING := Rect2(170, -66, 210, 132)   # vùng combat (không đặt cây)
+
+## Rải cảnh vật Bãi Săn: rừng dày quanh rìa (né clearing/town/suối), đá/bụi/hoa, điểm nhấn.
+func _build_field_decor() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 771026
+	# Viền rừng dày: rải ~40 cây trong dải field, né clearing combat + cột suối phải.
+	var placed := 0
+	for i in 120:
+		if placed >= 40:
+			break
+		var p := Vector2(rng.randf_range(138, 452), rng.randf_range(-142, 142))
+		if CLEARING.has_point(p) or p.x > 444:            # chừa clearing + suối
+			continue
+		if absf(p.y) < 22 and p.x < 210:                  # chừa đường mòn vào
+			continue
+		_decor(NAT + TREES[rng.randi() % TREES.size()] + ".png", p)
+		placed += 1
+	# Đá / bụi / hoa / lúa rải trong & ven clearing
+	for r in [[Vector2(176, 60), "rock2"], [Vector2(392, -30), "rock1"], [Vector2(360, -60), "rock3"], [Vector2(300, 70), "rock2"], [Vector2(162, -42), "crystal-rock"], [Vector2(348, 40), "rock1"]]:
+		_decor(NAT + str(r[1]) + ".png", r[0])
+	for b in [[Vector2(214, 68), "flowers"], [Vector2(332, -58), "flowers2"], [Vector2(280, 84), "wheat"], [Vector2(232, -50), "flowers2"], [Vector2(356, 60), "flowers"], [Vector2(190, 44), "log"], [Vector2(320, 8), "flowers"]]:
+		_decor(NAT + str(b[1]) + ".png", b[0])
+	# Điểm nhấn (như demo): tinh thể trái, rương, xe ngựa phải, đuốc, lửa trại
+	_decor(DEC + "crystal.png", Vector2(178, 20))
+	_decor(DEC + "chest.png", Vector2(210, -30))
+	_decor(DEC + "wagon.png", Vector2(360, -34))
+	_decor(DEC + "barrel.png", Vector2(342, -20))
+	_decor(DEC + "crate.png", Vector2(374, -16))
+	_decor(DEC + "torch.png", Vector2(196, 66))
+	_decor(DEC + "torch.png", Vector2(360, 66))
+	_decor(NAT + "campfire.png", Vector2(236, 78))
 
 func _build_town() -> void:
 	_building("inn", Vector2(-350, -40))
@@ -126,8 +200,7 @@ func _spawn_heroes() -> void:
 		i += 1
 
 func _build_camera() -> void:
-	var cam := Camera2D.new()
-	cam.position = Vector2(20, 0)
-	cam.zoom = Vector2(0.62, 0.62)   # zoom-out để thấy cả town + field
-	add_child(cam)
-	cam.make_current()               # sau khi vào tree
+	var cam := CameraController.new()
+	cam.position = Vector2(255, 24)        # focus Bãi Săn (như màn demo, thành nằm ngoài khung)
+	cam.zoom = Vector2(1.18, 1.18)         # zoom gần: thấy hero/quái to như demo
+	add_child(cam)                         # CameraController._ready() tự make_current + set target
