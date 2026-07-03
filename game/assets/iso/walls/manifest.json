@@ -1,0 +1,318 @@
+{
+  "source": "images/water-tileset/wall.png",
+  "materials": [
+    "stone",
+    "wood",
+    "castle",
+    "dungeon",
+    "temple"
+  ],
+  "pieces": [
+    "top",
+    "side",
+    "corner-outer",
+    "corner-inner",
+    "slope",
+    "broken",
+    "gate",
+    "pillar"
+  ],
+  "count": 205,
+  "tree": {
+    "stone": {
+      "top": [
+        "top-01.png",
+        "top-02.png",
+        "top-03.png",
+        "top-04.png",
+        "top-05.png",
+        "top-06.png",
+        "top-07.png"
+      ],
+      "side": [
+        "side-01.png",
+        "side-02.png",
+        "side-03.png",
+        "side-04.png",
+        "side-05.png",
+        "side-06.png",
+        "side-07.png",
+        "side-08.png",
+        "side-09.png",
+        "side-10.png"
+      ],
+      "corner-outer": [
+        "corner-outer-01.png",
+        "corner-outer-02.png"
+      ],
+      "corner-inner": [
+        "corner-inner-01.png",
+        "corner-inner-02.png"
+      ],
+      "slope": [
+        "slope-01.png",
+        "slope-02.png",
+        "slope-03.png"
+      ],
+      "broken": [
+        "broken-01.png",
+        "broken-02.png",
+        "broken-03.png",
+        "broken-04.png"
+      ],
+      "gate": [
+        "gate-01.png",
+        "gate-02.png",
+        "gate-03.png",
+        "gate-04.png",
+        "gate-05.png",
+        "gate-06.png",
+        "gate-07.png"
+      ],
+      "pillar": [
+        "pillar-01.png",
+        "pillar-02.png",
+        "pillar-03.png",
+        "pillar-04.png",
+        "pillar-05.png",
+        "pillar-06.png"
+      ]
+    },
+    "wood": {
+      "top": [
+        "top-01.png",
+        "top-02.png",
+        "top-03.png",
+        "top-04.png",
+        "top-05.png",
+        "top-06.png"
+      ],
+      "side": [
+        "side-01.png",
+        "side-02.png",
+        "side-03.png",
+        "side-04.png",
+        "side-05.png",
+        "side-06.png",
+        "side-07.png",
+        "side-08.png",
+        "side-09.png",
+        "side-10.png",
+        "side-11.png",
+        "side-12.png"
+      ],
+      "corner-outer": [
+        "corner-outer-01.png",
+        "corner-outer-02.png"
+      ],
+      "corner-inner": [
+        "corner-inner-01.png",
+        "corner-inner-02.png"
+      ],
+      "slope": [
+        "slope-01.png",
+        "slope-02.png",
+        "slope-03.png"
+      ],
+      "broken": [
+        "broken-01.png",
+        "broken-02.png",
+        "broken-03.png"
+      ],
+      "gate": [
+        "gate-01.png",
+        "gate-02.png",
+        "gate-03.png",
+        "gate-04.png",
+        "gate-05.png",
+        "gate-06.png",
+        "gate-07.png",
+        "gate-08.png",
+        "gate-09.png",
+        "gate-10.png"
+      ],
+      "pillar": [
+        "pillar-01.png",
+        "pillar-02.png",
+        "pillar-03.png",
+        "pillar-04.png",
+        "pillar-05.png",
+        "pillar-06.png"
+      ]
+    },
+    "castle": {
+      "top": [
+        "top-01.png",
+        "top-02.png",
+        "top-03.png",
+        "top-04.png",
+        "top-05.png",
+        "top-06.png",
+        "top-07.png",
+        "top-08.png"
+      ],
+      "side": [
+        "side-01.png",
+        "side-02.png",
+        "side-03.png",
+        "side-04.png",
+        "side-05.png",
+        "side-06.png",
+        "side-07.png",
+        "side-08.png",
+        "side-09.png",
+        "side-10.png",
+        "side-11.png",
+        "side-12.png",
+        "side-13.png",
+        "side-14.png",
+        "side-15.png",
+        "side-16.png"
+      ],
+      "corner-outer": [
+        "corner-outer-01.png",
+        "corner-outer-02.png"
+      ],
+      "corner-inner": [
+        "corner-inner-01.png",
+        "corner-inner-02.png",
+        "corner-inner-03.png"
+      ],
+      "slope": [
+        "slope-01.png",
+        "slope-02.png",
+        "slope-03.png"
+      ],
+      "broken": [
+        "broken-01.png",
+        "broken-02.png",
+        "broken-03.png",
+        "broken-04.png",
+        "broken-05.png",
+        "broken-06.png",
+        "broken-07.png",
+        "broken-08.png",
+        "broken-09.png",
+        "broken-10.png",
+        "broken-11.png",
+        "broken-12.png"
+      ],
+      "gate": [
+        "gate-01.png",
+        "gate-02.png",
+        "gate-03.png",
+        "gate-04.png",
+        "gate-05.png",
+        "gate-06.png",
+        "gate-07.png"
+      ],
+      "pillar": [
+        "pillar-01.png",
+        "pillar-02.png",
+        "pillar-03.png",
+        "pillar-04.png",
+        "pillar-05.png",
+        "pillar-06.png"
+      ]
+    },
+    "dungeon": {
+      "top": [
+        "top-01.png",
+        "top-02.png",
+        "top-03.png",
+        "top-04.png",
+        "top-05.png",
+        "top-06.png"
+      ],
+      "side": [
+        "side-01.png",
+        "side-02.png",
+        "side-03.png",
+        "side-04.png"
+      ],
+      "corner-outer": [
+        "corner-outer-01.png",
+        "corner-outer-02.png"
+      ],
+      "corner-inner": [
+        "corner-inner-01.png",
+        "corner-inner-02.png"
+      ],
+      "slope": [
+        "slope-01.png",
+        "slope-02.png",
+        "slope-03.png",
+        "slope-04.png"
+      ],
+      "broken": [
+        "broken-01.png",
+        "broken-02.png",
+        "broken-03.png",
+        "broken-04.png",
+        "broken-05.png",
+        "broken-06.png"
+      ],
+      "gate": [
+        "gate-01.png",
+        "gate-02.png"
+      ],
+      "pillar": [
+        "pillar-01.png",
+        "pillar-02.png",
+        "pillar-03.png",
+        "pillar-04.png",
+        "pillar-05.png",
+        "pillar-06.png",
+        "pillar-07.png",
+        "pillar-08.png",
+        "pillar-09.png",
+        "pillar-10.png",
+        "pillar-11.png",
+        "pillar-12.png"
+      ]
+    },
+    "temple": {
+      "top": [
+        "top-01.png",
+        "top-02.png"
+      ],
+      "side": [
+        "side-01.png",
+        "side-02.png",
+        "side-03.png",
+        "side-04.png",
+        "side-05.png"
+      ],
+      "corner-outer": [
+        "corner-outer-01.png",
+        "corner-outer-02.png"
+      ],
+      "corner-inner": [
+        "corner-inner-01.png",
+        "corner-inner-02.png"
+      ],
+      "slope": [
+        "slope-01.png",
+        "slope-02.png"
+      ],
+      "broken": [
+        "broken-01.png",
+        "broken-02.png",
+        "broken-03.png"
+      ],
+      "gate": [
+        "gate-01.png",
+        "gate-02.png",
+        "gate-03.png"
+      ],
+      "pillar": [
+        "pillar-01.png",
+        "pillar-02.png",
+        "pillar-03.png",
+        "pillar-04.png",
+        "pillar-05.png",
+        "pillar-06.png"
+      ]
+    }
+  }
+}
