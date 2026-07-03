@@ -18,3 +18,4 @@ extends Resource
 @export var drops: Array = []
 @export var sprite: String = ""          # tên base sprite 0x72 (vd "skelet")
 @export var sprite_single: bool = false  # true nếu pack chỉ có "<base>_anim_fN"
+@export var is_boss: bool = false        # true -> hiện thanh máu boss trên HUD (quái thường: ẩn)

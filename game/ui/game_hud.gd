@@ -27,6 +27,58 @@ var _battle_panel: BattlePanel
 var _season_panel: SeasonPanel
 var _panel_bg: Panel
 
+# minimap + boss target (bind từ world qua bind_world)
+var _world: Node = null
+var _spawner = null
+var _minimap: MiniMap = null
+var _boss_root: Control = null
+var _boss_name: Label = null
+var _boss_hp: ProgressBar = null
+var _boss_target = null
+var _boss_hp_val: float = 100.0
+
+## world.gd gọi để cấp nguồn dữ liệu sống cho minimap + boss nameplate.
+func bind_world(w: Node, sp, field: Rect2) -> void:
+	_world = w
+	_spawner = sp
+	if _minimap != null:
+		_minimap.spawner = sp
+		_minimap.world_node = w
+		_minimap.field = field
+
+## Minimap live: vẽ dot hero (xanh) + monster (đỏ) theo vị trí thật trong FIELD_RECT.
+class MiniMap extends Control:
+	var spawner = null
+	var world_node: Node = null
+	var field: Rect2 = Rect2()
+	var _acc: float = 0.0
+
+	func _process(delta: float) -> void:
+		_acc += delta
+		if _acc >= 0.2:      # ~5 FPS (ui.md: minimap không cần realtime)
+			_acc = 0.0
+			queue_redraw()
+
+	func _draw() -> void:
+		draw_rect(Rect2(Vector2.ZERO, size), Color(0.13, 0.17, 0.12))
+		if field.size.x <= 0.0 or field.size.y <= 0.0:
+			return
+		if spawner != null:
+			for m in spawner._alive:
+				if m != null and is_instance_valid(m) and m.is_alive():
+					_dot(m.global_position, Color(0.9, 0.32, 0.3), 2.0)
+		if world_node != null:
+			for c in world_node.get_children():
+				if c is Hero:
+					_dot(c.global_position, Color(0.42, 0.72, 1.0), 2.5)
+
+	func _dot(wp: Vector2, col: Color, r: float) -> void:
+		var lx := (wp.x - field.position.x) / field.size.x * size.x
+		var ly := (wp.y - field.position.y) / field.size.y * size.y
+		if lx < 0.0 or ly < 0.0 or lx > size.x or ly > size.y:
+			return
+		draw_circle(Vector2(lx, ly), r, col)
+
 func _ready() -> void:
 	_build()
 	EventBus.gold_changed.connect(func(v): _gold.text = _fmt(v))
@@ -50,6 +102,7 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	_refresh_party()
+	_update_boss(delta)
 	if _toast_cd > 0.0:
 		_toast_cd -= delta
 		if _toast_cd <= 0.0:
@@ -144,8 +197,55 @@ func _build() -> void:
 	_build_top()
 	_build_left()
 	_build_right()
+	_build_boss_bar()
 	_build_bottom()
 	_build_popups()
+
+## Boss/target bar giữa-trên map: nameplate = quái gần tâm (thật), HP = xấp xỉ auto-battle.
+func _build_boss_bar() -> void:
+	_boss_root = _panel(Vector2(VW / 2.0 - 104, 150), Vector2(208, 34))
+	_boss_name = _text(_boss_root, Vector2(8, 3), "", 12, Color(0.95, 0.42, 0.36))
+	_boss_hp = ProgressBar.new()
+	_boss_hp.position = Vector2(8, 20)
+	_boss_hp.custom_minimum_size = Vector2(192, 8)
+	_boss_hp.size = Vector2(192, 8)
+	_boss_hp.show_percentage = false
+	_boss_hp.max_value = 100
+	_boss_hp.value = 100
+	var fill := StyleBoxFlat.new()
+	fill.bg_color = Color(0.82, 0.22, 0.2)
+	fill.set_corner_radius_all(2)
+	var bg := StyleBoxFlat.new()
+	bg.bg_color = Color(0.1, 0.08, 0.08)
+	bg.set_corner_radius_all(2)
+	_boss_hp.add_theme_stylebox_override("fill", fill)
+	_boss_hp.add_theme_stylebox_override("background", bg)
+	_boss_hp.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_boss_root.add_child(_boss_hp)
+	_boss_root.visible = false
+
+func _update_boss(delta: float) -> void:
+	if _boss_root == null or _spawner == null:
+		return
+	# Thanh máu CHỈ hiện khi có boss trong field (quái thường: không hiện).
+	var boss = null
+	for m in _spawner._alive:
+		if m != null and is_instance_valid(m) and m.is_alive() and m.data != null and m.data.is_boss:
+			boss = m
+			break
+	if boss == null:
+		_boss_root.visible = false
+		_boss_target = null
+		return
+	_boss_root.visible = true
+	if boss != _boss_target:
+		_boss_target = boss
+		_boss_hp_val = 100.0
+		var lv := maxi(1, int(boss.data.max_hp / 6.0))
+		_boss_name.text = "Lv.%d %s" % [lv, boss.data.display_name]
+	else:
+		_boss_hp_val = maxf(6.0, _boss_hp_val - delta * 15.0)   # xấp xỉ hero whittle HP
+	_boss_hp.value = _boss_hp_val
 
 # --- TOP: player card + resource pills + menu 2x2 --------------------------
 func _build_top() -> void:
@@ -213,10 +313,12 @@ func _build_right() -> void:
 	var mm := _panel(Vector2(360, 110), Vector2(174, 150))
 	_text(mm, Vector2(8, 6), "Bài Săn Mở 1", 12, Color(0.96, 0.9, 0.7))
 	_text(mm, Vector2(154, 4), "✕", 12, Color(0.7, 0.7, 0.75))
-	var map := ColorRect.new()
-	map.position = Vector2(8, 28); map.size = Vector2(158, 86)
-	map.color = Color(0.14, 0.18, 0.13)
-	mm.add_child(map)
+	_minimap = MiniMap.new()
+	_minimap.position = Vector2(8, 28)
+	_minimap.size = Vector2(158, 86)
+	_minimap.custom_minimum_size = Vector2(158, 86)
+	_minimap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	mm.add_child(_minimap)
 	_text(mm, Vector2(52, 120), "Thế Giới 1", 12, Color(0.9, 0.85, 0.7))
 	_mini_btn(Vector2(500, 224), "+")
 
@@ -262,7 +364,6 @@ func _build_bottom() -> void:
 
 	# Hero party bar (6 card)
 	var party_bg := _panel(Vector2(6, 900), Vector2(528, 62))
-	add_child(party_bg)
 	for i in 6:
 		var cx := 4.0 + i * 87.0
 		var root := Panel.new()
@@ -280,10 +381,10 @@ func _build_bottom() -> void:
 	# Nav bar (7 icon + label)
 	var navbar := _panel(Vector2(0, VH - 116), Vector2(VW, 116))
 	var items := [
-		["nav-team", "Thành Chính", Callable(self, "_show").bind(null)],
+		["nav-team", "Thành Chính", Callable(self, "_go_town")],
 		["nav-hero", "Hero", Callable(self, "_show_hero")],
-		["nav-campaign", "Nhiệm Vụ", Callable(self, "_show_season")],
-		["nav-battle", "Bãi Săn", Callable(self, "_show").bind(null)],
+		["nav-quest", "Nhiệm Vụ", Callable(self, "_show_season")],
+		["nav-battle", "Bãi Săn", Callable(self, "_go_hunt")],
 		["nav-world", "Đấu Trường", Callable(self, "_show_battle")],
 		["nav-summon", "Sự Kiện", Callable(self, "_show_summon")],
 		["nav-build", "Cửa Hàng", Callable(self, "_show_build")],
@@ -311,6 +412,16 @@ func _build_bottom() -> void:
 		vb.add_child(lbl)
 
 # nav callbacks (tránh bind lambda phức tạp)
+func _go_town() -> void:
+	_show(null)
+	if _world != null and _world.has_method("go_town_view"):
+		_world.go_town_view()
+
+func _go_hunt() -> void:
+	_show(null)
+	if _world != null and _world.has_method("go_hunt_view"):
+		_world.go_hunt_view()
+
 func _show_hero() -> void: _show(_hero_panel)
 func _show_battle() -> void: _show(_battle_panel)
 func _show_summon() -> void: _show(_summon_panel)

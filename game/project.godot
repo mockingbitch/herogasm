@@ -45,9 +45,10 @@ NetManager="*res://autoload/net_manager.gd"
 
 window/size/viewport_width=540
 window/size/viewport_height=1138
-window/size/window_width_override=405
-window/size/window_height_override=854
+window/size/window_width_override=540
+window/size/window_height_override=1138
 window/stretch/mode="canvas_items"
+window/stretch/aspect="keep"
 window/handheld/orientation="portrait"
 
 [gui]

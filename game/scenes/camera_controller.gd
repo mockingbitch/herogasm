@@ -32,6 +32,13 @@ func _view_size() -> Vector2:
 func _screen_to_world(s: Vector2) -> Vector2:
 	return global_position + (s - _view_size() * 0.5) / zoom
 
+## Chuyển màn: snap camera tới 1 vùng (Thành / Bãi Săn) + đặt zoom.
+func focus(pos: Vector2, z: float) -> void:
+	global_position = pos
+	_target_zoom = clampf(z, zoom_min, zoom_max)
+	zoom = Vector2(_target_zoom, _target_zoom)
+	_anchor_screen = _view_size() * 0.5
+
 func _set_zoom_target(z: float, anchor_screen: Vector2) -> void:
 	_target_zoom = clampf(z, zoom_min, zoom_max)
 	_anchor_screen = anchor_screen

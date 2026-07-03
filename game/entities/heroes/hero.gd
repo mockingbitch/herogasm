@@ -21,6 +21,10 @@ var hero_id: String = ""
 var home_pos: Vector2 = Vector2.ZERO
 var field_center: Vector2 = Vector2(260, 0)
 var spawner: MonsterSpawner
+# Cổng dịch chuyển: nếu di chuyển vượt _gate_x -> nhảy tới điểm vào bên kia (không đi bộ khoảng cách town<->hunt)
+var _gate_x: float = 0.0
+var _town_ent: Vector2 = Vector2.ZERO
+var _hunt_ent: Vector2 = Vector2.ZERO
 
 var state: int = St.IDLE
 var goal: String = "idle"
@@ -33,11 +37,14 @@ var _spr: AnimatedSprite2D
 var _prev_pos: Vector2 = Vector2.ZERO
 var _evaluator := HeroGoalEvaluator.new()
 
-func setup(id: String, home: Vector2, field: Vector2, spawner_: MonsterSpawner) -> void:
+func setup(id: String, home: Vector2, field: Vector2, spawner_: MonsterSpawner, gate_x: float = 0.0, town_ent: Vector2 = Vector2.ZERO, hunt_ent: Vector2 = Vector2.ZERO) -> void:
 	hero_id = id
 	home_pos = home
 	field_center = field
 	spawner = spawner_
+	_gate_x = gate_x
+	_town_ent = town_ent
+	_hunt_ent = hunt_ent
 	position = home
 
 func _ready() -> void:
@@ -314,6 +321,9 @@ func _spawn_damage_numbers(res: BattleResult, monster: Monster) -> void:
 # --- helpers --------------------------------------------------------------
 ## Di chuyển về dest; trả true khi đã trong `arrive` khoảng cách.
 func _move(dest: Vector2, delta: float, arrive: float = 4.0) -> bool:
+	# Cổng dịch chuyển: đích ở bên kia ranh giới -> nhảy tới điểm vào (thay vì đi bộ)
+	if _gate_x > 0.0 and (position.x - _gate_x) * (dest.x - _gate_x) < 0.0:
+		position = _hunt_ent if dest.x > _gate_x else _town_ent
 	if position.distance_to(dest) <= arrive:
 		return true
 	position = position.move_toward(dest, MOVE_SPEED * delta)
