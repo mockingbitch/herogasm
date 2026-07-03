@@ -196,6 +196,7 @@ Người chơi luôn có mục tiêu mới:
 
 | File         | Description                 |
 | ------------ | --------------------------- |
+| FLOW.md      | **Kịch bản hành trình người chơi A→Z (offline-first) — bắt đầu đọc ở đây** |
 | STORY.md     | Thế giới và cốt truyện      |
 | WORLD.md     | Quốc gia, bản đồ, chủng tộc |
 | HERO.md      | Hero, Class, Race           |

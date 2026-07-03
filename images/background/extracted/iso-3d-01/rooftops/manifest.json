@@ -1,0 +1,52 @@
+{
+  "source": "background-3d-01.png",
+  "box": [
+    12,
+    902,
+    380,
+    1016
+  ],
+  "count": 8,
+  "sprites": [
+    {
+      "file": "rooftops-01.png",
+      "w": 45,
+      "h": 70
+    },
+    {
+      "file": "rooftops-02.png",
+      "w": 55,
+      "h": 70
+    },
+    {
+      "file": "rooftops-03.png",
+      "w": 44,
+      "h": 67
+    },
+    {
+      "file": "rooftops-04.png",
+      "w": 53,
+      "h": 70
+    },
+    {
+      "file": "rooftops-05.png",
+      "w": 48,
+      "h": 68
+    },
+    {
+      "file": "rooftops-06.png",
+      "w": 37,
+      "h": 67
+    },
+    {
+      "file": "rooftops-07.png",
+      "w": 47,
+      "h": 87
+    },
+    {
+      "file": "rooftops-08.png",
+      "w": 30,
+      "h": 82
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "source": "background-3d-01.png",
+  "box": [
+    12,
+    742,
+    425,
+    872
+  ],
+  "count": 8,
+  "sprites": [
+    {
+      "file": "water-01.png",
+      "w": 144,
+      "h": 103
+    },
+    {
+      "file": "water-02.png",
+      "w": 46,
+      "h": 107
+    },
+    {
+      "file": "water-03.png",
+      "w": 47,
+      "h": 107
+    },
+    {
+      "file": "water-04.png",
+      "w": 50,
+      "h": 39
+    },
+    {
+      "file": "water-05.png",
+      "w": 49,
+      "h": 40
+    },
+    {
+      "file": "water-06.png",
+      "w": 57,
+      "h": 82
+    },
+    {
+      "file": "water-07.png",
+      "w": 50,
+      "h": 42
+    },
+    {
+      "file": "water-08.png",
+      "w": 49,
+      "h": 45
+    }
+  ]
+}

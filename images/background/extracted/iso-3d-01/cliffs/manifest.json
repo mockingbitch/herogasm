@@ -1,0 +1,87 @@
+{
+  "source": "background-3d-01.png",
+  "box": [
+    12,
+    355,
+    425,
+    540
+  ],
+  "count": 15,
+  "sprites": [
+    {
+      "file": "cliffs-01.png",
+      "w": 54,
+      "h": 70
+    },
+    {
+      "file": "cliffs-02.png",
+      "w": 54,
+      "h": 70
+    },
+    {
+      "file": "cliffs-03.png",
+      "w": 53,
+      "h": 74
+    },
+    {
+      "file": "cliffs-04.png",
+      "w": 53,
+      "h": 75
+    },
+    {
+      "file": "cliffs-05.png",
+      "w": 52,
+      "h": 76
+    },
+    {
+      "file": "cliffs-06.png",
+      "w": 52,
+      "h": 72
+    },
+    {
+      "file": "cliffs-07.png",
+      "w": 50,
+      "h": 85
+    },
+    {
+      "file": "cliffs-08.png",
+      "w": 22,
+      "h": 45
+    },
+    {
+      "file": "cliffs-09.png",
+      "w": 57,
+      "h": 71
+    },
+    {
+      "file": "cliffs-10.png",
+      "w": 56,
+      "h": 70
+    },
+    {
+      "file": "cliffs-11.png",
+      "w": 58,
+      "h": 74
+    },
+    {
+      "file": "cliffs-12.png",
+      "w": 54,
+      "h": 69
+    },
+    {
+      "file": "cliffs-13.png",
+      "w": 54,
+      "h": 79
+    },
+    {
+      "file": "cliffs-14.png",
+      "w": 55,
+      "h": 68
+    },
+    {
+      "file": "cliffs-15.png",
+      "w": 55,
+      "h": 68
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "source": "background-3d-01.png",
+  "box": [
+    395,
+    902,
+    780,
+    1016
+  ],
+  "count": 7,
+  "sprites": [
+    {
+      "file": "castle-parts-01.png",
+      "w": 62,
+      "h": 83
+    },
+    {
+      "file": "castle-parts-02.png",
+      "w": 42,
+      "h": 79
+    },
+    {
+      "file": "castle-parts-03.png",
+      "w": 76,
+      "h": 93
+    },
+    {
+      "file": "castle-parts-04.png",
+      "w": 40,
+      "h": 82
+    },
+    {
+      "file": "castle-parts-05.png",
+      "w": 51,
+      "h": 87
+    },
+    {
+      "file": "castle-parts-06.png",
+      "w": 42,
+      "h": 86
+    },
+    {
+      "file": "castle-parts-07.png",
+      "w": 36,
+      "h": 76
+    }
+  ]
+}

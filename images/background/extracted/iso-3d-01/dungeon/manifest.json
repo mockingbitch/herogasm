@@ -1,0 +1,217 @@
+{
+  "source": "background-3d-01.png",
+  "box": [
+    1092,
+    78,
+    1528,
+    335
+  ],
+  "count": 41,
+  "sprites": [
+    {
+      "file": "dungeon-01.png",
+      "w": 48,
+      "h": 29
+    },
+    {
+      "file": "dungeon-02.png",
+      "w": 51,
+      "h": 35
+    },
+    {
+      "file": "dungeon-03.png",
+      "w": 53,
+      "h": 51
+    },
+    {
+      "file": "dungeon-04.png",
+      "w": 46,
+      "h": 17
+    },
+    {
+      "file": "dungeon-05.png",
+      "w": 52,
+      "h": 51
+    },
+    {
+      "file": "dungeon-06.png",
+      "w": 47,
+      "h": 21
+    },
+    {
+      "file": "dungeon-07.png",
+      "w": 46,
+      "h": 27
+    },
+    {
+      "file": "dungeon-08.png",
+      "w": 51,
+      "h": 42
+    },
+    {
+      "file": "dungeon-09.png",
+      "w": 45,
+      "h": 28
+    },
+    {
+      "file": "dungeon-10.png",
+      "w": 45,
+      "h": 29
+    },
+    {
+      "file": "dungeon-11.png",
+      "w": 49,
+      "h": 49
+    },
+    {
+      "file": "dungeon-12.png",
+      "w": 43,
+      "h": 29
+    },
+    {
+      "file": "dungeon-13.png",
+      "w": 36,
+      "h": 48
+    },
+    {
+      "file": "dungeon-14.png",
+      "w": 27,
+      "h": 28
+    },
+    {
+      "file": "dungeon-15.png",
+      "w": 44,
+      "h": 40
+    },
+    {
+      "file": "dungeon-16.png",
+      "w": 28,
+      "h": 30
+    },
+    {
+      "file": "dungeon-17.png",
+      "w": 46,
+      "h": 24
+    },
+    {
+      "file": "dungeon-18.png",
+      "w": 50,
+      "h": 51
+    },
+    {
+      "file": "dungeon-19.png",
+      "w": 48,
+      "h": 47
+    },
+    {
+      "file": "dungeon-20.png",
+      "w": 22,
+      "h": 55
+    },
+    {
+      "file": "dungeon-21.png",
+      "w": 42,
+      "h": 38
+    },
+    {
+      "file": "dungeon-22.png",
+      "w": 39,
+      "h": 56
+    },
+    {
+      "file": "dungeon-23.png",
+      "w": 74,
+      "h": 68
+    },
+    {
+      "file": "dungeon-24.png",
+      "w": 40,
+      "h": 33
+    },
+    {
+      "file": "dungeon-25.png",
+      "w": 20,
+      "h": 43
+    },
+    {
+      "file": "dungeon-26.png",
+      "w": 31,
+      "h": 54
+    },
+    {
+      "file": "dungeon-27.png",
+      "w": 23,
+      "h": 47
+    },
+    {
+      "file": "dungeon-28.png",
+      "w": 42,
+      "h": 39
+    },
+    {
+      "file": "dungeon-29.png",
+      "w": 20,
+      "h": 41
+    },
+    {
+      "file": "dungeon-30.png",
+      "w": 24,
+      "h": 54
+    },
+    {
+      "file": "dungeon-31.png",
+      "w": 46,
+      "h": 55
+    },
+    {
+      "file": "dungeon-32.png",
+      "w": 23,
+      "h": 51
+    },
+    {
+      "file": "dungeon-33.png",
+      "w": 34,
+      "h": 47
+    },
+    {
+      "file": "dungeon-34.png",
+      "w": 56,
+      "h": 53
+    },
+    {
+      "file": "dungeon-35.png",
+      "w": 54,
+      "h": 52
+    },
+    {
+      "file": "dungeon-36.png",
+      "w": 59,
+      "h": 55
+    },
+    {
+      "file": "dungeon-37.png",
+      "w": 90,
+      "h": 47
+    },
+    {
+      "file": "dungeon-38.png",
+      "w": 36,
+      "h": 45
+    },
+    {
+      "file": "dungeon-39.png",
+      "w": 53,
+      "h": 51
+    },
+    {
+      "file": "dungeon-40.png",
+      "w": 40,
+      "h": 49
+    },
+    {
+      "file": "dungeon-41.png",
+      "w": 40,
+      "h": 28
+    }
+  ]
+}

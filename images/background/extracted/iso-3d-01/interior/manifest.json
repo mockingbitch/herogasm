@@ -1,0 +1,237 @@
+{
+  "source": "background-3d-01.png",
+  "box": [
+    432,
+    758,
+    1085,
+    872
+  ],
+  "count": 45,
+  "sprites": [
+    {
+      "file": "interior-01.png",
+      "w": 35,
+      "h": 53
+    },
+    {
+      "file": "interior-02.png",
+      "w": 36,
+      "h": 52
+    },
+    {
+      "file": "interior-03.png",
+      "w": 36,
+      "h": 20
+    },
+    {
+      "file": "interior-04.png",
+      "w": 35,
+      "h": 43
+    },
+    {
+      "file": "interior-05.png",
+      "w": 46,
+      "h": 50
+    },
+    {
+      "file": "interior-06.png",
+      "w": 36,
+      "h": 42
+    },
+    {
+      "file": "interior-07.png",
+      "w": 31,
+      "h": 43
+    },
+    {
+      "file": "interior-08.png",
+      "w": 25,
+      "h": 44
+    },
+    {
+      "file": "interior-09.png",
+      "w": 63,
+      "h": 44
+    },
+    {
+      "file": "interior-10.png",
+      "w": 61,
+      "h": 45
+    },
+    {
+      "file": "interior-11.png",
+      "w": 62,
+      "h": 47
+    },
+    {
+      "file": "interior-12.png",
+      "w": 35,
+      "h": 45
+    },
+    {
+      "file": "interior-13.png",
+      "w": 34,
+      "h": 46
+    },
+    {
+      "file": "interior-14.png",
+      "w": 34,
+      "h": 46
+    },
+    {
+      "file": "interior-15.png",
+      "w": 45,
+      "h": 32
+    },
+    {
+      "file": "interior-16.png",
+      "w": 44,
+      "h": 31
+    },
+    {
+      "file": "interior-17.png",
+      "w": 36,
+      "h": 26
+    },
+    {
+      "file": "interior-18.png",
+      "w": 46,
+      "h": 50
+    },
+    {
+      "file": "interior-19.png",
+      "w": 56,
+      "h": 56
+    },
+    {
+      "file": "interior-20.png",
+      "w": 56,
+      "h": 56
+    },
+    {
+      "file": "interior-21.png",
+      "w": 59,
+      "h": 59
+    },
+    {
+      "file": "interior-22.png",
+      "w": 39,
+      "h": 27
+    },
+    {
+      "file": "interior-23.png",
+      "w": 48,
+      "h": 31
+    },
+    {
+      "file": "interior-24.png",
+      "w": 21,
+      "h": 35
+    },
+    {
+      "file": "interior-25.png",
+      "w": 44,
+      "h": 42
+    },
+    {
+      "file": "interior-26.png",
+      "w": 26,
+      "h": 27
+    },
+    {
+      "file": "interior-27.png",
+      "w": 38,
+      "h": 27
+    },
+    {
+      "file": "interior-28.png",
+      "w": 25,
+      "h": 38
+    },
+    {
+      "file": "interior-29.png",
+      "w": 35,
+      "h": 37
+    },
+    {
+      "file": "interior-30.png",
+      "w": 34,
+      "h": 33
+    },
+    {
+      "file": "interior-31.png",
+      "w": 34,
+      "h": 31
+    },
+    {
+      "file": "interior-32.png",
+      "w": 38,
+      "h": 37
+    },
+    {
+      "file": "interior-33.png",
+      "w": 31,
+      "h": 31
+    },
+    {
+      "file": "interior-34.png",
+      "w": 25,
+      "h": 28
+    },
+    {
+      "file": "interior-35.png",
+      "w": 25,
+      "h": 28
+    },
+    {
+      "file": "interior-36.png",
+      "w": 34,
+      "h": 17
+    },
+    {
+      "file": "interior-37.png",
+      "w": 30,
+      "h": 21
+    },
+    {
+      "file": "interior-38.png",
+      "w": 30,
+      "h": 21
+    },
+    {
+      "file": "interior-39.png",
+      "w": 20,
+      "h": 24
+    },
+    {
+      "file": "interior-40.png",
+      "w": 24,
+      "h": 22
+    },
+    {
+      "file": "interior-41.png",
+      "w": 29,
+      "h": 23
+    },
+    {
+      "file": "interior-42.png",
+      "w": 27,
+      "h": 25
+    },
+    {
+      "file": "interior-43.png",
+      "w": 27,
+      "h": 29
+    },
+    {
+      "file": "interior-44.png",
+      "w": 26,
+      "h": 26
+    },
+    {
+      "file": "interior-45.png",
+      "w": 34,
+      "h": 18
+    }
+  ]
+}

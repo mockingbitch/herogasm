@@ -1,0 +1,122 @@
+{
+  "source": "background-3d-01.png",
+  "box": [
+    12,
+    98,
+    425,
+    320
+  ],
+  "count": 22,
+  "sprites": [
+    {
+      "file": "ground-01.png",
+      "w": 52,
+      "h": 59
+    },
+    {
+      "file": "ground-02.png",
+      "w": 57,
+      "h": 59
+    },
+    {
+      "file": "ground-03.png",
+      "w": 58,
+      "h": 59
+    },
+    {
+      "file": "ground-04.png",
+      "w": 59,
+      "h": 59
+    },
+    {
+      "file": "ground-05.png",
+      "w": 58,
+      "h": 59
+    },
+    {
+      "file": "ground-06.png",
+      "w": 59,
+      "h": 59
+    },
+    {
+      "file": "ground-07.png",
+      "w": 59,
+      "h": 59
+    },
+    {
+      "file": "ground-08.png",
+      "w": 52,
+      "h": 65
+    },
+    {
+      "file": "ground-09.png",
+      "w": 57,
+      "h": 65
+    },
+    {
+      "file": "ground-10.png",
+      "w": 59,
+      "h": 65
+    },
+    {
+      "file": "ground-11.png",
+      "w": 59,
+      "h": 65
+    },
+    {
+      "file": "ground-12.png",
+      "w": 59,
+      "h": 65
+    },
+    {
+      "file": "ground-13.png",
+      "w": 59,
+      "h": 65
+    },
+    {
+      "file": "ground-14.png",
+      "w": 60,
+      "h": 65
+    },
+    {
+      "file": "ground-15.png",
+      "w": 54,
+      "h": 56
+    },
+    {
+      "file": "ground-16.png",
+      "w": 54,
+      "h": 57
+    },
+    {
+      "file": "ground-17.png",
+      "w": 56,
+      "h": 58
+    },
+    {
+      "file": "ground-18.png",
+      "w": 56,
+      "h": 55
+    },
+    {
+      "file": "ground-19.png",
+      "w": 46,
+      "h": 38
+    },
+    {
+      "file": "ground-20.png",
+      "w": 59,
+      "h": 42
+    },
+    {
+      "file": "ground-21.png",
+      "w": 63,
+      "h": 44
+    },
+    {
+      "file": "ground-22.png",
+      "w": 55,
+      "h": 40
+    }
+  ]
+}

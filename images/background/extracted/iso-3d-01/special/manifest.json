@@ -1,0 +1,222 @@
+{
+  "source": "background-3d-01.png",
+  "box": [
+    1092,
+    612,
+    1528,
+    872
+  ],
+  "count": 42,
+  "sprites": [
+    {
+      "file": "special-01.png",
+      "w": 53,
+      "h": 16
+    },
+    {
+      "file": "special-02.png",
+      "w": 28,
+      "h": 16
+    },
+    {
+      "file": "special-03.png",
+      "w": 48,
+      "h": 59
+    },
+    {
+      "file": "special-04.png",
+      "w": 46,
+      "h": 55
+    },
+    {
+      "file": "special-05.png",
+      "w": 49,
+      "h": 55
+    },
+    {
+      "file": "special-06.png",
+      "w": 33,
+      "h": 35
+    },
+    {
+      "file": "special-07.png",
+      "w": 32,
+      "h": 32
+    },
+    {
+      "file": "special-08.png",
+      "w": 25,
+      "h": 59
+    },
+    {
+      "file": "special-09.png",
+      "w": 23,
+      "h": 55
+    },
+    {
+      "file": "special-10.png",
+      "w": 42,
+      "h": 62
+    },
+    {
+      "file": "special-11.png",
+      "w": 51,
+      "h": 32
+    },
+    {
+      "file": "special-12.png",
+      "w": 35,
+      "h": 38
+    },
+    {
+      "file": "special-13.png",
+      "w": 47,
+      "h": 20
+    },
+    {
+      "file": "special-14.png",
+      "w": 47,
+      "h": 47
+    },
+    {
+      "file": "special-15.png",
+      "w": 47,
+      "h": 45
+    },
+    {
+      "file": "special-16.png",
+      "w": 20,
+      "h": 39
+    },
+    {
+      "file": "special-17.png",
+      "w": 37,
+      "h": 44
+    },
+    {
+      "file": "special-18.png",
+      "w": 38,
+      "h": 45
+    },
+    {
+      "file": "special-19.png",
+      "w": 47,
+      "h": 40
+    },
+    {
+      "file": "special-20.png",
+      "w": 41,
+      "h": 40
+    },
+    {
+      "file": "special-21.png",
+      "w": 43,
+      "h": 41
+    },
+    {
+      "file": "special-22.png",
+      "w": 41,
+      "h": 44
+    },
+    {
+      "file": "special-23.png",
+      "w": 32,
+      "h": 36
+    },
+    {
+      "file": "special-24.png",
+      "w": 30,
+      "h": 28
+    },
+    {
+      "file": "special-25.png",
+      "w": 30,
+      "h": 30
+    },
+    {
+      "file": "special-26.png",
+      "w": 32,
+      "h": 33
+    },
+    {
+      "file": "special-27.png",
+      "w": 28,
+      "h": 26
+    },
+    {
+      "file": "special-28.png",
+      "w": 31,
+      "h": 29
+    },
+    {
+      "file": "special-29.png",
+      "w": 21,
+      "h": 24
+    },
+    {
+      "file": "special-30.png",
+      "w": 37,
+      "h": 36
+    },
+    {
+      "file": "special-31.png",
+      "w": 39,
+      "h": 36
+    },
+    {
+      "file": "special-32.png",
+      "w": 33,
+      "h": 34
+    },
+    {
+      "file": "special-33.png",
+      "w": 30,
+      "h": 35
+    },
+    {
+      "file": "special-34.png",
+      "w": 30,
+      "h": 34
+    },
+    {
+      "file": "special-35.png",
+      "w": 34,
+      "h": 38
+    },
+    {
+      "file": "special-36.png",
+      "w": 30,
+      "h": 27
+    },
+    {
+      "file": "special-37.png",
+      "w": 36,
+      "h": 36
+    },
+    {
+      "file": "special-38.png",
+      "w": 40,
+      "h": 40
+    },
+    {
+      "file": "special-39.png",
+      "w": 33,
+      "h": 40
+    },
+    {
+      "file": "special-40.png",
+      "w": 39,
+      "h": 28
+    },
+    {
+      "file": "special-41.png",
+      "w": 42,
+      "h": 34
+    },
+    {
+      "file": "special-42.png",
+      "w": 33,
+      "h": 17
+    }
+  ]
+}

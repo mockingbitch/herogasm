@@ -1,0 +1,37 @@
+{
+  "source": "background-3d.png",
+  "box": [
+    790,
+    905,
+    1005,
+    1016
+  ],
+  "count": 5,
+  "sprites": [
+    {
+      "file": "paths-01.png",
+      "w": 53,
+      "h": 74
+    },
+    {
+      "file": "paths-02.png",
+      "w": 58,
+      "h": 72
+    },
+    {
+      "file": "paths-03.png",
+      "w": 57,
+      "h": 37
+    },
+    {
+      "file": "paths-04.png",
+      "w": 44,
+      "h": 75
+    },
+    {
+      "file": "paths-05.png",
+      "w": 56,
+      "h": 42
+    }
+  ]
+}

@@ -1,0 +1,172 @@
+{
+  "source": "background-3d.png",
+  "box": [
+    490,
+    412,
+    1000,
+    592
+  ],
+  "count": 32,
+  "sprites": [
+    {
+      "file": "props-01.png",
+      "w": 56,
+      "h": 50
+    },
+    {
+      "file": "props-02.png",
+      "w": 55,
+      "h": 49
+    },
+    {
+      "file": "props-03.png",
+      "w": 47,
+      "h": 41
+    },
+    {
+      "file": "props-04.png",
+      "w": 54,
+      "h": 51
+    },
+    {
+      "file": "props-05.png",
+      "w": 54,
+      "h": 51
+    },
+    {
+      "file": "props-06.png",
+      "w": 56,
+      "h": 39
+    },
+    {
+      "file": "props-07.png",
+      "w": 53,
+      "h": 38
+    },
+    {
+      "file": "props-08.png",
+      "w": 55,
+      "h": 32
+    },
+    {
+      "file": "props-09.png",
+      "w": 44,
+      "h": 47
+    },
+    {
+      "file": "props-10.png",
+      "w": 57,
+      "h": 50
+    },
+    {
+      "file": "props-11.png",
+      "w": 52,
+      "h": 49
+    },
+    {
+      "file": "props-12.png",
+      "w": 53,
+      "h": 18
+    },
+    {
+      "file": "props-13.png",
+      "w": 52,
+      "h": 42
+    },
+    {
+      "file": "props-14.png",
+      "w": 45,
+      "h": 31
+    },
+    {
+      "file": "props-15.png",
+      "w": 26,
+      "h": 32
+    },
+    {
+      "file": "props-16.png",
+      "w": 27,
+      "h": 43
+    },
+    {
+      "file": "props-17.png",
+      "w": 52,
+      "h": 49
+    },
+    {
+      "file": "props-18.png",
+      "w": 56,
+      "h": 74
+    },
+    {
+      "file": "props-19.png",
+      "w": 55,
+      "h": 54
+    },
+    {
+      "file": "props-20.png",
+      "w": 54,
+      "h": 47
+    },
+    {
+      "file": "props-21.png",
+      "w": 43,
+      "h": 48
+    },
+    {
+      "file": "props-22.png",
+      "w": 28,
+      "h": 34
+    },
+    {
+      "file": "props-23.png",
+      "w": 52,
+      "h": 60
+    },
+    {
+      "file": "props-24.png",
+      "w": 56,
+      "h": 58
+    },
+    {
+      "file": "props-25.png",
+      "w": 57,
+      "h": 52
+    },
+    {
+      "file": "props-26.png",
+      "w": 52,
+      "h": 42
+    },
+    {
+      "file": "props-27.png",
+      "w": 37,
+      "h": 41
+    },
+    {
+      "file": "props-28.png",
+      "w": 19,
+      "h": 37
+    },
+    {
+      "file": "props-29.png",
+      "w": 31,
+      "h": 49
+    },
+    {
+      "file": "props-30.png",
+      "w": 50,
+      "h": 38
+    },
+    {
+      "file": "props-31.png",
+      "w": 30,
+      "h": 31
+    },
+    {
+      "file": "props-32.png",
+      "w": 42,
+      "h": 45
+    }
+  ]
+}

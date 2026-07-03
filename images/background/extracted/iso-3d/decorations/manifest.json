@@ -1,0 +1,382 @@
+{
+  "source": "background-3d.png",
+  "box": [
+    490,
+    622,
+    1000,
+    872
+  ],
+  "count": 74,
+  "sprites": [
+    {
+      "file": "decorations-01.png",
+      "w": 52,
+      "h": 55
+    },
+    {
+      "file": "decorations-02.png",
+      "w": 50,
+      "h": 74
+    },
+    {
+      "file": "decorations-03.png",
+      "w": 50,
+      "h": 75
+    },
+    {
+      "file": "decorations-04.png",
+      "w": 43,
+      "h": 48
+    },
+    {
+      "file": "decorations-05.png",
+      "w": 28,
+      "h": 27
+    },
+    {
+      "file": "decorations-06.png",
+      "w": 28,
+      "h": 27
+    },
+    {
+      "file": "decorations-07.png",
+      "w": 49,
+      "h": 69
+    },
+    {
+      "file": "decorations-08.png",
+      "w": 34,
+      "h": 29
+    },
+    {
+      "file": "decorations-09.png",
+      "w": 29,
+      "h": 26
+    },
+    {
+      "file": "decorations-10.png",
+      "w": 34,
+      "h": 32
+    },
+    {
+      "file": "decorations-11.png",
+      "w": 28,
+      "h": 26
+    },
+    {
+      "file": "decorations-12.png",
+      "w": 22,
+      "h": 33
+    },
+    {
+      "file": "decorations-13.png",
+      "w": 29,
+      "h": 32
+    },
+    {
+      "file": "decorations-14.png",
+      "w": 24,
+      "h": 21
+    },
+    {
+      "file": "decorations-15.png",
+      "w": 21,
+      "h": 21
+    },
+    {
+      "file": "decorations-16.png",
+      "w": 32,
+      "h": 33
+    },
+    {
+      "file": "decorations-17.png",
+      "w": 29,
+      "h": 30
+    },
+    {
+      "file": "decorations-18.png",
+      "w": 30,
+      "h": 33
+    },
+    {
+      "file": "decorations-19.png",
+      "w": 30,
+      "h": 35
+    },
+    {
+      "file": "decorations-20.png",
+      "w": 30,
+      "h": 35
+    },
+    {
+      "file": "decorations-21.png",
+      "w": 26,
+      "h": 38
+    },
+    {
+      "file": "decorations-22.png",
+      "w": 44,
+      "h": 34
+    },
+    {
+      "file": "decorations-23.png",
+      "w": 31,
+      "h": 36
+    },
+    {
+      "file": "decorations-24.png",
+      "w": 25,
+      "h": 35
+    },
+    {
+      "file": "decorations-25.png",
+      "w": 26,
+      "h": 37
+    },
+    {
+      "file": "decorations-26.png",
+      "w": 31,
+      "h": 38
+    },
+    {
+      "file": "decorations-27.png",
+      "w": 35,
+      "h": 40
+    },
+    {
+      "file": "decorations-28.png",
+      "w": 27,
+      "h": 25
+    },
+    {
+      "file": "decorations-29.png",
+      "w": 24,
+      "h": 24
+    },
+    {
+      "file": "decorations-30.png",
+      "w": 34,
+      "h": 38
+    },
+    {
+      "file": "decorations-31.png",
+      "w": 31,
+      "h": 37
+    },
+    {
+      "file": "decorations-32.png",
+      "w": 32,
+      "h": 25
+    },
+    {
+      "file": "decorations-33.png",
+      "w": 42,
+      "h": 38
+    },
+    {
+      "file": "decorations-34.png",
+      "w": 33,
+      "h": 40
+    },
+    {
+      "file": "decorations-35.png",
+      "w": 27,
+      "h": 32
+    },
+    {
+      "file": "decorations-36.png",
+      "w": 30,
+      "h": 52
+    },
+    {
+      "file": "decorations-37.png",
+      "w": 24,
+      "h": 34
+    },
+    {
+      "file": "decorations-38.png",
+      "w": 30,
+      "h": 39
+    },
+    {
+      "file": "decorations-39.png",
+      "w": 31,
+      "h": 30
+    },
+    {
+      "file": "decorations-40.png",
+      "w": 31,
+      "h": 38
+    },
+    {
+      "file": "decorations-41.png",
+      "w": 34,
+      "h": 36
+    },
+    {
+      "file": "decorations-42.png",
+      "w": 34,
+      "h": 35
+    },
+    {
+      "file": "decorations-43.png",
+      "w": 38,
+      "h": 38
+    },
+    {
+      "file": "decorations-44.png",
+      "w": 31,
+      "h": 35
+    },
+    {
+      "file": "decorations-45.png",
+      "w": 30,
+      "h": 32
+    },
+    {
+      "file": "decorations-46.png",
+      "w": 30,
+      "h": 38
+    },
+    {
+      "file": "decorations-47.png",
+      "w": 28,
+      "h": 39
+    },
+    {
+      "file": "decorations-48.png",
+      "w": 30,
+      "h": 46
+    },
+    {
+      "file": "decorations-49.png",
+      "w": 25,
+      "h": 32
+    },
+    {
+      "file": "decorations-50.png",
+      "w": 34,
+      "h": 45
+    },
+    {
+      "file": "decorations-51.png",
+      "w": 29,
+      "h": 64
+    },
+    {
+      "file": "decorations-52.png",
+      "w": 32,
+      "h": 38
+    },
+    {
+      "file": "decorations-53.png",
+      "w": 41,
+      "h": 36
+    },
+    {
+      "file": "decorations-54.png",
+      "w": 24,
+      "h": 36
+    },
+    {
+      "file": "decorations-55.png",
+      "w": 28,
+      "h": 36
+    },
+    {
+      "file": "decorations-56.png",
+      "w": 38,
+      "h": 39
+    },
+    {
+      "file": "decorations-57.png",
+      "w": 34,
+      "h": 37
+    },
+    {
+      "file": "decorations-58.png",
+      "w": 35,
+      "h": 43
+    },
+    {
+      "file": "decorations-59.png",
+      "w": 23,
+      "h": 27
+    },
+    {
+      "file": "decorations-60.png",
+      "w": 26,
+      "h": 20
+    },
+    {
+      "file": "decorations-61.png",
+      "w": 34,
+      "h": 40
+    },
+    {
+      "file": "decorations-62.png",
+      "w": 24,
+      "h": 34
+    },
+    {
+      "file": "decorations-63.png",
+      "w": 28,
+      "h": 37
+    },
+    {
+      "file": "decorations-64.png",
+      "w": 30,
+      "h": 28
+    },
+    {
+      "file": "decorations-65.png",
+      "w": 42,
+      "h": 26
+    },
+    {
+      "file": "decorations-66.png",
+      "w": 30,
+      "h": 24
+    },
+    {
+      "file": "decorations-67.png",
+      "w": 38,
+      "h": 21
+    },
+    {
+      "file": "decorations-68.png",
+      "w": 28,
+      "h": 28
+    },
+    {
+      "file": "decorations-69.png",
+      "w": 46,
+      "h": 32
+    },
+    {
+      "file": "decorations-70.png",
+      "w": 38,
+      "h": 33
+    },
+    {
+      "file": "decorations-71.png",
+      "w": 36,
+      "h": 31
+    },
+    {
+      "file": "decorations-72.png",
+      "w": 37,
+      "h": 31
+    },
+    {
+      "file": "decorations-73.png",
+      "w": 28,
+      "h": 31
+    },
+    {
+      "file": "decorations-74.png",
+      "w": 31,
+      "h": 31
+    }
+  ]
+}

@@ -1,0 +1,192 @@
+{
+  "source": "images/background/background.png",
+  "panel": [
+    480,
+    66,
+    1012,
+    312
+  ],
+  "count": 15,
+  "sprites": [
+    {
+      "file": "building-01.png",
+      "w": 85,
+      "h": 108,
+      "area": 5661,
+      "abs_box": [
+        491,
+        91,
+        576,
+        199
+      ]
+    },
+    {
+      "file": "building-02.png",
+      "w": 84,
+      "h": 105,
+      "area": 6001,
+      "abs_box": [
+        584,
+        94,
+        668,
+        199
+      ]
+    },
+    {
+      "file": "building-03.png",
+      "w": 84,
+      "h": 108,
+      "area": 6266,
+      "abs_box": [
+        673,
+        91,
+        757,
+        199
+      ]
+    },
+    {
+      "file": "building-04.png",
+      "w": 143,
+      "h": 141,
+      "area": 13921,
+      "abs_box": [
+        765,
+        86,
+        908,
+        227
+      ]
+    },
+    {
+      "file": "building-05.png",
+      "w": 77,
+      "h": 133,
+      "area": 6389,
+      "abs_box": [
+        916,
+        86,
+        993,
+        219
+      ]
+    },
+    {
+      "file": "building-06.png",
+      "w": 79,
+      "h": 89,
+      "area": 4372,
+      "abs_box": [
+        493,
+        214,
+        572,
+        303
+      ]
+    },
+    {
+      "file": "building-07.png",
+      "w": 85,
+      "h": 103,
+      "area": 5032,
+      "abs_box": [
+        583,
+        203,
+        668,
+        306
+      ]
+    },
+    {
+      "file": "building-08.png",
+      "w": 78,
+      "h": 106,
+      "area": 5630,
+      "abs_box": [
+        677,
+        199,
+        755,
+        305
+      ]
+    },
+    {
+      "file": "building-09.png",
+      "w": 55,
+      "h": 69,
+      "area": 1877,
+      "abs_box": [
+        766,
+        235,
+        821,
+        304
+      ]
+    },
+    {
+      "file": "building-10.png",
+      "w": 24,
+      "h": 59,
+      "area": 867,
+      "abs_box": [
+        830,
+        244,
+        854,
+        303
+      ]
+    },
+    {
+      "file": "building-11.png",
+      "w": 36,
+      "h": 20,
+      "area": 398,
+      "abs_box": [
+        851,
+        263,
+        887,
+        283
+      ]
+    },
+    {
+      "file": "building-12.png",
+      "w": 26,
+      "h": 34,
+      "area": 430,
+      "abs_box": [
+        863,
+        231,
+        889,
+        265
+      ]
+    },
+    {
+      "file": "building-13.png",
+      "w": 27,
+      "h": 34,
+      "area": 448,
+      "abs_box": [
+        884,
+        248,
+        911,
+        282
+      ]
+    },
+    {
+      "file": "building-14.png",
+      "w": 73,
+      "h": 81,
+      "area": 3601,
+      "abs_box": [
+        921,
+        227,
+        994,
+        308
+      ]
+    },
+    {
+      "file": "building-15.png",
+      "w": 32,
+      "h": 20,
+      "area": 320,
+      "abs_box": [
+        532,
+        281,
+        564,
+        301
+      ]
+    }
+  ]
+}

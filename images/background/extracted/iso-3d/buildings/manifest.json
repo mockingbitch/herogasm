@@ -1,0 +1,77 @@
+{
+  "source": "background-3d.png",
+  "box": [
+    490,
+    95,
+    1000,
+    345
+  ],
+  "count": 13,
+  "sprites": [
+    {
+      "file": "buildings-01.png",
+      "w": 91,
+      "h": 117
+    },
+    {
+      "file": "buildings-02.png",
+      "w": 84,
+      "h": 113
+    },
+    {
+      "file": "buildings-03.png",
+      "w": 84,
+      "h": 106
+    },
+    {
+      "file": "buildings-04.png",
+      "w": 159,
+      "h": 170
+    },
+    {
+      "file": "buildings-05.png",
+      "w": 85,
+      "h": 145
+    },
+    {
+      "file": "buildings-06.png",
+      "w": 26,
+      "h": 42
+    },
+    {
+      "file": "buildings-07.png",
+      "w": 78,
+      "h": 107
+    },
+    {
+      "file": "buildings-08.png",
+      "w": 82,
+      "h": 110
+    },
+    {
+      "file": "buildings-09.png",
+      "w": 97,
+      "h": 126
+    },
+    {
+      "file": "buildings-10.png",
+      "w": 84,
+      "h": 102
+    },
+    {
+      "file": "buildings-11.png",
+      "w": 35,
+      "h": 46
+    },
+    {
+      "file": "buildings-12.png",
+      "w": 28,
+      "h": 38
+    },
+    {
+      "file": "buildings-13.png",
+      "w": 35,
+      "h": 38
+    }
+  ]
+}

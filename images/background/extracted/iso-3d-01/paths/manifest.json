@@ -1,0 +1,47 @@
+{
+  "source": "background-3d-01.png",
+  "box": [
+    795,
+    902,
+    1080,
+    1016
+  ],
+  "count": 7,
+  "sprites": [
+    {
+      "file": "paths-01.png",
+      "w": 55,
+      "h": 86
+    },
+    {
+      "file": "paths-02.png",
+      "w": 57,
+      "h": 87
+    },
+    {
+      "file": "paths-03.png",
+      "w": 59,
+      "h": 91
+    },
+    {
+      "file": "paths-04.png",
+      "w": 54,
+      "h": 46
+    },
+    {
+      "file": "paths-05.png",
+      "w": 49,
+      "h": 46
+    },
+    {
+      "file": "paths-06.png",
+      "w": 54,
+      "h": 45
+    },
+    {
+      "file": "paths-07.png",
+      "w": 49,
+      "h": 44
+    }
+  ]
+}

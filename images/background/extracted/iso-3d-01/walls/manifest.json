@@ -1,0 +1,112 @@
+{
+  "source": "background-3d-01.png",
+  "box": [
+    12,
+    565,
+    425,
+    720
+  ],
+  "count": 20,
+  "sprites": [
+    {
+      "file": "walls-01.png",
+      "w": 25,
+      "h": 35
+    },
+    {
+      "file": "walls-02.png",
+      "w": 44,
+      "h": 66
+    },
+    {
+      "file": "walls-03.png",
+      "w": 51,
+      "h": 75
+    },
+    {
+      "file": "walls-04.png",
+      "w": 57,
+      "h": 80
+    },
+    {
+      "file": "walls-05.png",
+      "w": 19,
+      "h": 50
+    },
+    {
+      "file": "walls-06.png",
+      "w": 29,
+      "h": 42
+    },
+    {
+      "file": "walls-07.png",
+      "w": 31,
+      "h": 53
+    },
+    {
+      "file": "walls-08.png",
+      "w": 17,
+      "h": 44
+    },
+    {
+      "file": "walls-09.png",
+      "w": 17,
+      "h": 45
+    },
+    {
+      "file": "walls-10.png",
+      "w": 29,
+      "h": 45
+    },
+    {
+      "file": "walls-11.png",
+      "w": 53,
+      "h": 70
+    },
+    {
+      "file": "walls-12.png",
+      "w": 25,
+      "h": 35
+    },
+    {
+      "file": "walls-13.png",
+      "w": 25,
+      "h": 53
+    },
+    {
+      "file": "walls-14.png",
+      "w": 44,
+      "h": 52
+    },
+    {
+      "file": "walls-15.png",
+      "w": 41,
+      "h": 47
+    },
+    {
+      "file": "walls-16.png",
+      "w": 40,
+      "h": 46
+    },
+    {
+      "file": "walls-17.png",
+      "w": 40,
+      "h": 49
+    },
+    {
+      "file": "walls-18.png",
+      "w": 39,
+      "h": 56
+    },
+    {
+      "file": "walls-19.png",
+      "w": 39,
+      "h": 67
+    },
+    {
+      "file": "walls-20.png",
+      "w": 77,
+      "h": 72
+    }
+  ]
+}

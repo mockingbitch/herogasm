@@ -1,0 +1,182 @@
+{
+  "source": "images/background/background-3d-01.png",
+  "count": 35,
+  "buildings": [
+    {
+      "name": "house-01",
+      "w": 92,
+      "h": 105
+    },
+    {
+      "name": "house-02",
+      "w": 88,
+      "h": 105
+    },
+    {
+      "name": "house-03",
+      "w": 88,
+      "h": 103
+    },
+    {
+      "name": "house-04",
+      "w": 87,
+      "h": 102
+    },
+    {
+      "name": "inn",
+      "w": 95,
+      "h": 111
+    },
+    {
+      "name": "tavern",
+      "w": 91,
+      "h": 102
+    },
+    {
+      "name": "shop",
+      "w": 95,
+      "h": 114
+    },
+    {
+      "name": "blacksmith",
+      "w": 95,
+      "h": 109
+    },
+    {
+      "name": "weapon-shop",
+      "w": 92,
+      "h": 118
+    },
+    {
+      "name": "armor-shop",
+      "w": 90,
+      "h": 112
+    },
+    {
+      "name": "general-store",
+      "w": 91,
+      "h": 108
+    },
+    {
+      "name": "library",
+      "w": 99,
+      "h": 109
+    },
+    {
+      "name": "school",
+      "w": 83,
+      "h": 117
+    },
+    {
+      "name": "town-hall",
+      "w": 95,
+      "h": 118
+    },
+    {
+      "name": "market",
+      "w": 94,
+      "h": 88
+    },
+    {
+      "name": "bakery",
+      "w": 98,
+      "h": 98
+    },
+    {
+      "name": "mill",
+      "w": 81,
+      "h": 97
+    },
+    {
+      "name": "well",
+      "w": 76,
+      "h": 97
+    },
+    {
+      "name": "workshop",
+      "w": 100,
+      "h": 105
+    },
+    {
+      "name": "storage",
+      "w": 88,
+      "h": 96
+    },
+    {
+      "name": "carpenter",
+      "w": 93,
+      "h": 100
+    },
+    {
+      "name": "church",
+      "w": 81,
+      "h": 117
+    },
+    {
+      "name": "temple",
+      "w": 95,
+      "h": 116
+    },
+    {
+      "name": "guild-hall",
+      "w": 90,
+      "h": 115
+    },
+    {
+      "name": "bank",
+      "w": 92,
+      "h": 116
+    },
+    {
+      "name": "magic-academy",
+      "w": 110,
+      "h": 121
+    },
+    {
+      "name": "watch-tower",
+      "w": 79,
+      "h": 117
+    },
+    {
+      "name": "barracks",
+      "w": 101,
+      "h": 114
+    },
+    {
+      "name": "hospital",
+      "w": 78,
+      "h": 90
+    },
+    {
+      "name": "alchemist-lab",
+      "w": 87,
+      "h": 95
+    },
+    {
+      "name": "town-gate",
+      "w": 61,
+      "h": 71
+    },
+    {
+      "name": "prison",
+      "w": 86,
+      "h": 85
+    },
+    {
+      "name": "courtyard",
+      "w": 108,
+      "h": 93
+    },
+    {
+      "name": "monument",
+      "w": 82,
+      "h": 95
+    },
+    {
+      "name": "statue",
+      "w": 72,
+      "h": 95
+    }
+  ],
+  "missing": []
+}

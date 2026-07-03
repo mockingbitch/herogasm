@@ -1,0 +1,67 @@
+{
+  "source": "background-3d.png",
+  "box": [
+    1010,
+    905,
+    1528,
+    1016
+  ],
+  "count": 11,
+  "sprites": [
+    {
+      "file": "stairs-01.png",
+      "w": 90,
+      "h": 59
+    },
+    {
+      "file": "stairs-02.png",
+      "w": 54,
+      "h": 65
+    },
+    {
+      "file": "stairs-03.png",
+      "w": 55,
+      "h": 65
+    },
+    {
+      "file": "stairs-04.png",
+      "w": 54,
+      "h": 64
+    },
+    {
+      "file": "stairs-05.png",
+      "w": 54,
+      "h": 64
+    },
+    {
+      "file": "stairs-06.png",
+      "w": 35,
+      "h": 30
+    },
+    {
+      "file": "stairs-07.png",
+      "w": 28,
+      "h": 59
+    },
+    {
+      "file": "stairs-08.png",
+      "w": 25,
+      "h": 58
+    },
+    {
+      "file": "stairs-09.png",
+      "w": 24,
+      "h": 67
+    },
+    {
+      "file": "stairs-10.png",
+      "w": 68,
+      "h": 50
+    },
+    {
+      "file": "stairs-11.png",
+      "w": 41,
+      "h": 46
+    }
+  ]
+}

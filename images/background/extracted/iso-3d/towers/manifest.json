@@ -1,0 +1,52 @@
+{
+  "source": "background-3d.png",
+  "box": [
+    400,
+    905,
+    780,
+    1016
+  ],
+  "count": 8,
+  "sprites": [
+    {
+      "file": "towers-01.png",
+      "w": 43,
+      "h": 74
+    },
+    {
+      "file": "towers-02.png",
+      "w": 43,
+      "h": 74
+    },
+    {
+      "file": "towers-03.png",
+      "w": 43,
+      "h": 76
+    },
+    {
+      "file": "towers-04.png",
+      "w": 43,
+      "h": 83
+    },
+    {
+      "file": "towers-05.png",
+      "w": 44,
+      "h": 88
+    },
+    {
+      "file": "towers-06.png",
+      "w": 45,
+      "h": 90
+    },
+    {
+      "file": "towers-07.png",
+      "w": 40,
+      "h": 50
+    },
+    {
+      "file": "towers-08.png",
+      "w": 42,
+      "h": 38
+    }
+  ]
+}
